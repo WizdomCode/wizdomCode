@@ -1,0 +1,146 @@
+/* index.css */
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  
+  .container-signin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .wrapper {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 300px;
+  }
+  
+  .heading {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .text {
+    font-size: 16px;
+    margin: 0;
+  }
+  
+  .text-large {
+    font-size: 24px;
+  }
+  
+  .text-normal {
+    color: #888;
+  }
+  
+  .text-links {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  .text-links:hover {
+    text-decoration: underline;
+  }
+  
+  .input-control {
+    margin-bottom: 15px;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+  
+  .input-submit {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .input-submit:hover {
+    background-color: #2980b9;
+  }
+
+  .todo-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .todo {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header {
+    text-align: center;
+    color: #333;
+  }
+  
+  form {
+    display: grid;
+    grid-gap: 10px;
+  }
+  
+  label {
+    font-weight: bold;
+  }
+  
+  input,
+  textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .btn-container {
+    text-align: center;
+  }
+  
+  .btn {
+    background-color: #4caf50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .btn:hover {
+    background-color: #45a049;
+  }
+  
+  .todo-content {
+    margin-top: 20px;
+  }
+  
+  .todo-content p {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 5px 0;
+  }
+  
+  .todo-content p:hover {
+    background-color: #f0f0f0;
+  }
+  
+  
