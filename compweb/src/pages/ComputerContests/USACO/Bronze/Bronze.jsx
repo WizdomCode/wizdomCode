@@ -9,6 +9,9 @@ const Bronze = () => {
             <h1>Bronze</h1>
             <p>Learn comeptitve programming today!</p>
             <Link to = "/simulation1">Simulation</Link>
+            <div>
+                <Link to="/usaco">USACO</Link>
+            </div>
         </>
     );
 };

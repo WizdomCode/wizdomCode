@@ -8,7 +8,15 @@ const USACO = () => {
             <Navigation></Navigation>
             <h1>USACO</h1>
             <p>Learn comeptitve programming today!</p>
-            <Link to = "/bronze">Bronze CONTESTS</Link>
+            <div>
+                <Link to="/bronze">Bronze CONTESTS</Link>
+            </div>
+            <div>
+                <Link to="/silver">Silver CONTESTS</Link>
+            </div>
+            <div>
+                <Link to="/computercontest">Computer CONTESTS</Link>
+            </div>
         </>
     );
 };

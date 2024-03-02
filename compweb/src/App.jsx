@@ -19,18 +19,13 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/aboutus" element={<AboutUs />} />
-      <Route path="/learningpath" element={<LearningPath />}>
-        <Route path="/computercontest" element={<ComputerContest />}>
-          <Route path="/usaco" element={<USACO />}>
-            <Route path="/bronze" element={<Bronze />}>
-              <Route path="simulation1" element={<Simulation1 />} />
-            </Route>
-            <Route path="/silver" element={<Silver />}>
-              <Route path="/bfs2" element={<BFS2 />} />
-            </Route>
-          </Route>
-        </Route>
-      </Route>
+      <Route path="/learningpath" element={<LearningPath />} />
+      <Route path="/computercontest" element={<ComputerContest />} />
+      <Route path="/usaco" element={<USACO />} />
+      <Route path="/bronze" element={<Bronze />} />
+      <Route path="/simulation1" element={<Simulation1 />} />
+      <Route path="/silver" element={<Silver />} />
+      <Route path="/bfs2" element={<BFS2 />} />
     </Routes>
   );
 }

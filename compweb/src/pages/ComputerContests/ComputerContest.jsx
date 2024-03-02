@@ -9,6 +9,9 @@ const ComputerContest = () => {
             <h1>Computer Contest</h1>
             <p>Learn comeptitve programming today!</p>
             <Link to = "/usaco">USACO CONTESTS</Link>
+            <div>
+                <Link to="/learningpath">Leaning paths</Link>
+            </div>
         </>
     );
 };
