@@ -94,10 +94,15 @@
 
 .test-cases {
   margin-top: 1rem;
+  display: flex; /* Add this line */
+  justify-content: space-between; /* Add this line */
+  flex-wrap: wrap; /* Add this line */
 }
 
 .test-case {
   margin-bottom: 1rem;
+  flex: 1; /* Add this line */
+  min-width: 200px; /* Add this line */
 }
 
 .input,

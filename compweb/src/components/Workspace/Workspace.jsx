@@ -13,7 +13,7 @@ const Workspace = (props) => {
         gutterSize={10}
     >
         <div><ProblemDescription problem={props.problem}/></div>
-        <div><CodeEditor boilerPlate={props.boilerPlate} /></div>
+        <div><CodeEditor boilerPlate={props.boilerPlate} testCases={props.testCases}/></div>
     </Split>
   )
 };
