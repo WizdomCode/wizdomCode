@@ -1,0 +1,33 @@
+.problem-statement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.description {
+  max-width: 600px;
+  text-align: left;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+p,
+ul {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+ul {
+  padding-left: 1.5rem;
+}

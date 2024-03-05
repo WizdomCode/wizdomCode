@@ -1,13 +1,12 @@
-import React from 'react'
-import '../../styles/globals.css'
+import React from 'react';
+import styles from '../../styles/ProblemDescription.module.css';
 
 const ProblemDescription = (props) => {
   const { title, description, inputFormat, constraints, outputFormat } = props.problem;
   return (
-    <div style={{ height: '100vh' }}>
-        <div className="problem-statement">
-      <h1 className="title">{title}</h1>
-      <div className="description">
+    <div className={styles.problemStatement}>
+      <h1 className={styles.title}>{title}</h1>
+      <div className={styles.description}>
         <h2>Problem Description</h2>
         <p>{description}</p>
         <h2>Input Format</h2>
@@ -22,8 +21,7 @@ const ProblemDescription = (props) => {
         <p>{outputFormat}</p>
       </div>
     </div>
-    </div>
-  )
-}
+  );
+};
 
-export default ProblemDescription
+export default ProblemDescription;

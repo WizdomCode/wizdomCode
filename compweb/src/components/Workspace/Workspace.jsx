@@ -2,7 +2,6 @@ import React from 'react';
 import Split from 'react-split';
 import ProblemDescription from './ProblemDescription/ProblemDescription';
 import CodeEditor from './Editor/Editor';
-import '../styles/globals.css';
 import styles from '../styles/Workspace.module.css';
 
 const Workspace = (props) => {
