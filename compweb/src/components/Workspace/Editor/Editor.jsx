@@ -33,7 +33,7 @@ const CodeEditor = (props) => {
         console.log(JSON.stringify(data));
   
         // Make a POST request to the Judge0 API
-        const response = await fetch('http://localhost:2358/submissions/?base64_encoded=false&wait=true', {
+        const response = await fetch('http://172.20.144.1:2358/submissions/?base64_encoded=false&wait=true', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
