@@ -3,7 +3,7 @@ import Navigation from "../components/Navigation/Navigation";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection } from "firebase/firestore"; // Update the import statement
+import { setDoc, doc } from "firebase/firestore";
 import "./index.css";
 
 const SignUp = () => {
@@ -16,34 +16,31 @@ const SignUp = () => {
   const [age, setAge] = useState("");
   const navigate = useNavigate();
 
-  const signUp = (e) => {
+  const signUp = async (e) => {
     e.preventDefault();
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("User UID:", user.uid);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("User UID:", user.uid);
 
-        // Add additional user information to Firestore
-        addDoc(collection(db, "Users"), {  // Use collection() and addDoc() correctly
-          firstName: firstName,
-          lastName: lastName,
-          country: country,
-          city: city,
-          age: parseInt(age, 10),
-          points: 0
-        })
-          .then(() => {
-            console.log("User information added to Firestore successfully!");
-            navigate("/login");
-          })
-          .catch((error) => {
-            console.error("Error adding user information to Firestore:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error signing up:", error);
+      // Set user information with the same ID as the user's authentication UID
+      const userDocRef = doc(db, "Users", user.uid);
+
+      await setDoc(userDocRef, {
+        firstName: firstName,
+        lastName: lastName,
+        country: country,
+        city: city,
+        age: parseInt(age, 10),
+        points: 0
       });
+
+      console.log("User information added to Firestore successfully!");
+      navigate("/login");
+    } catch (error) {
+      console.error("Error signing up:", error);
+    }
   };
 
   return (

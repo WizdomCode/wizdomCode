@@ -10,7 +10,7 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       if (auth.currentUser) {
         try {
-          const userDocRef = doc(db, "Users", "z4zV0Fu9FFXiNfpc9tK5");
+          const userDocRef = doc(db, "Users", auth.currentUser.uid);
           const userDocSnapshot = await getDoc(userDocRef);
 
           if (userDocSnapshot.exists()) {
@@ -25,7 +25,7 @@ const UserProfile = () => {
     };
 
     fetchUserData();
-  }); // Use auth.currentUser instead of auth.user
+  }, []); // Empty dependency array
 
   return (
     <>
