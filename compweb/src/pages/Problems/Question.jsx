@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { auth, ap, db } from "../../firebase";
+import { auth, app, db } from "../../firebase";
 import { addDoc, collection, getDoc, doc } from "firebase/firestore";
 import Navigation from "../../components/Navigation/Navigation";
 import "../../components/styles/globals.css";
@@ -13,7 +13,7 @@ const Question = () => {
     // Fetch problem data from Firebase
     const fetchProblemData = async () => {
       try {
-        const docRef = await getDoc(doc(db, "Questions", "uwlAqPacBFn2NrdT0vJR")); // replace "your_document_id" with the actual document ID
+        const docRef = await getDoc(doc(db, "Questions", "cowq1")); // replace "your_document_id" with the actual document ID
         if (docRef.exists()) {
           setProblem(docRef.data());
         } else {
@@ -25,9 +25,10 @@ const Question = () => {
     };
 
     fetchProblemData();
-  }, []); // Run the effect once on component mount
+  }, []);
 
-  const boilerPlate = `#include <stdio.h>
+  const boilerPlate = 
+`#include <stdio.h>
 
 int main() {
     int a, b;

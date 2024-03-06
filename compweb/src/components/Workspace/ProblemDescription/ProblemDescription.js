@@ -3,6 +3,7 @@ import styles from '../../styles/ProblemDescription.module.css';
 
 const ProblemDescription = (props) => {
   const { title, description, inputFormat, constraints, outputFormat, points } = props.problem;
+  
   return (
     <div className={styles.problemStatement}>
       <h1 className={styles.title}>{title}</h1>
@@ -13,9 +14,12 @@ const ProblemDescription = (props) => {
         <p>{inputFormat}</p>
         <h2>Constraints</h2>
         <ul>
-          {constraints.map((constraint, index) => (
-            <li key={index}>{constraint}</li>
-          ))}
+          {constraints &&
+            Object.entries(constraints).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {value}
+              </li>
+            ))}
         </ul>
         <h2>Output Format</h2>
         <p>{outputFormat}</p>

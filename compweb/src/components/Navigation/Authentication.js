@@ -37,6 +37,7 @@ const Authentication = () => {
     </> : 
       <>
         <Nav.Link href="/" onClick={userSignOut}>Sign Out</Nav.Link>
+        <Nav.Link href="/userprofile">UserProfile</Nav.Link>
       </>
       }
     </>
