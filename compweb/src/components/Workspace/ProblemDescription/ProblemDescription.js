@@ -2,7 +2,7 @@ import React from 'react';
 import styles from '../../styles/ProblemDescription.module.css';
 
 const ProblemDescription = (props) => {
-  const { title, description, inputFormat, constraints, outputFormat } = props.problem;
+  const { title, description, inputFormat, constraints, outputFormat, points } = props.problem;
   return (
     <div className={styles.problemStatement}>
       <h1 className={styles.title}>{title}</h1>
@@ -19,6 +19,8 @@ const ProblemDescription = (props) => {
         </ul>
         <h2>Output Format</h2>
         <p>{outputFormat}</p>
+        <h2>Points</h2>
+        <p>{points}</p>
       </div>
     </div>
   );

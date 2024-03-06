@@ -14,6 +14,7 @@ const SignUp = () => {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [age, setAge] = useState("");
+  const [points, setPoints] = useState("");
   const navigate = useNavigate();
 
   const signUp = (e) => {

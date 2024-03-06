@@ -10,6 +10,7 @@ import Bronze from "./pages/ComputerContests/USACO/Bronze/Bronze";
 import Simulation1 from "./pages/ComputerContests/USACO/Bronze/Lessons/Simulation1";
 import Silver from "./pages/ComputerContests/USACO/Silver/Silver";
 import BFS2 from "./pages/ComputerContests/USACO/Silver/Lessons/BFS2";
+import Question from "./pages/Problems/Question";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
       <Route path="/simulation1" element={<Simulation1 />} />
       <Route path="/silver" element={<Silver />} />
       <Route path="/bfs2" element={<BFS2 />} />
+      <Route path="/question" element={<Question />} />
     </Routes>
   );
 }
