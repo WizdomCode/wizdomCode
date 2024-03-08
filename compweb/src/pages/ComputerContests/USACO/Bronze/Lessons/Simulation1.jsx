@@ -10,7 +10,6 @@ const Simulation1 = () => {
         <>
             <Navigation></Navigation>
             <h1>Simulation</h1>
-            <Question questionID={"cowq1"} />
             <Question questionID={"shellGame"} />
             <Link to = "/bronze">Back to bronze</Link>
         </>

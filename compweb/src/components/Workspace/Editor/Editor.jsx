@@ -60,7 +60,7 @@ const CodeEditor = (props) => {
         }
   
         // Compare the result with the expected output
-        if (result.stdout && result.stdout.trim() === testCase.output.trim()) {
+        if (result.stdout && testCase.output && result.stdout.trim() === testCase.output.toString().trim()) {
           results.push({
             testCaseKey: testCase.key,
             status: 'Passed',
