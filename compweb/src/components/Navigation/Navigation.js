@@ -18,6 +18,8 @@ const Navigation = () => {
             <Authentication/>
             <Nav.Link href="/aboutus">AboutUs</Nav.Link>
             <Nav.Link href="/learningpath">LearningPath</Nav.Link>
+            <Nav.Link href="/problems">Problems</Nav.Link>
+            <Nav.Link href="/addproblem">AddProblems</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

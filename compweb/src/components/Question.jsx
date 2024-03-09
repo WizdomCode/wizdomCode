@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { auth, app, db } from "../../firebase";
+import { auth, app, db } from "../firebase";
 import { addDoc, collection, getDoc, doc } from "firebase/firestore";
-import Navigation from "../../components/Navigation/Navigation";
-import "../../components/styles/globals.css";
-import TestCaseReader from "./TestCaseReader";
-import Workspace from "../../components/Workspace/Workspace";
+import Navigation from "./Navigation/Navigation";
+import Workspace from "./Workspace/Workspace";
 import axios from "axios";
 
-const Question = ({ questionID }) => {
+const Question = ({ questionID, testCaseFolder}) => {
   const [problem, setProblem] = useState(null);
   const [testCases, setTestCases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,8 +41,8 @@ const fetchTestCasesData = async () => {
       console.log("Processing file:", fileName);
 
       try {
-        const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/shellGameCases/${fileName}`);
-        const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/shellGameCases/${fileName.replace(".in", ".out")}`);
+        const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName}`);
+        const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName.replace(".in", ".out")}`);
 
         console.log("File Name:", fileName);
         console.log("Input Response:", inputResponse.data);
