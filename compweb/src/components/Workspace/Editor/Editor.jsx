@@ -1,53 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Split from 'react-split';
-import CodeMirror from '@uiw/react-codemirror';
-import { vscodeDark } from '@uiw/codemirror-theme-vscode';
-import { javascript } from '@codemirror/lang-javascript';
 import styles from '../../styles/Editor.module.css';
-import { cpp } from '@codemirror/lang-cpp';
+import Editor from '@monaco-editor/react';
+import axios from 'axios';
 
 const CodeEditor = (props) => {
   const [code, setCode] = useState(props.boilerPlate);
   const [output, setOutput] = useState([]);
+  const [language, setLanguage] = useState("");
+
+  const submitCode = () => {
+    console.log(code);
+  };
+
+  useEffect(() => {
+    console.log(code);
+  }, [code]);
 
   // Function to run the user's code against all test cases
   const runAllTests = async () => {
     let results = [];
     for (let testCase of props.testCases) {
       try {
-        // Prepare the data for the Judge0 API
+        // Prepare the data for the Piston API
         const data = {
-          source_code: code,
-          language_id: 54, // C++ (GCC 9.2.0)
+          language: 'cpp',
+          version: '10.2.0', // replace with the version you want to use
+          files: [
+            {
+              name: 'temp.cpp',
+              content: code
+            }
+          ],
           stdin: testCase.input, // Convert input to an array
-          cpu_time_limit: 2, // CPU time limit in seconds
-          cpu_extra_time: 0.5, // Extra time in seconds
-          memory_limit: 128000, // Memory limit in kilobytes
-          stack_limit: 64000, // Stack limit in kilobytes
-          max_processes_and_or_threads: 30, // Maximum number of processes and/or threads
-          enable_per_process_and_thread_time_limit: false,
-          enable_per_process_and_thread_memory_limit: false,
-          max_file_size: 1024 // Maximum file size in kilobytes
         };
 
-        console.log(JSON.stringify(data));
-  
-        // Make a POST request to the Judge0 API
-        const response = await fetch('http://172.20.144.1:2358/submissions/?base64_encoded=false&wait=true', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        });
-  
-        // Parse the response
-        const result = await response.json();
+        console.log(data);
 
-        console.log(result);
-        console.log('Standard Output:', result['stdout']);
-        console.log('Error Messages:', result.stderr || result.message);
-  
+        // Make a POST request to the Piston API
+        const response = await axios.post('http://localhost:2000/api/v2/execute', data);
+
+        // Parse the response
+        const result = response.data;
+
         // Check if the program encountered an error
         if (result.stderr || result.message) {
           results.push({
@@ -58,7 +53,7 @@ const CodeEditor = (props) => {
           });
           continue;
         }
-  
+
         // Compare the result with the expected output
         if (result.stdout && testCase.output && result.stdout.trim() === testCase.output.toString().trim()) {
           results.push({
@@ -86,7 +81,6 @@ const CodeEditor = (props) => {
       }
     }
     setOutput(results);
-    console.log(results);
   };
 
   return (
@@ -111,15 +105,18 @@ const CodeEditor = (props) => {
     </div>
     <div className={styles.codeEditor}>
       <h1 className={styles.title}>Code Editor</h1>
-      <CodeMirror 
+      <button style={{background: language === "python" ? "black" : "white", color: language === "python" ? "white" : "black"}} onClick={() => { setLanguage("python")}}>Python</button>
+      <button style={{background: language === "java" ? "black" : "white", color: language === "java" ? "white" : "black"}} onClick={() => { setLanguage("java")}}>Java</button>
+      <button style={{background: language === "cpp" ? "black" : "white", color: language === "cpp" ? "white" : "black"}} onClick={() => { setLanguage("cpp")}}>C++</button>
+      <button onClick={() => {
+        submitCode();
+      }}>SUBMIT</button>
+      <Editor
+        theme="vs-dark"
+        height="90vh"
+        defaultLanguage="cpp"
         value={code}
-        theme={vscodeDark}
-        extensions={[cpp()]}
-        onChange={(editor, data, value) => {
-          console.log(editor);
-          setCode(editor);
-        }}
-        style={{fontSize:16}}
+        onChange={(value) => setCode(value)}
       />
       <button className={styles.runButton} onClick={runAllTests}>
           Run All Test Cases

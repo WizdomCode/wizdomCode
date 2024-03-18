@@ -1,0 +1,127 @@
+[debug] [2024-03-13T00:50:23.498Z] ----------------------------------------------------------------------
+[debug] [2024-03-13T00:50:23.502Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\lingo\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-03-13T00:50:23.503Z] CLI Version:   13.4.1
+[debug] [2024-03-13T00:50:23.503Z] Platform:      win32
+[debug] [2024-03-13T00:50:23.503Z] Node Version:  v20.11.1
+[debug] [2024-03-13T00:50:23.503Z] Time:          Tue Mar 12 2024 20:50:23 GMT-0400 (Eastern Daylight Saving Time)
+[debug] [2024-03-13T00:50:23.503Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-03-13T00:50:23.522Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-13T00:50:23.525Z] > authorizing via signed-in user (competitive.programming2197@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\lingo\OneDrive\Desktop\CompetitiveProgrammingWebsite
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-03-13T01:02:21.070Z] > refreshing access token with scopes: []
+[debug] [2024-03-13T01:02:21.075Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2024-03-13T01:02:21.075Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-03-13T01:02:21.363Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2024-03-13T01:02:21.364Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-03-13T01:02:21.374Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2024-03-13T01:02:21.790Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2024-03-13T01:02:21.790Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project competitveprogrammingweb (CompetitveProgrammingWeb) 
+[info] 
+=== Firestore Setup
+[debug] [2024-03-13T01:02:27.507Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/firestore.googleapis.com [none]
+[debug] [2024-03-13T01:02:27.507Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/firestore.googleapis.com x-goog-quota-user=projects/competitveprogrammingweb
+[debug] [2024-03-13T01:02:27.917Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/firestore.googleapis.com 200
+[debug] [2024-03-13T01:02:27.917Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/firestore.googleapis.com [omitted]
+[debug] [2024-03-13T01:02:27.918Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default) [none]
+[debug] [2024-03-13T01:02:28.212Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default) 200
+[debug] [2024-03-13T01:02:28.213Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default) {"name":"projects/competitveprogrammingweb/databases/(default)","uid":"89dbbc2f-2430-48ac-bc59-cc0ac484251e","createTime":"2024-03-06T04:52:19.651368Z","updateTime":"2024-03-06T04:52:19.651368Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-03-13T00:02:29.105359Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"INvXq6GF8IQDMOGqoans3oQD"}
+[debug] [2024-03-13T01:02:28.213Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-03-13T01:02:28.213Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-13T01:02:28.213Z] > authorizing via signed-in user (competitive.programming2197@gmail.com)
+[debug] [2024-03-13T01:02:28.213Z] [iam] checking project competitveprogrammingweb for permissions ["firebase.projects.get"]
+[debug] [2024-03-13T01:02:28.214Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions [none]
+[debug] [2024-03-13T01:02:28.214Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions x-goog-quota-user=projects/competitveprogrammingweb
+[debug] [2024-03-13T01:02:28.214Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-13T01:02:28.504Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions 200
+[debug] [2024-03-13T01:02:28.504Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-03-13T01:07:39.511Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/competitveprogrammingweb/releases pageSize=10&pageToken=
+[debug] [2024-03-13T01:07:39.825Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/competitveprogrammingweb/releases 200
+[debug] [2024-03-13T01:07:39.825Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/competitveprogrammingweb/releases {"releases":[{"name":"projects/competitveprogrammingweb/releases/cloud.firestore","rulesetName":"projects/competitveprogrammingweb/rulesets/42c3851d-30dc-4f2a-9c8b-5b5b2b5c02b6","createTime":"2024-03-06T05:05:13.066628Z","updateTime":"2024-03-09T07:12:30.235731Z"}]}
+[debug] [2024-03-13T01:07:39.826Z] Found ruleset: projects/competitveprogrammingweb/rulesets/42c3851d-30dc-4f2a-9c8b-5b5b2b5c02b6
+[debug] [2024-03-13T01:07:39.826Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/competitveprogrammingweb/rulesets/42c3851d-30dc-4f2a-9c8b-5b5b2b5c02b6 [none]
+[debug] [2024-03-13T01:07:40.003Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/competitveprogrammingweb/rulesets/42c3851d-30dc-4f2a-9c8b-5b5b2b5c02b6 200
+[debug] [2024-03-13T01:07:40.004Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/competitveprogrammingweb/rulesets/42c3851d-30dc-4f2a-9c8b-5b5b2b5c02b6 [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-03-13T01:08:23.783Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-03-13T01:08:23.787Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-03-13T01:08:24.107Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-03-13T01:08:24.107Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default)/collectionGroups/-/indexes {}
+[debug] [2024-03-13T01:08:24.154Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-03-13T01:08:24.154Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/competitveprogrammingweb/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/competitveprogrammingweb/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[info] 
+=== Functions Setup
+[debug] [2024-03-13T01:08:24.160Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-13T01:08:24.160Z] > authorizing via signed-in user (competitive.programming2197@gmail.com)
+[debug] [2024-03-13T01:08:24.161Z] [iam] checking project competitveprogrammingweb for permissions ["firebase.projects.get"]
+[debug] [2024-03-13T01:08:24.161Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions [none]
+[debug] [2024-03-13T01:08:24.161Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions x-goog-quota-user=projects/competitveprogrammingweb
+[debug] [2024-03-13T01:08:24.161Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-13T01:08:24.442Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions 200
+[debug] [2024-03-13T01:08:24.442Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/competitveprogrammingweb:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-13T01:08:24.443Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-03-13T01:08:24.443Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/competitveprogrammingweb
+[debug] [2024-03-13T01:08:24.448Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-03-13T01:08:24.449Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/competitveprogrammingweb
+[debug] [2024-03-13T01:08:24.845Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/runtimeconfig.googleapis.com 200
+[debug] [2024-03-13T01:08:24.845Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-03-13T01:08:24.852Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com 200
+[debug] [2024-03-13T01:08:24.852Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2024-03-13T01:08:24.854Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com:enable [none]
+[debug] [2024-03-13T01:08:24.854Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com:enable x-goog-quota-user=projects/competitveprogrammingweb
+[debug] [2024-03-13T01:08:25.442Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com:enable 200
+[debug] [2024-03-13T01:08:25.442Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com:enable [omitted]
+[debug] [2024-03-13T01:08:35.478Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-03-13T01:08:35.478Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/competitveprogrammingweb
+[debug] [2024-03-13T01:08:35.884Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com 200
+[debug] [2024-03-13T01:08:35.884Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/competitveprogrammingweb/services/cloudfunctions.googleapis.com [omitted]
+[info] Let's create a new codebase for your functions.
+[info] A directory corresponding to the codebase will be created in your project
+[info] with sample code pre-configured.
+
+[info] See https://firebase.google.com/docs/functions/organize-functions for
+[info] more information on organizing your functions using codebases.
+
+[info] Functions can be deployed with firebase deploy.
+
+[info] +  Wrote functions/package.json 
+[info] +  Wrote functions/index.js 
+[info] +  Wrote functions/.gitignore 
+[info] 
+=== Hosting Setup
+[debug] [2024-03-13T01:17:48.716Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/competitveprogrammingweb [none]
+[debug] [2024-03-13T01:17:49.121Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/competitveprogrammingweb 200
+[debug] [2024-03-13T01:17:49.121Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/competitveprogrammingweb {"projectId":"competitveprogrammingweb","projectNumber":"308681160429","displayName":"CompetitveProgrammingWeb","name":"projects/competitveprogrammingweb","resources":{"hostingSite":"competitveprogrammingweb"},"state":"ACTIVE","etag":"1_69007d79-0563-4bc8-b88d-6f838e289a41"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 

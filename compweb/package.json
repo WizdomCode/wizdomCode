@@ -5,6 +5,7 @@
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.2",
     "@codemirror/lang-javascript": "^6.2.2",
+    "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^5.15.11",
     "@mui/material": "^5.15.11",
     "@testing-library/jest-dom": "^5.17.0",
@@ -14,7 +15,10 @@
     "@uiw/react-codemirror": "^4.21.24",
     "axios": "^1.6.7",
     "bootstrap": "^5.3.3",
+    "express": "^4.18.3",
     "firebase": "^10.8.0",
+    "http-proxy-middleware": "^2.0.6",
+    "piston-client": "^1.0.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.1",
     "react-dom": "^18.2.0",
