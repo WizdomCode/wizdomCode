@@ -15,6 +15,12 @@ const USACO = () => {
                 <Link to="/silver">Silver CONTESTS</Link>
             </div>
             <div>
+                <Link to="/gold">Gold CONTESTS</Link>
+            </div>
+            <div>
+                <Link to="/platinum">Platinum CONTESTS</Link>
+            </div>
+            <div>
                 <Link to="/computercontest">Computer CONTESTS</Link>
             </div>
         </>

@@ -5,13 +5,36 @@ import Navigation from "../../../../components/Navigation/Navigation";
 const Silver = () => {
     return (
         <>
-            <Navigation></Navigation>
+            <Navigation />
             <h1>Silver</h1>
-            <p>Learn comeptitve programming today!</p>
-            <Link to = "/bfs2">BFS 2</Link>
-            <div>
-                <Link to="/silver">Silver</Link>
-            </div>
+            <p>Learn competitive programming today!</p>
+            <ul>
+                <li>
+                    <Link to="/binarysearch">Binary Search</Link>
+                </li>
+                <li>
+                    <Link to="/prefixsums">Prefix Sums</Link>
+                </li>
+                <li>
+                    <Link to="/twopointers">Two Pointers</Link>
+                </li>
+                <li>
+                    <Link to="/depthfirstsearch">Depth First Search</Link>
+                </li>
+                <li>
+                    <Link to="/floodfill">Flood Fill</Link>
+                </li>
+                <li>
+                    <Link to="/trees">Trees</Link>
+                </li>
+                <li>
+                    <Link to="/customcomparators">Custom Comparators</Link>
+                </li>
+                <li>
+                    <Link to="/greedysorting">Greedy Sorting</Link>
+                </li>
+            </ul>
+            <Link to="/usaco">back to usaco</Link>
         </>
     );
 };
