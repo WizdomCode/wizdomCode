@@ -89,7 +89,6 @@ return (
   <>
     {problem && (
       <>
-        <h1>{problem.title}</h1>
         {!isLoading && <Workspace problem={problem} boilerPlate={boilerPlate} testCases={testCases} />}
       </>
     )}

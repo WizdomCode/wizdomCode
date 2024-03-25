@@ -1,0 +1,41 @@
+/* Navigation.module.css */
+.navbar {
+  position: fixed;
+  width: 100%;
+  transition: background-color 0.5s ease;
+  z-index: 1000;
+  background-color: transparent;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+}
+
+.navbarScrolled {
+    background-color: #0A0A23 !important;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #0A0A23 !important;
+}
+
+.nav {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  background-color: #0A0A23 !important;
+}
+
+.navLink {
+  color: #fff;
+  transition: color 0.5s ease;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+}
+
+.navLink:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

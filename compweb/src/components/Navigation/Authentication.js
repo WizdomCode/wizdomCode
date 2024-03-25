@@ -5,6 +5,7 @@ import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import { Link } from "react-router-dom";
 import { onAuthStateChanged, signOut} from "firebase/auth";
+import styles from '../styles/Navigation.module.css';
 
 const Authentication = () => {
   const [authenticatedUser, setauthenticatedUser] = useState("");
@@ -31,8 +32,8 @@ const Authentication = () => {
     <>
     {authenticatedUser == null ? 
     <>
-      <Nav.Link href="/login">Login</Nav.Link>
-      <Nav.Link href="/signup">Signup</Nav.Link>
+      <Nav.Link className={styles.navLink} href="/login">Login</Nav.Link>
+      <Nav.Link className={styles.navLink} href="/signup">Signup</Nav.Link>
       
     </> : 
       <>

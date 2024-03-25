@@ -1,16 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import Split from 'react-split';
 import styles from '../../styles/Editor.module.css';
+import '../../styles/Editor.css';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
+import * as monaco from 'monaco-editor';
 
 const CodeEditor = (props) => {
   const [code, setCode] = useState(props.boilerPlate);
   const [output, setOutput] = useState([]);
-  const [language, setLanguage] = useState("");
+  const [language, setLanguage] = useState("cpp");
 
-  const submitCode = () => {
-    console.log(code);
+  console.log(props.testCases);
+ 
+  const submitCode = async () => {
+    for (let testCase of props.testCases) {
+    
+      const answer = await fetch(
+        "http://localhost:9000/2015-03-31/functions/function/invocations",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({
+            code: code,
+            language: language,
+            input: testCase.input,
+            expected_output: testCase.output
+          }),
+        }
+      );
+
+      const result = answer.json();
+
+      
+        if (result.body === 'Test Passed') {
+          console.log(`Test case ${testCase.key} passed`);
+        } else {
+          console.log(`Test case ${testCase.key} failed`);
+        }
+      console.log(result);
+    }
   };
 
   useEffect(() => {
@@ -83,56 +114,84 @@ const CodeEditor = (props) => {
     setOutput(results);
   };
 
+  /* load monaco */
+
+  fetch('/themes/Monokai.json')
+  .then(data => data.json())
+  .then(data => {
+    monaco.editor.defineTheme('monokai', data);
+    monaco.editor.setTheme('monokai');
+  })
+
+  monaco.editor.defineTheme('my-custom-theme', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      
+    ],
+    colors: {}
+  });
+
+  monaco.editor.setTheme('my-custom-theme');
+
+  const BGDARK = "#1B1B32";
+  const UNSELECTED = "#0A0A23";
+
   return (
-    <Split
-        className={styles.split} // Change this line
-        direction="vertical"
-        minSize={10}
-        gutterSize={10}
-        sizes={[50, 50]}
-    >
-    <div>
-        <h2>Test Cases</h2>
-        <div className={styles.testCases}>
-        {props.testCases.map((testCase) => (
-            <div key={testCase.key} className={styles.testCase}>
-            <h3>{testCase.key}</h3>
-            <p>Input: {JSON.stringify(testCase.input)}</p>
-            <p>Expected Output: {testCase.output}</p>
-            </div>
-        ))}
+    <>
+      <div className={styles.codeEditor}>
+        <div className={styles.buttonRow}>
+          <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
+            <p className={styles.buttonText}>Python</p>
+            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>
+          </button>
+          <button className={styles.button} style={{background: language === "java" ? BGDARK : UNSELECTED, color: language === "java" ? "white" : "white"}} onClick={() => { setLanguage("java")}}>
+            <p className={styles.buttonText}>Java</p>
+            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+          </button>
+          <button className={styles.button} style={{background: language === "cpp" ? BGDARK : UNSELECTED, color: language === "cpp" ? "white" : "white"}} onClick={() => { setLanguage("cpp")}}>
+            <p className={styles.buttonText}>C++</p>
+            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+          </button>
+          <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
+          <div className={styles.rightAlign}>
+            <button 
+              className={styles.buttonIcon}
+              onClick={() => {
+              submitCode();
+            }}>
+              <img src='/run.png' alt="Run" style={{maxWidth: '20px', maxHeight: '20px'}}/>
+            </button>
+            <button 
+              className={styles.buttonIcon}
+              onClick={() => {
+              submitCode();
+            }}>
+              <p className={styles.buttonText}>SUBMIT</p>
+            </button>
+          </div>
         </div>
-    </div>
-    <div className={styles.codeEditor}>
-      <h1 className={styles.title}>Code Editor</h1>
-      <button style={{background: language === "python" ? "black" : "white", color: language === "python" ? "white" : "black"}} onClick={() => { setLanguage("python")}}>Python</button>
-      <button style={{background: language === "java" ? "black" : "white", color: language === "java" ? "white" : "black"}} onClick={() => { setLanguage("java")}}>Java</button>
-      <button style={{background: language === "cpp" ? "black" : "white", color: language === "cpp" ? "white" : "black"}} onClick={() => { setLanguage("cpp")}}>C++</button>
-      <button onClick={() => {
-        submitCode();
-      }}>SUBMIT</button>
-      <Editor
-        theme="vs-dark"
-        height="90vh"
-        defaultLanguage="cpp"
-        value={code}
-        onChange={(value) => setCode(value)}
-      />
-      <button className={styles.runButton} onClick={runAllTests}>
-          Run All Test Cases
-        </button>
-      <div className={styles.output}>
-      {output.map((result, index) => (
-        <div key={index}>
-          <h5>Test Case {result.testCaseKey}</h5>
-          <p>Status: {result.status}</p>
-          <p>Output: {result.output || 'N/A'}</p> {/* Display 'N/A' if output is undefined */}
-          <p>Error: {result.error || 'N/A'}</p> {/* Display 'N/A' if error is undefined */}
-        </div>
-      ))}
+        <br />
+        <Editor
+          className={styles.codeEditor}
+          theme="vs-dark"
+          height="60vh"
+          defaultLanguage="cpp"
+          value={code}
+          onChange={(value) => setCode(value)}
+        />
       </div>
-    </div>
-    </Split>
+      <div className={styles.output}>
+        {output.map((result, index) => (
+          <div key={index}>
+            <h5>Test Case {result.testCaseKey}</h5>
+            <p>Status: {result.status}</p>
+            <p>Output: {result.output || 'N/A'}</p> {/* Display 'N/A' if output is undefined */}
+            <p>Error: {result.error || 'N/A'}</p> {/* Display 'N/A' if error is undefined */}
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 

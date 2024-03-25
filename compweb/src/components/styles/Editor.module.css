@@ -1,3 +1,14 @@
+:root {
+  --dark-bg:#1B1B32;
+  --light-bg: #3B3B4F;
+  --code-bg: #0A0A23;
+  --navbar: #0A0A23;
+}
+
+.split {
+  height: 100vh;
+}
+
 .gutter {
     background-color: #eee;
     background-repeat: no-repeat;
@@ -50,13 +61,8 @@
   margin-bottom: 0.5rem;
 }
 
-.code-editor {
-  margin: 2rem auto;
-  width: 80%;
-  border: 1px solid #ccc;
-  padding: 1rem;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.codeEditor {
+  background-color: var(--dark-bg);
 }
 
 .title {
@@ -76,6 +82,63 @@
   line-height: 1.5;
   color: #333;
   margin-bottom: 1rem;
+}
+
+.buttonRow {
+  display: flex;
+  background: var(--navbar);
+  align-items: center;
+}
+
+.rightAlign {
+  position: absolute;
+  right: 0;
+  display: flex;
+  background-color: var(--dark-bg);
+}
+
+.button {
+  display: flex;
+  padding: 8px 16px;
+  align-items: center;
+  justify-content: flex-start;
+  border: none;
+  background: #2E3139;
+  width: 156px;
+  height: 48.848px;
+  flex-shrink: 0;
+  font-size: medium;
+}
+
+.buttonText {
+  flex: 2;
+  text-align: left;
+}
+
+.closeIcon {
+  flex: 1;
+  background-color: var(--dark-bg);
+}
+
+.buttonIcon {
+  background-color: var(--dark-bg);
+  border: none;
+  font-size: large;
+  padding: 100% 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.newTab {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: none;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
 }
 
 .run-button {
@@ -124,7 +187,6 @@
   line-height: 1.5;
   color: #333;
   padding: 0.5rem;
-  border-radius: 5px;
   margin-bottom: 0.5rem;
 }
 

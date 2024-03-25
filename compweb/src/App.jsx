@@ -44,7 +44,7 @@ import MatrixExponentiation from "./pages/ComputerContests/USACO/Platinum/Lesson
 import UserProfile from "./pages/UserProfile";
 import Problems from "./pages/Problems";
 import AddProblem from "./pages/AddProblem";
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
