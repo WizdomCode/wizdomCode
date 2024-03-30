@@ -743,7 +743,7 @@ int main() {
                 </div>
                 <br />
                 <br />
-                <button className={styles.runAll} onClick={runAllTests}>Run All Tests (Ctrl + Enter)</button>
+                <button className={styles.runAll} onClick={submitCode}>Run All Tests (Ctrl + Enter)</button>
                 <br />
                 <div className={styles.testCases}>
                   {testCases.map((testCase, index) => {

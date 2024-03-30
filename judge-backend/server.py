@@ -5,11 +5,50 @@ from flask import Flask, request, jsonify
 import tempfile
 import os
 import re
+import time
+import signal
 
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+
+# Set a time limit for each test case
+TIME_LIMIT = 5  # seconds
+
+class TimeoutException(Exception): pass
+
+def handler(signum, frame):
+    raise TimeoutException()
+
+# Windows doesn't support signal.SIGALRM, so we use a workaround
+if os.name == 'nt':
+    def execute_with_time_limit(func, args):
+        from threading import Thread
+        res = [None]
+        def target():
+            try:
+                res[0] = func(*args)
+            except Exception as e:
+                res[0] = str(e)
+        thread = Thread(target=target)
+        thread.start()
+        thread.join(TIME_LIMIT)
+        if thread.is_alive():
+            return 'Time limit exceeded'
+        return res[0]
+else:
+    signal.signal(signal.SIGALRM, handler)
+    def execute_with_time_limit(func, args):
+        signal.alarm(TIME_LIMIT)
+        try:
+            res = func(*args)
+            signal.alarm(0)
+            return res
+        except TimeoutException:
+            return 'Time limit exceeded'
+        except Exception as e:
+            return str(e)
 
 def execute_code(code, test_cases, language):
     results = []
@@ -25,21 +64,24 @@ def execute_code(code, test_cases, language):
         input_data = test_case['input']
         expected_output = test_case['output'].replace('\r', '')
 
+        start_time = time.time()
         if language == 'python':
-            result = execute_python_code(compiled_code, input_data)
+            result = execute_with_time_limit(execute_python_code, (compiled_code, input_data))
         elif language == 'java':
-            result = execute_java_code(compiled_code, input_data)
+            result = execute_with_time_limit(execute_java_code, (compiled_code, input_data))
         elif language == 'cpp':
-            result = execute_cpp_code(compiled_code, input_data)
+            result = execute_with_time_limit(execute_cpp_code, (compiled_code, input_data))
         else:
             result = 'Unsupported lang ' + language
+        execution_time = time.time() - start_time
 
         result = result.replace('\r', '')
 
-        if result.strip() == expected_output.strip():
-            results.append({'key': key, 'status': 'Passed'})
-        else:
-            results.append({'key': key, 'status': 'Failed', 'actual_output': result})
+        status = {'description': 'Accepted', 'id': 1} if result.strip() == expected_output.strip() else {'description': 'Wrong Answer', 'id': 2}
+        if result == 'Time limit exceeded':
+            status = {'description': 'Time limit exceeded', 'id': 3}
+
+        results.append({'key': key, 'status': status, 'stdout': result, 'time': execution_time})
 
     return results
 
