@@ -1,3 +1,6 @@
+// problem is a unique identifier (str) representing a question's title, passed to the question component as questionID
+// cases is a string indicating the location of a problem's test cases, passed to the question component as testCaseFolders
+
 import React, { useState, useEffect } from "react";
 import { auth, app, db } from "../firebase";
 import Navigation from "../components/Navigation/Navigation";
@@ -5,6 +8,8 @@ import Question from "../components/Question";
 import { collection, getDocs } from "firebase/firestore";
 import "../Fonts.css";
 import Select from "react-select";
+import Workspace from "../components/Workspace/Workspace";
+import IDE from "../components/Workspace/ProblemDescription/IDE";
 
 const Problems = () => {
   const [problem, setProblem] = useState(null);
@@ -194,8 +199,8 @@ const Problems = () => {
 
   return (
     <>
-      <Navigation />
       <div className="body">
+      <IDE />
       {problem && cases && (
         <Question questionID={problem} testCaseFolder={cases} />
       )}

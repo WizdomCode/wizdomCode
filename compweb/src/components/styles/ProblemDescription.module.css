@@ -52,6 +52,7 @@
   align-items: center;
   width: 100%;
   margin: 0 0;
+  height: 48.848px;
 }
 
 .rightAlign {
@@ -131,7 +132,7 @@
 .description {
   width: 100%;
   text-align: left;
-  background-color: var(--dark-bg);
+  background-color: transparent;
 }
 
 br {
@@ -202,6 +203,26 @@ ul {
 .testCaseOdd {
   color: #fff;
   /* Add more styles as needed */
+}
+
+.testCaseFailed {
+  background-color: palevioletred;
+}
+
+.testCasePassed {
+  background-color: #7EC699;
+}
+
+.runAll {
+  display: flex;
+  height: 47.78px;
+  padding: 9.605px 0px 9.885px 0px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 100%;
+  border: 3px solid #F5F6F7;
+  background: #3B3B4F;
 }
 
 .testCaseContent {

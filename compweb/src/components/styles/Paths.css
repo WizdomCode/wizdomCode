@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+    --dark-gray: #0E1015;
+    --gray: #181A20;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: var(--dark-bg);
+    color: white;
+}
+
+.unit-title {
+    color: #EFECF0;
+    font-family: "Poppins";
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    background-color: transparent;
+}
+
+.lesson-icon {
+    width: 47.346px;
+    height: 47.346px;
+    margin: 24px;
+    background-color: transparent;
+}
+
+.lesson-category {
+  color: #F5F6F7;
+  text-align: center;
+  font-family: "Inter";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  background-color: transparent;
+}
+
+.lesson-name {
+  color: #F5F6F7;
+  text-align: center;
+  font-family: "Inter";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22.86px; /* 142.875% */
+  background-color: transparent;
+}
+
+.long-lesson-name {
+  color: #F5F6F7;
+  text-align: center;
+  font-family: "Inter";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  background-color: transparent;
+}
+
+.unit-header {
+    display: flex;
+    background-color: transparent;
+}
+
+.unit-header-left {
+    flex: 2;
+    background-color: transparent;
+}
+
+.unit-header-right {
+    flex: 1;
+    align-items: center;
+    background-color: transparent;
+}
+
+.lesson-wrapper {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none; /* For Firefox */
+    scroll-behavior: smooth;
+}
+
+.lesson-wrapper::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari and Opera */
+}
+
+.lesson-background-rect {
+    flex: 0 0 auto;
+    width: 146.442px;
+    height: 210.304px;
+    aspect-ratio: 146.442 / 210.304; /* width / height */
+    flex-shrink: 0;
+    background: var(--gray);
+    margin: 10px;
+    display: flex; /* Add this */
+    flex-direction: column; /* Add this */
+    align-items: center; /* Add this */
+    position: relative; /* Add this */
+    padding: 20px; /* Add this */
+    transition: all 0.3s ease; /* Add this */
+}
+
+.lesson-background-rect.hovered {
+    transform: scale(1.1); /* Grow bigger */
+    background: gray; /* Change color */
+}
+
+.scroll-button {
+  top: 50%;
+  background: transparent;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.scroll-row {
+  display: flex;
+}
+
+.scroll-button.left {
+  left: 10px;
+}
+
+.scroll-button.right {
+  right: 10px;
+}
+
+.bottom-rectangle {
+    width: 100%; /* Full width */
+    background: var(--light-bg); /* Replace with your color */
+    position: absolute; /* Add this */
+    bottom: 0; /* Add this */
+    left: 0;
+    display: flex;
+    border: none;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    padding: 8px 16px;
+    flex-shrink: 0;
+}
+
+.search-rect {
+    height: 47px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #FFF;
+    opacity: 0.99;
+    margin: 20px 0;
+}
+
+input {
+    color: black;
+    background-color: transparent;
+    border: none;
+}
+
+input:focus {
+    outline: none;
+}
+
+.subsearch-row {
+    display: flex;
+    background-color: transparent;
+}
+
+.subsearch-text {
+    flex: 1;
+    background-color: transparent;
+}
+
+.search-container {
+  flex: 2;
+  display: flex;
+  width: 100%;
+  background-color: transparent;
+}
+
+.search-container > *:not(:last-child) {
+  margin-right: 10px; /* Adjust this value to increase or decrease the space */
+}
+
+.column1, .column2, .column3 {
+  position: relative;
+  flex: 1;
+  background-color: transparent;
+}
+
+.css-b62m3t-container {
+  background-color: transparent;
+}
+
+.dropdown-placeholder {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;  
+    position: absolute;
+    top: 20%;
+    left: 10px;
+    background-color: white;
+    color: black;
+}
+
+.poppins-thin {
+  font-family: "Poppins", sans-serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.poppins-extralight {
+  font-family: "Poppins", sans-serif;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.poppins-light {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.poppins-regular {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.poppins-medium {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.poppins-semibold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.poppins-bold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.poppins-extrabold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.poppins-black {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.poppins-thin-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.poppins-extralight-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.poppins-light-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.poppins-regular-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.poppins-medium-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.poppins-semibold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.poppins-bold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.poppins-extrabold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.poppins-black-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+

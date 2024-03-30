@@ -1,0 +1,20 @@
+{
+  "apps": [
+    {
+      "name": "server",
+      "script": "./judge-backend/server.py",
+      "watch": true,
+      "interpreter": "python3"
+    },
+    {
+      "name": "client",
+      "script": "npm",
+      "args": "start",
+      "interpreter": "none",
+      "env": {
+        "BROWSER": "none"
+      },
+      "cwd": "./compweb"
+    }
+  ]
+}

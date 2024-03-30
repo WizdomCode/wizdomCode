@@ -1,3 +1,11 @@
+// questionID is a unique identifier (str) representing a question's title, used to fetch information on a specfic question within this file 
+// testCaseFolder is a string indicating the location of a problem's test cases, used to fetch information on a specfic question's test cases within this file
+
+// problem is an object containing { title, description, inputFormat, constraints, outputFormat, points }, passed to Workspace as problem
+// testCases is an array of objects, each containing a .key, .input, and .output, passed to Workspace as testCases
+
+// this data is eventually passed to the ProblemDescription as props.problem and props.testCases
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { auth, app, db } from "../firebase";
@@ -26,9 +34,6 @@ const Question = ({ questionID, testCaseFolder}) => {
       }
     };
 
-    // Fetch test cases data from TestCaseReader
-    // Fetch test cases data from TestCaseReader
-// Fetch test cases data from TestCaseReader
 // Fetch test cases data from TestCaseReader
 const fetchTestCasesData = async () => {
   try {
@@ -38,15 +43,15 @@ const fetchTestCasesData = async () => {
     for (let i = 1; i <= 10; i++) {
       const fileName = `${i}.in`;
 
-      console.log("Processing file:", fileName);
+      // console.log("Processing file:", fileName);
 
       try {
         const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName}`);
         const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName.replace(".in", ".out")}`);
 
-        console.log("File Name:", fileName);
-        console.log("Input Response:", inputResponse.data);
-        console.log("Output Response:", outputResponse.data);
+        // console.log("File Name:", fileName);
+        // console.log("Input Response:", inputResponse.data);
+        // console.log("Output Response:", outputResponse.data);
 
         testCaseArray.push({
           key: fileName.replace(".in", ""),
@@ -58,7 +63,7 @@ const fetchTestCasesData = async () => {
       }
     }
 
-    console.log("Test Cases:", testCaseArray);
+    // console.log("Test Cases:", testCaseArray);
 
     setTestCases(testCaseArray);
     setIsLoading(false); // Set the loading state to false after fetching the test cases data

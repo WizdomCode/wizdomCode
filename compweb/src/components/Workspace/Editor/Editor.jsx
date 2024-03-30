@@ -12,107 +12,41 @@ const CodeEditor = (props) => {
   const [language, setLanguage] = useState("cpp");
 
   console.log(props.testCases);
- 
-  const submitCode = async () => {
-    for (let testCase of props.testCases) {
-    
-      const answer = await fetch(
-        "http://localhost:9000/2015-03-31/functions/function/invocations",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({
-            code: code,
-            language: language,
-            input: testCase.input,
-            expected_output: testCase.output
-          }),
-        }
-      );
-
-      const result = answer.json();
-
-      
-        if (result.body === 'Test Passed') {
-          console.log(`Test case ${testCase.key} passed`);
-        } else {
-          console.log(`Test case ${testCase.key} failed`);
-        }
-      console.log(result);
-    }
-  };
 
   useEffect(() => {
-    console.log(code);
+    props.getCode(code, language);
   }, [code]);
 
-  // Function to run the user's code against all test cases
-  const runAllTests = async () => {
-    let results = [];
-    for (let testCase of props.testCases) {
-      try {
-        // Prepare the data for the Piston API
-        const data = {
-          language: 'cpp',
-          version: '10.2.0', // replace with the version you want to use
-          files: [
-            {
-              name: 'temp.cpp',
-              content: code
-            }
-          ],
-          stdin: testCase.input, // Convert input to an array
-        };
+  const submitCode = async () => {
+    console.log("sent code:", props.testCases);
 
-        console.log(data);
+    // Start the timer
+    const startTime = performance.now();
 
-        // Make a POST request to the Piston API
-        const response = await axios.post('http://localhost:2000/api/v2/execute', data);
+    const response = await fetch('http://localhost:5000/api/execute', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        language: language,
+        code: code,
+        test_cases: props.testCases
+      })
+    });
 
-        // Parse the response
-        const result = response.data;
+    // End the timer and calculate the elapsed time
+    const endTime = performance.now();
+    const elapsedTime = endTime - startTime;
+    console.log(`Execution time: ${elapsedTime} milliseconds`);
 
-        // Check if the program encountered an error
-        if (result.stderr || result.message) {
-          results.push({
-            testCaseKey: testCase.key,
-            status: 'Error',
-            output: null,
-            error: result.stderr || result.message
-          });
-          continue;
-        }
+    console.log("sent code");
+    const data = await response.json();
+    console.log(data);
+    setOutput(data);
 
-        // Compare the result with the expected output
-        if (result.stdout && testCase.output && result.stdout.trim() === testCase.output.toString().trim()) {
-          results.push({
-            testCaseKey: testCase.key,
-            status: 'Passed',
-            output: result.stdout,
-            error: null
-          });
-        } else {
-          results.push({
-            testCaseKey: testCase.key,
-            status: 'Failed',
-            output: result.stdout,
-            error: null
-          });
-        }
-      } catch (error) {
-        // If there's an error in the user's code, catch it and display the message
-        results.push({
-          testCaseKey: testCase.key,
-          status: 'Error',
-          output: null,
-          error: error.message
-        });
-      }
-    }
-    setOutput(results);
-  };
+    props.getResults(data);
+  };  
 
   /* load monaco */
 
@@ -184,10 +118,9 @@ const CodeEditor = (props) => {
       <div className={styles.output}>
         {output.map((result, index) => (
           <div key={index}>
-            <h5>Test Case {result.testCaseKey}</h5>
+            <h5>Test Case {result.key}</h5>
             <p>Status: {result.status}</p>
-            <p>Output: {result.output || 'N/A'}</p> {/* Display 'N/A' if output is undefined */}
-            <p>Error: {result.error || 'N/A'}</p> {/* Display 'N/A' if error is undefined */}
+            {result.status === 'Failed' && <p>Actual Output:{"\n"}{result.actual_output}</p>}
           </div>
         ))}
       </div>

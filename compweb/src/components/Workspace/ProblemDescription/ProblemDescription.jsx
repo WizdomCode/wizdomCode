@@ -1,16 +1,23 @@
+// questionID is a unique identifier (str) representing a question's title, used to fetch information on a specfic question within this file
+// testCaseFolder is a string indicating the location of a problem's test cases
+// these are decided by the search/filter system
+
+// problem is an object containing { title, description, inputFormat, constraints, outputFormat, points }
+// testCases is an array of objects, each containing a .key, .input, and .output
+
 import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect } from "react";
 import { auth, app, db } from "../../../firebase.js";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, doc } from "firebase/firestore";
 import "../../../Fonts.css";
 import Select from "react-select";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
-const ProblemDescription = (props) => {
-  const { title, description, inputFormat, constraints, outputFormat, points } = props.problem;
-  const [currentTab, setCurrentTab] = useState('description');  
-  const [language, setLanguage] = useState('Mixing Milk'); // default language
-  const languages = ['Mixing Milk', 'java']; // add or remove languages here
-  const [problem, setProblem] = useState(null);
+const ProblemDescription = () => {
+  const [currentTab, setCurrentTab] = useState('newTab');  
+  const [currentProblem, setCurrentProblem] = useState({}); // default problem
+  const [problems, setProblems] = useState([]); // default problems
   const [cases, setCases] = useState(null);
   const [searchPoints, setSearchPoints] = useState("");
   const [search, setSearch] = useState("");
@@ -19,6 +26,11 @@ const ProblemDescription = (props) => {
   const [questions, setQuestions] = useState([]);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [isFocused, setIsFocused] = useState({topics: false, contests: false, points: false});
+  const [questionID, setQuestionID] = useState(null);
+  const [testCaseFolder, setTestCaseFolder] = useState(null);
+
+  const [testCases, setTestCases] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOption, setFilterOption] = useState('');
@@ -206,28 +218,120 @@ const ProblemDescription = (props) => {
     setFilteredQuestions(filtered);
   }, [questions, searchPoints, search, topics, contests]);
 
+  useEffect(() => {
+    // Fetch problem data from Firebase
+    const fetchProblemData = async () => {
+      if (questionID) {  // Add this check
+        try {
+          const docRef = await getDoc(doc(db, "Questions", questionID));
+          if (docRef.exists()) {
+            setCurrentProblem(docRef.data());
+            if (!problems.includes(docRef.data())) {
+              setProblems(prevProblems => [...prevProblems, docRef.data()]);
+            }          
+            console.log("Problem from problemdesc:", docRef.data());
+          } else {
+            console.log("No such document!");
+          }
+        } catch (error) {
+          console.error("Error fetching document: ", error);
+        }
+      }
+    };
+  
+    fetchProblemData();
+  }, [questionID]);  
+
+  useEffect(() => {
+    // Fetch test cases data from TestCaseReader
+    const fetchTestCasesData = async () => {
+      try {
+        let testCaseArray = [];
+  
+        // Get the testCaseFolder from the currentProblem
+        const testCaseFolder = currentProblem.folder;
+  
+        if (testCaseFolder) {  // Add this check
+          // Hardcoded file names from 1.in to 10.in
+          for (let i = 1; i <= 10; i++) {
+            const fileName = `${i}.in`;
+  
+            console.log("Processing file:", fileName);
+  
+            try {
+              const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName}`);
+              const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName.replace(".in", ".out")}`);
+  
+              console.log("File Name:", fileName);
+              console.log("Input Response:", inputResponse.data);
+              console.log("Output Response:", outputResponse.data);
+  
+              testCaseArray.push({
+                key: fileName.replace(".in", ""),
+                input: inputResponse.data,
+                output: outputResponse.data,
+              });
+            } catch (error) {
+              console.error("Error processing file:", fileName, error);
+            }
+          }
+  
+          console.log("Test Cases from problemdesc:", testCaseArray);
+  
+          setTestCases(testCaseArray);
+          setIsLoading(false); // Set the loading state to false after fetching the test cases data
+        }
+      } catch (error) {
+        console.error("Error fetching test cases: ", error);
+      }
+    };
+  
+    fetchTestCasesData();
+  }, [currentProblem]);  
+
   return (
     <div className={styles.row}>
       <div className={styles.sidebar}>
         <button className={`${styles.button} ${currentTab === 'description' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('description')}>
           <img src='/question.png' alt="Description" style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
         </button>
+        <button className={`${styles.button} ${currentTab === 'description' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('description')}>
+          <img src='/paths.png' alt="Paths" style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
+        </button>
         <button className={`${styles.button} ${currentTab === 'testCases' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('testCases')}>
           <img src='/tests.png' alt="Tests" style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
+        </button>
+        <button className={`${styles.button} ${currentTab === 'description' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('description')}>
+          <img src='/profile.png' alt="Profile" style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
+        </button>
+        <button className={`${styles.button} ${currentTab === 'description' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('description')}>
+          <img src='/settings.png' alt="Settings" style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
         </button>
       </div>
       <div className={styles.problemStatement}>
         <div className={styles.scrollableContent}> 
           <div className={styles.buttonRow}>
-            {languages.map((lang) => (
+            {problems.map((problem, index) => (
               <button 
-                key={lang}
+                key={problem}
                 className={styles.buttonTab} 
-                style={{background: language === lang ? "#1B1B32" : "#0A0A23", color: language === lang ? "white" : "white"}} 
-                onClick={() => { setLanguage(lang)}}
+                style={{background: currentProblem.title === problem.title ? "#1B1B32" : "#0A0A23", color: currentProblem.title === problem.title ? "white" : "white"}} 
+                onClick={() => { setCurrentProblem(problem)}}
               >
-                <p className={styles.buttonText}>{lang.charAt(0).toUpperCase() + lang.slice(1)}</p>
-                <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>
+                <p className={styles.buttonText}>{problem.title.charAt(0).toUpperCase() + problem.title.slice(1)}</p>
+                <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevents the click event from bubbling up to the parent button
+                    const updatedProblems = problems.filter((_, problemIndex) => problemIndex !== index);
+                    setProblems(updatedProblems);
+                    if (currentProblem.title === problem.title) {
+                      setCurrentProblem(updatedProblems[0] || {});
+                      if (updatedProblems.length === 0) { // Add this check
+                        setCurrentTab('newTab');
+                      }                
+                    }
+                  }}            
+                />
               </button>
             ))}
             <button className={styles.newTab} onClick={() => setCurrentTab('newTab')}><img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
@@ -238,21 +342,21 @@ const ProblemDescription = (props) => {
             <>
               <div className={styles.wrapper}>
                 <br />
-                <h1 className={styles.title}>{title}</h1>
+                <h1 className={styles.title}>{currentProblem.title}</h1>
                 <br />
                 <div className={styles.description}>
                   <h3>Problem Description</h3>
-                  <p>{description}</p>
+                  <p>{currentProblem.description}</p>
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Input Format</h3>
-                  <p>{inputFormat}</p>
+                  <p>{currentProblem.inputFormat}</p>
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Constraints</h3>
                   <ul>
-                    {false && constraints &&
-                      Object.entries(constraints).map(([key, value]) => (
+                    {false && currentProblem.constraints &&
+                      Object.entries(currentProblem.constraints).map(([key, value]) => (
                         <li key={key}>
                           <strong>{key}:</strong> {value}
                         </li>
@@ -261,11 +365,33 @@ const ProblemDescription = (props) => {
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Output Format</h3>
-                  <p>{outputFormat}</p>
+                  <p>{currentProblem.outputFormat}</p>
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Points</h3>
-                  <p>{points}</p>
+                  <p>{currentProblem.points}</p>
+                </div>
+                <br />
+                <br />
+                <h2 className={styles.title}>Tests</h2>
+                <div className={styles.testCases}>
+                  {testCases.map((testCase, index) => (
+                    <div key={testCase.key} className={index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd}>
+                      <div className={index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd}>
+                        <br />
+                        <h3 className={index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd}>
+                          {testCase.key}
+                          {testCase.status === 'passed' ? <span className={styles.passIcon}>✔️</span> : <span className={styles.failIcon}>❌</span>}
+                        </h3>
+                        <br />
+                        <h4 className={index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd}>Input:</h4>
+                        <pre className={styles.codeSnippet}>{testCase.input.replace(/\\r\\n/g, '\n')}</pre>
+                        <br />
+                        <h4 className={index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd}>Expected Output:</h4>
+                        <pre className={styles.codeSnippet}>{testCase.output.replace(/\\r\\n/g, '\n')}</pre>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div> 
             </>
@@ -352,8 +478,9 @@ const ProblemDescription = (props) => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    setProblem(q.title);
-                                    setCases(q.folder);
+                                    setQuestionID(q.title);
+                                    setTestCaseFolder(q.folder);
+                                    setCurrentTab('description');
                                     window.scrollTo(0, 0); // This will scroll the page to the top
                                   }}
                                 >
@@ -375,7 +502,7 @@ const ProblemDescription = (props) => {
               <h2 className={styles.title}>Tests</h2>
               <br />
               <div className={styles.testCases}>
-                {props.testCases.map((testCase, index) => (
+                {testCases.map((testCase, index) => (
                   <div key={testCase.key} className={index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd}>
                     <div className={index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd}>
                       <br />

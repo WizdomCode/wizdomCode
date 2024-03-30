@@ -67,6 +67,8 @@ def execute_cpp_code(code):
         return str(e)
 
 def handler(event, context):
+    print("Event: ", event)
+    print("Context: ", context)
     language = event.get('language', 'python')
     code = event.get('code', '')
     if language == 'python':

@@ -1,0 +1,82 @@
+:root {
+  --dark-bg:#1B1B32;
+  --light-bg: #3B3B4F;
+  --code-bg: #0A0A23;
+  --navbar: #0A0A23;
+}
+
+.img {
+    background: transparent;
+    width: 90%;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align items to the left */
+  justify-content: flex-start; /* Align items to the top */
+  flex: 0.15;
+  background: var(--light-bg);
+  color: #fff;
+  padding: 2rem;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.problemStatement {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 100vh;
+  overflow: auto;
+  width: 100%;
+  padding-left: 10px;
+  background-color: var(--dark-bg);
+}
+
+.scrollableContent {
+  overflow-y: auto;
+  height: 100%;
+  width: 100%;
+  background-color: var(--dark-bg);
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  background: none;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.button:hover,
+.button:focus {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.activeTab {
+  position: relative;
+}
+
+.activeTab::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 20px;
+  background-color: #fff;
+}
