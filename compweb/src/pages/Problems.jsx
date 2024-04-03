@@ -10,6 +10,7 @@ import "../Fonts.css";
 import Select from "react-select";
 import Workspace from "../components/Workspace/Workspace";
 import IDE from "../components/Workspace/ProblemDescription/IDE";
+import { Provider } from 'react-redux';
 
 const Problems = () => {
   const [problem, setProblem] = useState(null);
@@ -200,7 +201,7 @@ const Problems = () => {
   return (
     <>
       <div className="body">
-      <IDE />
+        <IDE currentPage="problems"/>
       {problem && cases && (
         <Question questionID={problem} testCaseFolder={cases} />
       )}

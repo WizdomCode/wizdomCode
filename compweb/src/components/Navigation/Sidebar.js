@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from "react-router-dom";
 import styles from '../styles/Sidebar.module.css';
 
-const Sidebar = () => {
+const Sidebar = ({ onUsacoClick, onCccClick }) => {
   const [currentTab, setCurrentTab] = useState('home');
 
   return (
@@ -17,6 +17,12 @@ const Sidebar = () => {
             <img src='/paths.png' alt="Learning Path" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
+        <button className={`${styles.button} ${currentTab === 'usaco' ? styles.activeTab : ''}`} onClick={() => {setCurrentTab('usaco'); onUsacoClick();}}>
+          <img src='/usaco.png' alt="Usaco Paths" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
+        </button>
+        <button className={`${styles.button} ${currentTab === 'ccc' ? styles.activeTab : ''}`} onClick={() => {setCurrentTab('ccc'); onCccClick();}}>
+          <img src='/ccc.png' alt="CCC Paths" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
+        </button>
         <Link to="/" className={styles.img}>
           <button className={`${styles.button} ${currentTab === 'home' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('home')}>
             <img src='/home.png' alt="Home" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>

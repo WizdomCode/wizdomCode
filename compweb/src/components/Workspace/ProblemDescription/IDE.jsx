@@ -18,6 +18,9 @@ import CodeEditor from '../Editor/Editor.jsx';
 import '../../styles/Workspace.css';
 import Sidebar from '../../Navigation/Sidebar.js';
 import "../../styles/Paths.css";
+import Paths from './Paths.jsx';
+import Tab from './Tab.jsx';
+import { useDispatch, useSelector } from 'react-redux';
 
 const LessonBackgroundRect = (props) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -39,8 +42,23 @@ const LessonBackgroundRect = (props) => {
 };
 
 const IDE = (props) => {
-  const [currentTab, setCurrentTab] = useState('newTab');  
+  const dispatch = useDispatch();
+  const tabs = useSelector(state => state.tabs);
+  const currentTab = useSelector(state => state.currentTab);
+
+  useEffect(() => {
+    console.log("Current tab:", currentTab);
+  }, [currentTab]);
+
+  const TOPICS = ["sorting", "searching"];
+  const CONTESTS = ["CCC", "USACO"];
+  const CCC_DIVISIONS = ["Junior", "Senior"];
+  const USACO_DIVISIONS = ["Bronze", "Silver", "Gold", "Platinum"];
+
   const [currentProblem, setCurrentProblem] = useState({}); // default problem
+  const [currentDivision, setCurrentDivision] = useState(
+    props.currentPage === "ccc" ? CCC_DIVISIONS[0] : USACO_DIVISIONS[0]
+  );
   const [problems, setProblems] = useState([]); // default problems
   const [searchPoints, setSearchPoints] = useState("");
   const [search, setSearch] = useState("");
@@ -64,6 +82,15 @@ const IDE = (props) => {
 
   console.log("Current page:", props.currentPage);
 
+  useEffect(() => {
+    if (props.currentPage === 'ccc' || props.currentPage === 'usaco') {
+      const divisions = props.currentPage === 'ccc' ? CCC_DIVISIONS : USACO_DIVISIONS;
+      divisions.forEach(division => {
+        dispatch({ type: 'ADD_TAB', payload: { type: 'division', data: division } });
+      });
+    }
+  }, [props.currentPage]);
+
   const handleFocus = (name) => {
     setIsFocused({...isFocused, [name]: true});
   };
@@ -80,8 +107,19 @@ const IDE = (props) => {
     setFilterOption(event.target.value);
   };
 
-  const TOPICS = ["sorting", "searching"];
-  const CONTESTS = ["CCC", "USACO"];
+  const handleUsacoClick = () => {
+    console.log('USACO button clicked');
+    USACO_DIVISIONS.forEach(division => {
+      dispatch({ type: 'ADD_TAB', payload: { type: 'division', data: division } });
+    });
+  };
+
+  const handleCccClick = () => {
+    console.log('CCC button clicked');
+    CCC_DIVISIONS.forEach(division => {
+      dispatch({ type: 'ADD_TAB', payload: { type: 'division', data: division } });
+    });
+  };
 
   // Define your color constants
   const BACKGROUND_COLOR = '#fff'; // This is the color used for the background of the components
@@ -247,18 +285,20 @@ const IDE = (props) => {
     setFilteredQuestions(filtered);
   }, [questions, searchPoints, search, topics, contests]);
 
+  // Modify the useEffect hook for fetching problem data
   useEffect(() => {
-    // Fetch problem data from Firebase
     const fetchProblemData = async () => {
-      if (questionID) {  // Add this check
+      if (questionID) {
         try {
           const docRef = await getDoc(doc(db, "Questions", questionID));
           if (docRef.exists()) {
-            setCurrentProblem(docRef.data());
-            if (!problems.includes(docRef.data())) {
-              setProblems(prevProblems => [...prevProblems, docRef.data()]);
-            }          
-            console.log("Problem from problemdesc:", docRef.data());
+            const problemData = docRef.data();
+            setCurrentProblem(problemData);
+            if (!problems.includes(problemData)) {
+              setProblems(prevProblems => [...prevProblems, problemData]);
+            }
+            // Add the problem to the tabs
+            dispatch({ type: 'ADD_TAB', payload: { type: 'problem', data: problemData } });
           } else {
             console.log("No such document!");
           }
@@ -269,8 +309,8 @@ const IDE = (props) => {
     };
   
     fetchProblemData();
-  }, [questionID]);  
-
+  }, [questionID, dispatch]);
+  
   useEffect(() => {
     // Fetch test cases data from TestCaseReader
     const fetchTestCasesData = async () => {
@@ -326,55 +366,6 @@ int main() {
   return 0;
 }`;
 
-  // Create separate useRef instances for each row
-  const scrollContainer1 = useRef(null);
-  const scrollContainer2 = useRef(null);
-  const scrollContainer3 = useRef(null);
-
-  // Variables for refining the scrolling behavior
-  const scrollDistance = 200; // Distance to scroll
-  const scrollDuration = 30; // Duration of the scroll animation in milliseconds
-  const scrollInterval = 1; // Interval between each scroll step in milliseconds
-
-  // Modify the smoothScroll function to take a scrollContainer as a parameter
-  const smoothScroll = (end, scrollContainer) => {
-    if (scrollContainer.current) {
-      let start = scrollContainer.current.scrollLeft;
-      let change = end - start;
-      let currentTime = 0;
-  
-      const animateScroll = () => {
-        currentTime += scrollInterval;
-        const val = Math.easeInOutQuad(currentTime, start, change, scrollDuration);
-        scrollContainer.current.scrollLeft = val;
-        if(currentTime < scrollDuration) {
-          setTimeout(animateScroll, scrollInterval);
-        }
-      };
-      animateScroll();
-    }
-  };
-    
-  Math.easeInOutQuad = function (t, b, c, d) {
-    t /= d/2;
-    if (t < 1) return c/2*t*t + b;
-    t--;
-    return -c/2 * (t*(t-2) - 1) + b;
-  };
-
-  const scrollLeft = (scrollContainer) => {
-    console.log("scrolling left");
-    if (scrollContainer.current) {
-      smoothScroll(scrollContainer.current.scrollLeft - scrollDistance, scrollContainer);
-    }
-  };
-  
-  const scrollRight = (scrollContainer) => {
-    if (scrollContainer.current) {
-      smoothScroll(scrollContainer.current.scrollLeft + scrollDistance, scrollContainer);
-    }
-  };
-
   const getResults = (data) => {
     console.log("Received code output in parent component:", data);
     setResults(data);
@@ -387,7 +378,11 @@ int main() {
   }
 
   const submitCode = async () => {
-    console.log("sent code:", code);
+    console.log("sent data:", JSON.stringify({
+      language: language,
+      code: code,
+      test_cases: testCases
+    }));
 
     // Start the timer
     const startTime = performance.now();
@@ -589,144 +584,47 @@ int main() {
     >
     <div id="split-0">
     <div className={styles.row}>
-      <Sidebar />
+      <Sidebar onUsacoClick={handleUsacoClick} onCccClick={handleCccClick} />
       <div className={styles.problemStatement}>
         <div className={styles.scrollableContent}> 
           <div className={styles.buttonRow}>
-            {problems.map((problem, index) => (
-              <button 
-                key={problem}
-                className={styles.buttonTab} 
-                style={{background: currentProblem.title === problem.title ? "#1B1B32" : "#0A0A23", color: currentProblem.title === problem.title ? "white" : "white"}} 
-                onClick={() => { setCurrentProblem(problem)}}
-              >
-                <p className={styles.buttonText}>{problem.title.charAt(0).toUpperCase() + problem.title.slice(1)}</p>
-                <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevents the click event from bubbling up to the parent button
-                    const updatedProblems = problems.filter((_, problemIndex) => problemIndex !== index);
-                    setProblems(updatedProblems);
-                    if (currentProblem.title === problem.title) {
-                      setCurrentProblem(updatedProblems[0] || {});
-                      if (updatedProblems.length === 0) { // Add this check
-                        setCurrentTab('newTab');
-                      }                
-                    }
-                  }}            
-                />
-              </button>
+            {tabs.map((tab, index) => (
+              <Tab
+                key={index}
+                tab={tab}
+                isActive={currentTab === tab}
+                onClose={() => dispatch({ type: 'REMOVE_TAB', payload: tab })}
+              />
             ))}
-            <button className={styles.newTab} onClick={() => setCurrentTab('newTab')}><img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
+            <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
+              <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
+            </button>
             <div className={styles.rightAlign}>
             </div>
           </div>
-          { props.currentPage === 'paths' ? (
+          { currentTab.type === 'division' ? (
             <>
-              <div className="hero">
-                <div className="wrapper">
-                  <div className="unit-header">
-                    <div className="unit-header-left">
-                      <h1 className='unit-title'>J1 & J2 & J3: Basic Programming</h1>
-                      <br />
-                      <p>lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      </p>
-                    </div>
-                    <div className="unit-header-right"><p>Button</p></div>
-                  </div>
-                </div>
-              </div>
-              <div className='scroll-row'>
-                <button onClick={() => scrollLeft(scrollContainer1)} className="scroll-button left"><img src='/leftarrow.png' alt='Left' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/></button>
-                <div className="lesson-wrapper" ref={scrollContainer1}>
-                  <LessonBackgroundRect category={"5 Problems"} lessonName={"Basic Syntax"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Loops"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"7 Problems"} lessonName={"Conditions"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"1 Problem"} lessonName={"Arrays"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Basic String Manipulation"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"6 Problems"} lessonName={"Arithmetic operations"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Nested Loops"} imgPath={"/open.png"}/>
-                </div>
-                <button onClick={() => scrollRight(scrollContainer1)} className="scroll-button right"><img src='/rightarrow.png' alt='Right' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/></button>
-              </div>
-              <div className="hero">
-                <div className="wrapper">
-                  <div className="unit-header">
-                    <div className="unit-header-left">
-                      <h1 className='unit-title'>J1 & J2 & J3: Basic Programming</h1>
-                      <br />
-                      <p>lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      </p>
-                    </div>
-                    <div className="unit-header-right"><p>Button</p></div>
-                  </div>
-                </div>
-              </div>
-              <div className='scroll-row'>
-              <button onClick={() => scrollLeft(scrollContainer2)} className="scroll-button left"><img src='/leftarrow.png' alt='Left' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/></button>
-                <div className="lesson-wrapper" ref={scrollContainer2}>
-                  <LessonBackgroundRect category={"5 Problems"} lessonName={"Basic Syntax"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Loops"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"7 Problems"} lessonName={"Conditions"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"1 Problem"} lessonName={"Arrays"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Basic String Manipulation"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"6 Problems"} lessonName={"Arithmetic operations"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Nested Loops"} imgPath={"/open.png"}/>
-                </div>
-                <button onClick={() => scrollRight(scrollContainer2)} className="scroll-button right"><img src='/rightarrow.png' alt='Right' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/></button>
-              </div>
-              <div className="hero">
-                <div className="wrapper">
-                  <div className="unit-header">
-                    <div className="unit-header-left">
-                      <h1 className='unit-title'>J1 & J2 & J3: Basic Programming</h1>
-                      <br />
-                      <p>lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.
-                      </p>
-                    </div>
-                    <div className="unit-header-right"><p>Button</p></div>
-                  </div>
-                </div>
-              </div>
-              <div className='scroll-row'>
-              <button onClick={() => scrollLeft(scrollContainer3)} className="scroll-button left"><img src='/leftarrow.png' alt='Left' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/></button>
-                <div className="lesson-wrapper" ref={scrollContainer3}>
-                  <LessonBackgroundRect category={"5 Problems"} lessonName={"Basic Syntax"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Loops"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"7 Problems"} lessonName={"Conditions"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"1 Problem"} lessonName={"Arrays"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Basic String Manipulation"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"6 Problems"} lessonName={"Arithmetic operations"} imgPath={"/open.png"}/>
-                  <LessonBackgroundRect category={"4 Problems"} lessonName={"Nested Loops"} imgPath={"/open.png"}/>
-                </div>
-                <button onClick={() => scrollRight(scrollContainer3)} className="scroll-button right"><img src='/rightarrow.png' alt='Right' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/></button>
-              </div>
-              <Link to = "/computercontest">COMPUTER CONTESTS</Link>
-            </>          
-          ) : currentTab === 'description' ? (
+              <Paths currentTab={currentTab.data}/>
+            </>
+          ) : currentTab.type === 'problem' ? (
             <>
               <div className={styles.wrapper}>
                 <br />
-                <h1 className={styles.title}>{currentProblem.title}</h1>
+                <h1 className={styles.title}>{currentTab.data.title}</h1>
                 <br />
                 <div className={styles.description}>
                   <h3>Problem Description</h3>
-                  <p>{currentProblem.description}</p>
+                  <p>{currentTab.data.description}</p>
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Input Format</h3>
-                  <p>{currentProblem.inputFormat}</p>
+                  <p>{currentTab.data.inputFormat}</p>
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Constraints</h3>
                   <ul>
-                    {false && currentProblem.constraints &&
-                      Object.entries(currentProblem.constraints).map(([key, value]) => (
+                    {false && currentTab.data.constraints &&
+                      Object.entries(currentTab.data.constraints).map(([key, value]) => (
                         <li key={key}>
                           <strong>{key}:</strong> {value}
                         </li>
@@ -735,11 +633,11 @@ int main() {
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Output Format</h3>
-                  <p>{currentProblem.outputFormat}</p>
+                  <p>{currentTab.data.outputFormat}</p>
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Points</h3>
-                  <p>{currentProblem.points}</p>
+                  <p>{currentTab.data.points}</p>
                 </div>
                 <br />
                 <br />
@@ -777,7 +675,7 @@ int main() {
                 </div>
               </div> 
             </>
-          ) : currentTab === 'newTab' ? (
+          ) : currentTab.type === 'newTab' ? (
             <div className={styles.wrapper}>
               <div className='hero'> 
                 <div className={styles.description}>
@@ -859,7 +757,6 @@ int main() {
                                   onClick={() => {
                                     setQuestionID(q.title);
                                     setTestCaseFolder(q.folder);
-                                    setCurrentTab('description');
                                     window.scrollTo(0, 0); // This will scroll the page to the top
                                   }}
                                 >

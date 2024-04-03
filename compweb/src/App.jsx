@@ -44,6 +44,7 @@ import MatrixExponentiation from "./pages/ComputerContests/USACO/Platinum/Lesson
 import UserProfile from "./pages/UserProfile";
 import Problems from "./pages/Problems";
 import AddProblem from "./pages/AddProblem";
+import CCC from "./pages/ComputerContests/CCC/CCC";
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
       <Route path="/learningpath" element={<LearningPath />} />
       <Route path="/computercontest" element={<ComputerContest />} />
       <Route path="/usaco" element={<USACO />} />
+      <Route path="/ccc" element={<CCC />} />
 
       {/* Routes for Bronze lessons */}
       <Route path="/bronze" element={<Bronze />} />
