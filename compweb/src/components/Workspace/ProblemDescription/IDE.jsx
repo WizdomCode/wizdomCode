@@ -21,6 +21,10 @@ import "../../styles/Paths.css";
 import Paths from './Paths.jsx';
 import Tab from './Tab.jsx';
 import { useDispatch, useSelector } from 'react-redux';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 const LessonBackgroundRect = (props) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -50,7 +54,7 @@ const IDE = (props) => {
     console.log("Current tab:", currentTab);
   }, [currentTab]);
 
-  const TOPICS = ["sorting", "searching"];
+  const TOPICS = ["sorting", "searching", "syntax"];
   const CONTESTS = ["CCC", "USACO"];
   const CCC_DIVISIONS = ["Junior", "Senior"];
   const USACO_DIVISIONS = ["Bronze", "Silver", "Gold", "Platinum"];
@@ -321,27 +325,36 @@ const IDE = (props) => {
         const testCaseFolder = currentProblem.folder;
   
         if (testCaseFolder) {  // Add this check
-          // Hardcoded file names from 1.in to 10.in
-          for (let i = 1; i <= 10; i++) {
-            const fileName = `${i}.in`;
+          // Fetch the list of files in the test case folder
+          const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+          const fileList = fileListResponse.data;
   
-            console.log("Processing file:", fileName);
+          // Sort the file list in alphabetical order
+          fileList.sort();
+  
+          // Process each file in the sorted list
+          for (let i = 0; i < fileList.length; i += 2) {
+            const inputFileName = fileList[i];
+            const outputFileName = fileList[i + 1];
+  
+            console.log("Processing files:", inputFileName, outputFileName);
   
             try {
-              const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName}`);
-              const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName.replace(".in", ".out")}`);
+              const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
+              const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
   
-              console.log("File Name:", fileName);
+              console.log("Input File Name:", inputFileName);
+              console.log("Output File Name:", outputFileName);
               console.log("Input Response:", inputResponse.data);
               console.log("Output Response:", outputResponse.data);
   
               testCaseArray.push({
-                key: fileName.replace(".in", ""),
+                key: (i / 2) + 1,
                 input: inputResponse.data,
                 output: outputResponse.data,
               });
             } catch (error) {
-              console.error("Error processing file:", fileName, error);
+              console.error("Error processing files:", inputFileName, outputFileName, error);
             }
           }
   
@@ -387,7 +400,7 @@ int main() {
     // Start the timer
     const startTime = performance.now();
 
-    const response = await fetch('http://localhost:5000/api/execute', {
+    const response = await fetch('https://bfa7-66-22-164-190.ngrok-free.app/execute', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -614,11 +627,11 @@ int main() {
                 <br />
                 <div className={styles.description}>
                   <h3>Problem Description</h3>
-                  <p>{currentTab.data.description}</p>
+                  <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={currentTab.data.description.replace(/\\n/g, '\n')} />
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Input Format</h3>
-                  <p>{currentTab.data.inputFormat}</p>
+                  <pre className={styles.descriptionText}>{currentTab.data.inputFormat.replace(/\\n/g, '\n')}</pre>
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Constraints</h3>
@@ -658,10 +671,10 @@ int main() {
                         </h3>
                         <br />
                         <h4 className={className}>Input:</h4>
-                        <pre className={styles.codeSnippet}>{testCase.input.replace(/\\r\\n/g, '\n')}</pre>
+                        <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
                         <br />
                         <h4 className={className}>Expected Output:</h4>
-                        <pre className={styles.codeSnippet}>{testCase.output.replace(/\\r\\n/g, '\n')}</pre>
+                        <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
                         {results[index] && results[index].status.description === 'Wrong Answer' && (
                           <>
                             <br />

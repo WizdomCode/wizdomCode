@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import Navigation from "../components/Navigation/Navigation";
 import { auth, app, db } from "../firebase";
 import { collection, getDocs, addDoc, setDoc, doc } from "firebase/firestore";
+import "./Add.css";
 
 const AddProblem = () => {
     const [title, setTitle] = useState("");

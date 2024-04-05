@@ -135,6 +135,17 @@
   background-color: transparent;
 }
 
+.descriptionText {
+  color: #F5F6F7;
+  font-family: "Lato";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 27px; /* 150% */
+  background-color: transparent;
+  white-space: pre-wrap;
+}
+
 br {
   background-color: var(--dark-bg);
 }
