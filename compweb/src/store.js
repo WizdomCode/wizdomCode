@@ -5,11 +5,23 @@ const initialState = {
   tabs: [
     { type: 'newTab', data: null },
   ],
-  lessonTab: {
-    division: '',
-    lesson: '',
+  lessonTabs: [],
+  lessonMetaData: {
+    unit: NaN,
+    lesson: NaN,
     problem_id: '',
   },
+  lessonProblemData: {
+    contest: '',
+    description: 'asdfsa',
+    folder: '',
+    inputFormat: '',
+    outputFormat: '',
+    points: NaN,
+    title: '',
+    topics: [],
+  },
+  lessonActiveTab: { type: '', data: null },
   codeState: { // modified code state
     language: '',
     code: '',
@@ -26,11 +38,22 @@ function reducer(state = initialState, action) {
         tabs: [...state.tabs, action.payload],
         currentTab: action.payload,
       };
+    case 'ADD_LESSON_TAB':
+      return {
+        ...state,
+        lessonTabs: [...state.tabs, action.payload],
+        lessonTab: action.payload,
+      };
     case 'REMOVE_TAB':
       return {
         ...state,
         tabs: state.tabs.filter(tab => tab !== action.payload),
       };
+    case 'CLEAR_LESSON_TABS':
+      return {
+        ...state,
+        lessonTabs: [],
+      };  
     case 'SET_CURRENT_TAB':
       return {
         ...state,
@@ -39,10 +62,20 @@ function reducer(state = initialState, action) {
     case 'SET_LESSON_TAB':
       return {
         ...state,
-        lessonTab: {
-          ...state.lessonTab,
+        lessonActiveTab: action.payload,
+      };
+    case 'SET_LESSON_META_DATA':
+      return {
+        ...state,
+        lessonMetaData: {
+          ...state.lessonMetaData,
           ...action.payload,
         },
+      };
+    case 'SET_LESSON_PROBLEM_DATA':
+      return {
+        ...state,
+        lessonProblemData: action.payload,
       };
     case 'SET_CODE_STATE': // modified case to handle code state
       return {

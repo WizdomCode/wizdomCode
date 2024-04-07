@@ -26,25 +26,6 @@ import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
-const LessonBackgroundRect = (props) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-      <div 
-          className={`lesson-background-rect ${isHovered ? 'hovered' : ''}`}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-      >
-          <h4 className='lesson-category'>{ props.category }</h4>
-          <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
-          <h3 className={ props.lessonName.length > 20 ? 'long-lesson-name' : 'lesson-name'}>{ props.lessonName }</h3>
-          <div>
-              <button className="bottom-rectangle">Click me</button>
-          </div>
-      </div>
-  );
-};
-
 const IDE = (props) => {
   const dispatch = useDispatch();
   const tabs = useSelector(state => state.tabs);
@@ -85,15 +66,6 @@ const IDE = (props) => {
   const [language, setLanguage] = useState("cpp");
 
   console.log("Current page:", props.currentPage);
-
-  useEffect(() => {
-    if (props.currentPage === 'ccc' || props.currentPage === 'usaco') {
-      const divisions = props.currentPage === 'ccc' ? CCC_DIVISIONS : USACO_DIVISIONS;
-      divisions.forEach(division => {
-        dispatch({ type: 'ADD_TAB', payload: { type: 'division', data: division } });
-      });
-    }
-  }, [props.currentPage]);
 
   const handleFocus = (name) => {
     setIsFocused({...isFocused, [name]: true});
@@ -599,7 +571,8 @@ int main() {
     <div className={styles.row}>
       <Sidebar onUsacoClick={handleUsacoClick} onCccClick={handleCccClick} />
       <div className={styles.problemStatement}>
-        <div className={styles.scrollableContent}> 
+        <div className={styles.scrollableContent}>
+          { props.currentPage === 'problems' && ( 
           <div className={styles.tabWrapper}>
             <div className={styles.buttonRow}>
               {tabs.map((tab, index) => (
@@ -617,9 +590,10 @@ int main() {
               </div>
             </div>
           </div>
-          { currentTab.type === 'division' ? (
+          )}
+          { props.currentPage === 'ccc' || props.currentPage === 'usaco' ? (
             <>
-              <Paths currentTab={currentTab.data}/>
+              <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
             </>
           ) : currentTab.type === 'problem' ? (
             <>

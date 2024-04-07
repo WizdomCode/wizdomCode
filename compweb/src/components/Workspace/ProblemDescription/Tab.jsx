@@ -1,9 +1,10 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from '../../styles/ProblemDescription.module.css';
 
-const Tab = ({ tab, isActive }) => {
+const Tab = ({ tab, isActive, type }) => {
   const dispatch = useDispatch();
+  
   let text;
   switch (tab.type) {
     case 'newTab':
@@ -23,7 +24,10 @@ const Tab = ({ tab, isActive }) => {
     <button 
       className={styles.buttonTab} 
       style={{background: isActive ? "#1B1B32" : "#0A0A23", color: "white"}} 
-      onClick={() => dispatch({ type: 'SET_CURRENT_TAB', payload: tab })}
+      onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
+        console.log("type:", type === 'lesson');
+        console.log("payload", tab);
+    }}
     >
       <p className={styles.buttonText}>{text}</p>
       <img 

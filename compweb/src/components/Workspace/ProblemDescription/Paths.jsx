@@ -11,36 +11,12 @@ import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import axios from "axios";
+import Tab from "./Tab.jsx";
+import { initializeAnalytics } from "firebase/analytics";
 
 const LessonBackgroundRect = ({ onButtonClick, ...props }) => {
-    const dispatch = useDispatch();
 
     const [isHovered, setIsHovered] = useState(false);
-
-    const fetchProblemData = async (questionID) => {
-        if (questionID) {
-          try {
-            const docRef = await getDoc(doc(db, "Questions", questionID));
-            if (docRef.exists()) {
-                let problemData = docRef.data();
-                return problemData;
-            } else {
-              console.log("No such document!");
-            }
-          } catch (error) {
-            console.error("Error fetching document: ", error);
-          }
-        }
-      };
-
-    const addGroup = async () => {
-        const problemDataPromises = props.problemIds.map(problem_id => fetchProblemData(problem_id));
-        const problemsData = await Promise.all(problemDataPromises);
-        problemsData.forEach((problemData, index) => {
-            console.log(`Problem data for id ${props.problemIds[index]}:`, problemData);
-            dispatch({ type: 'ADD_TAB', payload: { type: 'problem', data: problemData } });
-        });
-    };
 
     return (
         <div 
@@ -205,7 +181,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                                   onClick={() => {
                                     window.scrollTo(0, 0); // This will scroll the page to the top
                                     dispatch({
-                                        type: 'SET_LESSON_TAB',
+                                        type: 'SET_LESSON_META_DATA',
                                         payload: {
                                             division: division,
                                             lesson: lastPressed,
@@ -232,19 +208,102 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
 
 const Paths = (props) => {
 
-    const lessonTab = useSelector(state => state.lessonTab);
+    const lessonMetaData = useSelector(state => state.lessonMetaData); // This is what is actually used to keep track of which problem is active, contains all problem data
     const code = useSelector(state => state.codeState);
-    const [currentTab, setCurrentTab] = useState(null);
+    const currentlyClickedTab = useSelector(state => state.lessonActiveTab); // Something like this: {type: 'division', data: 'Junior'}, used to keep track of active tab
+    const tabs = useSelector(state => state.lessonTabs); // Array of currentlyClickedTabs
+    const lessonProblemData = useSelector(state => state.lessonProblemData);
     const [testCases, setTestCases] = useState([]);
     const [results, setResults] = useState([]);
+
+    console.log("State after fetch:", useSelector(state => state)); // Log the state after dispatch
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        let initialTabs = [];
+        let initialTab = {};
+        if (props.currentPage === 'ccc') {
+            initialTabs = [
+                { type: 'division', data: 'Junior'},
+                { type: 'division', data: 'Senior'}
+            ];
+            initialTab = initialTabs[0];
+        }
+        else {
+            initialTabs = [
+                { type: 'division', data: 'Bronze'},
+                { type: 'division', data: 'Silver'},
+                { type: 'division', data: 'Gold'},
+                { type: 'division', data: 'Platinum'}
+            ];
+            initialTab = initialTabs[0];
+        }
+
+        let addedTabs = [];
+        initialTabs.forEach(tab => {
+            if (!addedTabs.some(addedTab => addedTab.type === tab.type && addedTab.data === tab.data)) {
+                dispatch({
+                    type: 'ADD_LESSON_TAB',
+                    payload: tab
+                });
+                addedTabs.push(tab);
+            }
+        });   
+
+        dispatch({
+            type: 'SET_LESSON_TAB',
+            payload: initialTab
+        })
+    }, []); 
 
     const fetchProblemData = async (questionID) => {
         if (questionID) {
           try {
             const docRef = await getDoc(doc(db, "Questions", questionID));
             if (docRef.exists()) {
-                let problemData = docRef.data();
-                return problemData;
+              let problemData = docRef.data();
+      
+              // Fetch test cases data from TestCaseReader
+              const fetchTestCasesData = async () => {
+                try {
+                  let testCaseArray = [];
+                  const testCaseFolder = problemData.folder; // Get the testCaseFolder from the problemData
+      
+                  if (testCaseFolder) {  // Add this check
+                    const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+                    const fileList = fileListResponse.data;
+                    fileList.sort();
+      
+                    for (let i = 0; i < fileList.length; i += 2) {
+                      const inputFileName = fileList[i];
+                      const outputFileName = fileList[i + 1];
+      
+                      try {
+                        const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                        const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+      
+                        testCaseArray.push({
+                          key: (i / 2) + 1,
+                          input: inputResponse.data,
+                          output: outputResponse.data,
+                        });
+                      } catch (error) {
+                        console.error("Error processing files:", inputFileName, outputFileName, error);
+                      }
+                    }
+      
+                    console.log("Test Cases from problemdesc:", testCaseArray);
+                    setTestCases(testCaseArray);
+                  }
+                } catch (error) {
+                  console.error("Error fetching test cases: ", error);
+                }
+              };
+      
+              await fetchTestCasesData(); // Call the fetchTestCasesData function here
+      
+              return problemData;
             } else {
               console.log("No such document!");
             }
@@ -253,87 +312,32 @@ const Paths = (props) => {
           }
         }
       };
-
+      
       const addGroup = async (problemId) => {
         const problemData = await fetchProblemData(problemId);
         console.log(`Problem data for id ${problemId}:`, problemData);
         return problemData;
-    };    
-
-    useEffect(() => {
+      };    
+      
+      useEffect(() => {
         const fetchData = async () => {
-            const data = await addGroup(lessonTab.problem_id);
-            console.log("Current tab data:", data);
-            setCurrentTab({ type: 'problem', data: data});
-        };
-    
-        fetchData();
-    }, [lessonTab]);
-
-    useEffect(() => {
-        // Fetch test cases data from TestCaseReader
-        const fetchTestCasesData = async () => {
-          try {
-            let testCaseArray = [];
-      
-            // Get the testCaseFolder from the currentProblem
-            const testCaseFolder = currentTab.data.folder;
-      
-            if (testCaseFolder) {  // Add this check
-              // Fetch the list of files in the test case folder
-              const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
-              const fileList = fileListResponse.data;
-      
-              // Sort the file list in alphabetical order
-              fileList.sort();
-      
-              // Process each file in the sorted list
-              for (let i = 0; i < fileList.length; i += 2) {
-                const inputFileName = fileList[i];
-                const outputFileName = fileList[i + 1];
-      
-                console.log("Processing files:", inputFileName, outputFileName);
-      
-                try {
-                  const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                  const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
-      
-                  console.log("Input File Name:", inputFileName);
-                  console.log("Output File Name:", outputFileName);
-                  console.log("Input Response:", inputResponse.data);
-                  console.log("Output Response:", outputResponse.data);
-      
-                  testCaseArray.push({
-                    key: (i / 2) + 1,
-                    input: inputResponse.data,
-                    output: outputResponse.data,
-                  });
-                } catch (error) {
-                  console.error("Error processing files:", inputFileName, outputFileName, error);
-                }
-              }
-      
-              console.log("Test Cases from problemdesc:", testCaseArray);
-      
-              setTestCases(testCaseArray);
+          const data = await addGroup(lessonMetaData.problem_id);
+          dispatch({
+            type: 'SET_LESSON_PROBLEM_DATA',
+            payload: {
+              data: data
             }
-          } catch (error) {
-            console.error("Error fetching test cases: ", error);
-          }
+          });
         };
       
-        fetchTestCasesData();
-      }, [currentTab]);
+        fetchData();
+      }, [lessonMetaData]);      
+
+    const state = useSelector(state => state); // Access the state
 
     useEffect(() => {
-        console.log("lesson code sj dsfjaiofewjiafojdsa:", code);
-    }, [code]);
-
-    useEffect(() => {
-        console.log("fjdsajfk paths current tab:", currentTab);
-    }, [currentTab]);
-
-    console.log("Paths props:", props);
+    console.log("State after dispatch:", state); // Log the state after dispatch
+    }, [state]); // Add state as a dependency to useEffect
 
     const lessons = [
         { category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png" },
@@ -411,10 +415,59 @@ const Paths = (props) => {
         setResults(data);
       };
 
+      function findProblem(data, currentProblemId, direction) {
+        for (let unit of data) {
+            for (let lesson of unit) {
+                let problemIds = lesson.problemIds;
+                let currentIndex = problemIds.indexOf(currentProblemId);
+                if (currentIndex !== -1) {
+                    if (direction === 'next' && currentIndex < problemIds.length - 1) {
+                        return problemIds[currentIndex + 1];
+                    } else if (direction === 'previous' && currentIndex > 0) {
+                        return problemIds[currentIndex - 1];
+                    }
+                }
+            }
+        }
+        return null;
+    }    
+
+    const scrollLeft = () => {
+        dispatch({
+            type: 'SET_LESSON_META_DATA',
+            payload: {
+                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData.problem_id, "previous")
+            }
+        });
+    };
+
+    const scrollRight = () => {
+        dispatch({
+            type: 'SET_LESSON_META_DATA',
+            payload: {
+                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData.problem_id, "next")
+            }
+        });
+    };
+
     return (
         <>
-            {lessonTab.problem_id === '' ? (
-                props.currentTab === 'Junior' ? (
+            <div className={styles.tabWrapper}>
+                <div className={styles.buttonRow}>
+                {tabs.map((tab, index) => (
+                    <Tab
+                        key={index}
+                        tab={tab}
+                        isActive={currentlyClickedTab === tab}
+                        type='lesson'
+                    />
+                ))}
+                <div className={styles.rightAlign}>
+                </div>
+                </div>
+            </div>
+            {!lessonProblemData.data ? (
+                currentlyClickedTab.data === 'Junior' ? (
                     <>
                         {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
                             <React.Fragment key={index}>
@@ -424,7 +477,7 @@ const Paths = (props) => {
                         ))}
                         <Link to = "/computercontest">CCC junior</Link> 
                     </>
-                ) : props.currentTab === 'Senior' ? (
+                ) : currentlyClickedTab.data === 'Senior' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
@@ -435,7 +488,7 @@ const Paths = (props) => {
                         <Link to = "/computercontest">CCC senior</Link>
                     </>
                 
-                ) : props.currentTab === 'Bronze' ? (
+                ) : currentlyClickedTab.data === 'Bronze' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
@@ -445,7 +498,7 @@ const Paths = (props) => {
                         <br />
                         <Link to = "/computercontest">USACO bronze</Link> 
                     </>
-                ) : props.currentTab === 'Silver' ? (
+                ) : currentlyClickedTab.data === 'Silver' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
@@ -455,7 +508,7 @@ const Paths = (props) => {
                         <br />
                         <Link to = "/computercontest">USACO silver</Link> 
                     </>
-                ) : props.currentTab === 'Gold' ? (
+                ) : currentlyClickedTab.data === 'Gold' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
@@ -478,24 +531,32 @@ const Paths = (props) => {
                 )
             ) : (
                 <>
-                    { currentTab && currentTab.data && (
+                    { true && (
                     <div className={styles.wrapper}>
                         <br />
-                        <h1 className={styles.title}>{currentTab.data.title}</h1>
+                            <div className={styles.problemTitleRow}>
+                                <button onClick={scrollLeft} className="scroll-button left">
+                                    <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
+                                </button>
+                                <h1 className={styles.title}>{lessonProblemData.data.title}</h1>
+                                <button onClick={scrollRight} className="scroll-button right">
+                                    <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
+                                </button>
+                            </div>
                         <br />
                         <div className={styles.description}>
                         <h3>Problem Description</h3>
-                        <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={currentTab.data.description.replace(/\\n/g, '\n')} />
+                        <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={lessonProblemData.data.description.replace(/\\n/g, '\n')} />
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Input Format</h3>
-                        <pre className={styles.descriptionText}>{currentTab.data.inputFormat.replace(/\\n/g, '\n')}</pre>
+                        <pre className={styles.descriptionText}>{lessonProblemData.data.inputFormat.replace(/\\n/g, '\n')}</pre>
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Constraints</h3>
                         <ul>
-                            {false && currentTab.data.constraints &&
-                            Object.entries(currentTab.data.constraints).map(([key, value]) => (
+                            {false && lessonProblemData.data.constraints &&
+                            Object.entries(lessonProblemData.data.constraints).map(([key, value]) => (
                                 <li key={key}>
                                 <strong>{key}:</strong> {value}
                                 </li>
@@ -504,11 +565,11 @@ const Paths = (props) => {
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Output Format</h3>
-                        <p>{currentTab.data.outputFormat}</p>
+                        <p>{lessonProblemData.data.outputFormat}</p>
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Points</h3>
-                        <p>{currentTab.data.points}</p>
+                        <p>{lessonProblemData.data.points}</p>
                         </div>
                         <br />
                         <br />
