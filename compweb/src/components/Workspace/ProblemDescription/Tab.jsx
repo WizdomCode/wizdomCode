@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from '../../styles/ProblemDescription.module.css';
 
-const Tab = ({ tab, isActive, type }) => {
+const Tab = ({ index, tab, isActive, type }) => {
   const dispatch = useDispatch();
   
   let text;
@@ -27,6 +27,10 @@ const Tab = ({ tab, isActive, type }) => {
       onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
         console.log("type:", type === 'lesson');
         console.log("payload", tab);
+        dispatch({
+          type: 'SET_LESSON_TAB_INDEX',
+          payload: index
+        })
     }}
     >
       <p className={styles.buttonText}>{text}</p>

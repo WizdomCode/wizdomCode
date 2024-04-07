@@ -13,7 +13,7 @@ const initialState = {
   },
   lessonProblemData: {
     contest: '',
-    description: 'asdfsa',
+    description: '',
     folder: '',
     inputFormat: '',
     outputFormat: '',
@@ -26,6 +26,7 @@ const initialState = {
     language: '',
     code: '',
   },
+  lessonTabIndex: 0,
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -84,6 +85,11 @@ function reducer(state = initialState, action) {
           ...state.codeState,
           ...action.payload,
         },
+      };
+    case 'SET_LESSON_TAB_INDEX':
+      return {
+        ...state,
+        lessonTabIndex: action.payload,  // Update tabIndex with the new value
       };
     default:
       return state;

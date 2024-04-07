@@ -215,6 +215,22 @@ const Paths = (props) => {
     const lessonProblemData = useSelector(state => state.lessonProblemData);
     const [testCases, setTestCases] = useState([]);
     const [results, setResults] = useState([]);
+    
+    const defaultTabs = props.currentPage === 'ccc' ? [
+        { type: 'division', data: 'Junior'},
+        { type: 'division', data: 'Senior'}
+    ] : [
+        { type: 'division', data: 'Bronze'},
+        { type: 'division', data: 'Silver'},
+        { type: 'division', data: 'Gold'},
+        { type: 'division', data: 'Platinum'}
+    ];
+
+    const tabIndex = useSelector(state => state.lessonTabIndex);
+
+    console.log("Default tabs:", defaultTabs);
+    console.log("Default tab ind:", tabIndex);
+    console.log("Default tab data:", defaultTabs[tabIndex]['data']);
 
     console.log("State after fetch:", useSelector(state => state)); // Log the state after dispatch
 
@@ -454,20 +470,21 @@ const Paths = (props) => {
         <>
             <div className={styles.tabWrapper}>
                 <div className={styles.buttonRow}>
-                {tabs.map((tab, index) => (
-                    <Tab
-                        key={index}
-                        tab={tab}
-                        isActive={currentlyClickedTab === tab}
-                        type='lesson'
-                    />
-                ))}
-                <div className={styles.rightAlign}>
-                </div>
+                    {defaultTabs.map((tab, index) => (
+                        <Tab
+                            key={index}
+                            index={index}
+                            tab={tab}
+                            isActive={tabIndex === index}
+                            type='lesson'
+                        />
+                    ))}
+                    <div className={styles.rightAlign}>
+                    </div>
                 </div>
             </div>
             {!lessonProblemData.data ? (
-                currentlyClickedTab.data === 'Junior' ? (
+                defaultTabs[tabIndex].data === 'Junior' ? (
                     <>
                         {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
                             <React.Fragment key={index}>
@@ -477,7 +494,7 @@ const Paths = (props) => {
                         ))}
                         <Link to = "/computercontest">CCC junior</Link> 
                     </>
-                ) : currentlyClickedTab.data === 'Senior' ? (
+                ) : defaultTabs[tabIndex].data === 'Senior' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
@@ -488,7 +505,7 @@ const Paths = (props) => {
                         <Link to = "/computercontest">CCC senior</Link>
                     </>
                 
-                ) : currentlyClickedTab.data === 'Bronze' ? (
+                ) : defaultTabs[tabIndex].data === 'Bronze' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
@@ -498,7 +515,7 @@ const Paths = (props) => {
                         <br />
                         <Link to = "/computercontest">USACO bronze</Link> 
                     </>
-                ) : currentlyClickedTab.data === 'Silver' ? (
+                ) : defaultTabs[tabIndex].data === 'Silver' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
@@ -508,7 +525,7 @@ const Paths = (props) => {
                         <br />
                         <Link to = "/computercontest">USACO silver</Link> 
                     </>
-                ) : currentlyClickedTab.data === 'Gold' ? (
+                ) : defaultTabs[tabIndex].data === 'Gold' ? (
                     <>
                         <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
                         <br />
