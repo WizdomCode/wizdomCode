@@ -5,16 +5,25 @@ import '../../styles/Editor.css';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import * as monaco from 'monaco-editor';
+import { useDispatch, useSelector } from 'react-redux';
 
 const CodeEditor = (props) => {
   const [code, setCode] = useState(props.boilerPlate);
   const [output, setOutput] = useState([]);
   const [language, setLanguage] = useState("cpp");
+  const dispatch = useDispatch();
 
   console.log(props.testCases);
 
   useEffect(() => {
     props.getCode(code, language);
+    dispatch({
+      type: 'SET_CODE_STATE',
+      payload: {
+        language: language,
+        code: code
+      }
+    })
   }, [code]);
 
   const submitCode = async () => {

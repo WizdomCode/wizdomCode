@@ -46,13 +46,31 @@
   margin: 10px 0;
 }
 
+.tabWrapper {
+  overflow: hidden;
+  height: 48.848px;
+}
+
 .buttonRow {
   display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden; /* Disable vertical scrollbar */
   background: var(--navbar);
   align-items: center;
   width: 100%;
   margin: 0 0;
   height: 48.848px;
+}
+
+.buttonRow::-webkit-scrollbar {
+  width: 6px;
+  height: 2px;
+}
+
+.buttonRow::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.7);
+  border-radius: 20px;
 }
 
 .rightAlign {

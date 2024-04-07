@@ -322,7 +322,7 @@ const IDE = (props) => {
         let testCaseArray = [];
   
         // Get the testCaseFolder from the currentProblem
-        const testCaseFolder = currentProblem.folder;
+        const testCaseFolder = currentTab.data.folder;
   
         if (testCaseFolder) {  // Add this check
           // Fetch the list of files in the test case folder
@@ -369,7 +369,7 @@ const IDE = (props) => {
     };
   
     fetchTestCasesData();
-  }, [currentProblem]);  
+  }, [currentTab]);  
 
   const boilerPlate = 
 `#include <iostream>
@@ -600,19 +600,21 @@ int main() {
       <Sidebar onUsacoClick={handleUsacoClick} onCccClick={handleCccClick} />
       <div className={styles.problemStatement}>
         <div className={styles.scrollableContent}> 
-          <div className={styles.buttonRow}>
-            {tabs.map((tab, index) => (
-              <Tab
-                key={index}
-                tab={tab}
-                isActive={currentTab === tab}
-                onClose={() => dispatch({ type: 'REMOVE_TAB', payload: tab })}
-              />
-            ))}
-            <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
-              <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
-            </button>
-            <div className={styles.rightAlign}>
+          <div className={styles.tabWrapper}>
+            <div className={styles.buttonRow}>
+              {tabs.map((tab, index) => (
+                <Tab
+                  key={index}
+                  tab={tab}
+                  isActive={currentTab === tab}
+                  onClose={() => dispatch({ type: 'REMOVE_TAB', payload: tab })}
+                />
+              ))}
+              <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
+                <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
+              </button>
+              <div className={styles.rightAlign}>
+              </div>
             </div>
           </div>
           { currentTab.type === 'division' ? (
