@@ -59,8 +59,8 @@ def execute_code(code, test_cases, language):
 
     for test_case in test_cases:
         key = test_case['key']
-        input_data = test_case['input']
-        expected_output = test_case['output'].replace('\r', '')
+        input_data = str(test_case['input'])
+        expected_output = str(test_case['output']).replace('\r', '')
 
         start_time = time.time()
         if language == 'python':
