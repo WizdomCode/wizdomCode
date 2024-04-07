@@ -415,6 +415,41 @@ const Paths = (props) => {
         setResults(data);
       };
 
+      function findProblem(data, currentProblemId, direction) {
+        for (let unit of data) {
+            for (let lesson of unit) {
+                let problemIds = lesson.problemIds;
+                let currentIndex = problemIds.indexOf(currentProblemId);
+                if (currentIndex !== -1) {
+                    if (direction === 'next' && currentIndex < problemIds.length - 1) {
+                        return problemIds[currentIndex + 1];
+                    } else if (direction === 'previous' && currentIndex > 0) {
+                        return problemIds[currentIndex - 1];
+                    }
+                }
+            }
+        }
+        return null;
+    }    
+
+    const scrollLeft = () => {
+        dispatch({
+            type: 'SET_LESSON_META_DATA',
+            payload: {
+                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData.problem_id, "previous")
+            }
+        });
+    };
+
+    const scrollRight = () => {
+        dispatch({
+            type: 'SET_LESSON_META_DATA',
+            payload: {
+                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData.problem_id, "next")
+            }
+        });
+    };
+
     return (
         <>
             <div className={styles.tabWrapper}>
@@ -499,7 +534,15 @@ const Paths = (props) => {
                     { true && (
                     <div className={styles.wrapper}>
                         <br />
-                        <h1 className={styles.title}>{lessonProblemData.data.title}</h1>
+                            <div className={styles.problemTitleRow}>
+                                <button onClick={scrollLeft} className="scroll-button left">
+                                    <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
+                                </button>
+                                <h1 className={styles.title}>{lessonProblemData.data.title}</h1>
+                                <button onClick={scrollRight} className="scroll-button right">
+                                    <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
+                                </button>
+                            </div>
                         <br />
                         <div className={styles.description}>
                         <h3>Problem Description</h3>

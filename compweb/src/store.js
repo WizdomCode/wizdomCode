@@ -7,8 +7,8 @@ const initialState = {
   ],
   lessonTabs: [],
   lessonMetaData: {
-    division: '',
-    lesson: '',
+    unit: NaN,
+    lesson: NaN,
     problem_id: '',
   },
   lessonProblemData: {

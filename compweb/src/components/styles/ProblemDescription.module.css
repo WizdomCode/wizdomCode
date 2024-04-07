@@ -278,3 +278,9 @@ ul {
 .passIcon, .failIcon {
   background-color: transparent;
 }
+
+.problemTitleRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
