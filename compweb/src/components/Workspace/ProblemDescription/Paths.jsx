@@ -28,7 +28,7 @@ const LessonBackgroundRect = ({ onButtonClick, ...props }) => {
             <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
             <h3 className={ props.lessonName.length > 20 ? 'long-lesson-name' : 'lesson-name'}>{ props.lessonName }</h3>
             <div>
-                <button className="bottom-rectangle" onClick={onButtonClick}>Start Lesson</button>
+                <button className="bottom-rectangle" onClick={onButtonClick}>View problems</button>
             </div>
         </div>
     );
@@ -407,7 +407,7 @@ const Paths = (props) => {
         // Start the timer
         const startTime = performance.now();
     
-        const response = await fetch('https://1651-66-22-164-190.ngrok-free.app/execute', {
+        const response = await fetch('https://e816-66-22-164-190.ngrok-free.app/execute', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

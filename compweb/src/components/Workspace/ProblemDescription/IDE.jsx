@@ -83,20 +83,6 @@ const IDE = (props) => {
     setFilterOption(event.target.value);
   };
 
-  const handleUsacoClick = () => {
-    console.log('USACO button clicked');
-    USACO_DIVISIONS.forEach(division => {
-      dispatch({ type: 'ADD_TAB', payload: { type: 'division', data: division } });
-    });
-  };
-
-  const handleCccClick = () => {
-    console.log('CCC button clicked');
-    CCC_DIVISIONS.forEach(division => {
-      dispatch({ type: 'ADD_TAB', payload: { type: 'division', data: division } });
-    });
-  };
-
   // Define your color constants
   const BACKGROUND_COLOR = '#fff'; // This is the color used for the background of the components
   const TEXT_COLOR = '#000'; // This is the color used for the text in the components
@@ -569,7 +555,7 @@ int main() {
     >
     <div id="split-0">
     <div className={styles.row}>
-      <Sidebar onUsacoClick={handleUsacoClick} onCccClick={handleCccClick} />
+      <Sidebar />
       <div className={styles.problemStatement}>
         <div className={styles.scrollableContent}>
           { props.currentPage === 'problems' && ( 
