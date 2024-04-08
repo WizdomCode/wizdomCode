@@ -197,3 +197,59 @@
 .output {
   background-color: #e5e5e5;
 }
+
+.inputOutputSection {
+  height: 100%;
+}
+
+.tabWrapper {
+  overflow: hidden;
+  height: 48.848px;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden; /* Disable vertical scrollbar */
+  background: var(--navbar);
+  align-items: center;
+  width: 100%;
+  margin: 0 0;
+  height: 48.848px;
+}
+
+.buttonRow::-webkit-scrollbar {
+  width: 6px;
+  height: 2px;
+}
+
+.buttonRow::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.7);
+  border-radius: 20px;
+}
+
+.rightAlign {
+  position: absolute;
+  right: 0;
+  display: flex;
+  background-color: var(--dark-bg);
+}
+
+.buttonTab {
+  display: flex;
+  padding: 8px 16px;
+  align-items: center;
+  justify-content: flex-start;
+  border: none;
+  background: #2E3139;
+  width: 156px;
+  height: 48.848px;
+  flex-shrink: 0;
+  font-size: medium;
+}
+
+.buttonText {
+  flex: 2;
+  text-align: left;
+}

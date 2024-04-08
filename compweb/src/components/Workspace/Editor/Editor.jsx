@@ -11,9 +11,14 @@ const CodeEditor = (props) => {
   const [code, setCode] = useState(props.boilerPlate);
   const [output, setOutput] = useState([]);
   const [language, setLanguage] = useState("cpp");
-  const dispatch = useDispatch();
 
-  console.log(props.testCases);
+  const inputOutputTab = useSelector(state => state.inputOutputTab);
+  const inputData = useSelector(state => state.inputData);
+  const outputData = useSelector(state => state.outputData);
+  const [localInputData, setLocalInputData] = useState(inputData);
+  const [localOutputData, setLocalOutputData] = useState(outputData);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     props.getCode(code, language);
@@ -27,12 +32,12 @@ const CodeEditor = (props) => {
   }, [code]);
 
   const submitCode = async () => {
-    console.log("sent code:", props.testCases);
+    console.log("CUSTOM TEST:", localInputData);
 
     // Start the timer
     const startTime = performance.now();
 
-    const response = await fetch('http://localhost:5000/api/execute', {
+    const response = await fetch('https://e816-66-22-164-190.ngrok-free.app/execute', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -40,7 +45,7 @@ const CodeEditor = (props) => {
       body: JSON.stringify({
         language: language,
         code: code,
-        test_cases: props.testCases
+        test_cases: [{ key: 1, input: localInputData, output: ''}]
       })
     });
 
@@ -52,9 +57,7 @@ const CodeEditor = (props) => {
     console.log("sent code");
     const data = await response.json();
     console.log(data);
-    setOutput(data);
-
-    props.getResults(data);
+    setLocalOutputData(data[0].stdout + `\nExecution time: ${data[0].time}s`);
   };  
 
   /* load monaco */
@@ -98,20 +101,6 @@ const CodeEditor = (props) => {
           </button>
           <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
           <div className={styles.rightAlign}>
-            <button 
-              className={styles.buttonIcon}
-              onClick={() => {
-              submitCode();
-            }}>
-              <img src='/run.png' alt="Run" style={{maxWidth: '20px', maxHeight: '20px'}}/>
-            </button>
-            <button 
-              className={styles.buttonIcon}
-              onClick={() => {
-              submitCode();
-            }}>
-              <p className={styles.buttonText}>SUBMIT</p>
-            </button>
           </div>
         </div>
         <br />
@@ -124,14 +113,59 @@ const CodeEditor = (props) => {
           onChange={(value) => setCode(value)}
         />
       </div>
-      <div className={styles.output}>
-        {output.map((result, index) => (
-          <div key={index}>
-            <h5>Test Case {result.key}</h5>
-            <p>Status: {result.status}</p>
-            {result.status === 'Failed' && <p>Actual Output:{"\n"}{result.actual_output}</p>}
+      <div className={styles.inputOutputSection}>
+        <div className={styles.tabWrapper}>
+            <div className={styles.buttonRow}>
+              <button 
+                className={styles.buttonTab} 
+                style={{background: inputOutputTab === 'input' ? "#1B1B32" : "#0A0A23", color: "white"}} 
+                onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
+              >
+                <p className={styles.buttonText}>Input</p>
+              </button>
+              <button 
+                className={styles.buttonTab} 
+                style={{background: inputOutputTab === 'output' ? "#1B1B32" : "#0A0A23", color: "white"}} 
+                onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
+              >
+                <p className={styles.buttonText}>Output</p>
+              </button>
+              <div className={styles.rightAlign}>
+                <button 
+                  className={styles.buttonIcon}
+                  onClick={() => {
+                  submitCode();
+                  dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
+                }}>
+                  <p className={styles.buttonText}>SUBMIT</p>
+                </button>
+              </div>
+            </div>
+        </div>
+        <br />
+        { inputOutputTab === 'input' ? (
+          <div>
+            <Editor
+              className={styles.codeEditor}
+              theme="vs-dark"
+              defaultLanguage="cpp"
+              height="40vh"
+              value={localInputData}
+              onChange={(value) => setLocalInputData(value)}
+            />
           </div>
-        ))}
+        ) : (
+          <div>
+            <Editor
+              className={styles.codeEditor}
+              theme="vs-dark"
+              defaultLanguage="cpp"
+              height="40vh"
+              value={localOutputData}
+              onChange={(value) => setLocalOutputData(value)}
+            />
+          </div>
+        )}
       </div>
     </>
   );

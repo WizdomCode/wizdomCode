@@ -27,6 +27,9 @@ const initialState = {
     code: '',
   },
   lessonTabIndex: 0,
+  inputOutputTab: 'input',
+  inputData: '',
+  outputData: ''
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -97,6 +100,21 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         lessonTabIndex: action.payload,  // Update tabIndex with the new value
+      };
+    case 'SET_INPUT_OUTPUT_TAB':
+      return {
+        ...state,
+        inputOutputTab: action.payload,  // Update tabIndex with the new value
+      };
+    case 'SET_INPUT_DATA':
+      return {
+        ...state,
+        inputData: action.payload,  // Update tabIndex with the new value
+      };
+    case 'SET_OUTPUT_DATA':
+      return {
+        ...state,
+        outputData: action.payload,  // Update tabIndex with the new value
       };
     default:
       return state;
