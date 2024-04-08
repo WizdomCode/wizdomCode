@@ -14,15 +14,15 @@ import axios from "axios";
 import Tab from "./Tab.jsx";
 import { initializeAnalytics } from "firebase/analytics";
 
-const LessonBackgroundRect = ({ onButtonClick, ...props }) => {
-
-    const [isHovered, setIsHovered] = useState(false);
+const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
 
     return (
         <div 
-            className={`lesson-background-rect ${isHovered ? 'hovered' : ''}`}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            className={`lesson-background-rect ${ isFocused ? 'hovered' : ''}`}
+            onClick={() => {
+                onButtonClick();
+            }}
+            tabIndex="0" // Add this to make the div focusable
         >
             <h4 className='lesson-category'>{ props.category }</h4>
             <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
@@ -43,11 +43,17 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
 
     const [questions, setQuestions] = useState([]);
     const [lastPressed, setLastPressed] = useState(null);
+    const [isQuestionListOpen, setIsQuestionListOpen] = useState(false); // Add this line
     
     const dispatch = useDispatch();
 
     const handleButtonClick = (lessonIndex) => {
-        setLastPressed(lessonIndex);
+        if (lessonIndex === lastPressed) {
+            setIsQuestionListOpen(!isQuestionListOpen); // Toggle question list state when clicked
+        } else {
+            setLastPressed(lessonIndex);
+            setIsQuestionListOpen(true); // Open question list when a new LessonBackgroundRect is clicked
+        }
         console.log("Last pressed:", lessonIndex);
     };    
 
@@ -145,14 +151,14 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                 </button>
                 <div className="lesson-wrapper" ref={scrollContainer}>
                     {lessons.map((lesson, index) => (
-                        <LessonBackgroundRect key={index} {...lesson} onButtonClick={() => handleButtonClick(index)}/>
+                        <LessonBackgroundRect key={index} {...lesson} onButtonClick={() => handleButtonClick(index)} isFocused={index === lastPressed && isQuestionListOpen}/>
                     ))}
                 </div>
                 <button onClick={scrollRight} className="scroll-button right">
                     <img src='/rightarrow.png' alt='Right' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/>
                 </button>
             </div>
-            {questions.length !== 0 && (
+            {isQuestionListOpen && questions.length !== 0 && (
                 <div className="question-list">
                 <div className="wrapper">
                   <div className="question-list-rect">
@@ -605,6 +611,11 @@ const Paths = (props) => {
                                 {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}>✔️</span>}
                                 {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}>❌</span>}
                                 </h3>
+                                {results[index] && (
+                                    <>
+                                        <h5 className={className}>[ {results[index].time}s ]</h5>
+                                    </>
+                                )}
                                 <br />
                                 <h4 className={className}>Input:</h4>
                                 <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>

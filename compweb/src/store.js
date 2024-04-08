@@ -46,9 +46,16 @@ function reducer(state = initialState, action) {
         lessonTab: action.payload,
       };
     case 'REMOVE_TAB':
+      const newTabs = state.tabs.filter(tab => tab !== action.payload);
+      let newCurrentTab = state.currentTab;
+      if (state.currentTab === action.payload) {
+        const index = state.tabs.indexOf(action.payload);
+        newCurrentTab = index < newTabs.length ? newTabs[index] : newTabs[newTabs.length - 1];
+      }
       return {
         ...state,
-        tabs: state.tabs.filter(tab => tab !== action.payload),
+        tabs: newTabs,
+        currentTab: newCurrentTab,
       };
     case 'CLEAR_LESSON_TABS':
       return {

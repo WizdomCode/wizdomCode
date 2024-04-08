@@ -1,49 +1,49 @@
-import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link, useLocation } from "react-router-dom";
 import styles from '../styles/Sidebar.module.css';
 
 const Sidebar = ({ onUsacoClick, onCccClick }) => {
-  const [currentTab, setCurrentTab] = useState('home');
+  const location = useLocation();
 
   return (
     <div className={styles.sidebar}>
         <Link to="/problems" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'problems' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('problems')}>
+          <button className={`${styles.button} ${location.pathname === '/problems' ? styles.activeTab : ''}`}>
             <img src='/question.png' alt="Problems" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
         <Link to="/learningpath" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'learningpath' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('learningpath')}>
+          <button className={`${styles.button} ${location.pathname === '/learningpath' ? styles.activeTab : ''}`}>
             <img src='/paths.png' alt="Learning Path" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
         <Link to="/usaco" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'usaco' ? styles.activeTab : ''}`} onClick={() => {setCurrentTab('usaco'); onUsacoClick();}}>
+          <button className={`${styles.button} ${location.pathname === '/usaco' ? styles.activeTab : ''}`} onClick={onUsacoClick}>
             <img src='/usaco.png' alt="Usaco Paths" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
         <Link to="/ccc" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'ccc' ? styles.activeTab : ''}`} onClick={() => {setCurrentTab('ccc'); onCccClick();}}>
+          <button className={`${styles.button} ${location.pathname === '/ccc' ? styles.activeTab : ''}`} onClick={onCccClick}>
             <img src='/ccc.png' alt="CCC Paths" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
         <Link to="/" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'home' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('home')}>
+          <button className={`${styles.button} ${location.pathname === '/' ? styles.activeTab : ''}`}>
             <img src='/home.png' alt="Home" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
         <Link to="/addproblem" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'addproblem' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('addproblem')}>
+          <button className={`${styles.button} ${location.pathname === '/addproblem' ? styles.activeTab : ''}`}>
             <img src='/addproblem.png' alt="Add Problems" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
         <Link to="/signup" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'signup' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('signup')}>
+          <button className={`${styles.button} ${location.pathname === '/signup' ? styles.activeTab : ''}`}>
             <img src='/profile.png' alt="Sign Up" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
         <Link to="/settings" className={styles.img}>
-          <button className={`${styles.button} ${currentTab === 'settings' ? styles.activeTab : ''}`} onClick={() => setCurrentTab('settings')}>
+          <button className={`${styles.button} ${location.pathname === '/settings' ? styles.activeTab : ''}`}>
             <img src='/settings.png' alt="Settings" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>

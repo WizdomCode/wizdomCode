@@ -628,9 +628,14 @@ int main() {
                         <br />
                         <h3 className={className}>
                           Case {testCase.key}
-                          {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}>✔️</span>}
-                          {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}>❌</span>}
+                          {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
+                          {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
                         </h3>
+                        {results[index] && (
+                            <>
+                              <h5 className={className}>[ {results[index].time}s ]</h5>
+                            </>
+                          )}
                         <br />
                         <h4 className={className}>Input:</h4>
                         <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
