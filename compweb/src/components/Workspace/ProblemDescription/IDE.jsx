@@ -551,6 +551,7 @@ int main() {
   return (
     <Split
         className="split"
+        style={{ display: 'flex', flexDirection: 'row' }}
         minSize={500}
     >
     <div id="split-0">

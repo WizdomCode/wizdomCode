@@ -5,6 +5,14 @@
   --navbar: #0A0A23;
 }
 
+.scrollableContent {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--dark-bg);
+}
+
 .split {
   height: 100vh;
 }
@@ -63,6 +71,8 @@
 
 .codeEditor {
   background-color: var(--dark-bg);
+  resize: vertical;
+  overflow: auto;
 }
 
 .title {
@@ -124,7 +134,7 @@
   background-color: var(--dark-bg);
   border: none;
   font-size: large;
-  padding: 100% 16px;
+  padding: 8px 16px;
   align-items: center;
   justify-content: center;
 }
@@ -199,7 +209,8 @@
 }
 
 .inputOutputSection {
-  height: 100%;
+  resize: vertical;
+  overflow: auto;
 }
 
 .tabWrapper {
@@ -252,4 +263,15 @@
 .buttonText {
   flex: 2;
   text-align: left;
+}
+
+.gutter {
+  background-color: #eee;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter.gutter-vertical {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+  cursor: row-resize;
 }

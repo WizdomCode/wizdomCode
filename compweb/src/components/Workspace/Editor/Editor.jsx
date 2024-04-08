@@ -85,87 +85,94 @@ const CodeEditor = (props) => {
 
   return (
     <>
-      <div className={styles.codeEditor}>
-        <div className={styles.buttonRow}>
-          <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
-            <p className={styles.buttonText}>Python</p>
-            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>
-          </button>
-          <button className={styles.button} style={{background: language === "java" ? BGDARK : UNSELECTED, color: language === "java" ? "white" : "white"}} onClick={() => { setLanguage("java")}}>
-            <p className={styles.buttonText}>Java</p>
-            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
-          </button>
-          <button className={styles.button} style={{background: language === "cpp" ? BGDARK : UNSELECTED, color: language === "cpp" ? "white" : "white"}} onClick={() => { setLanguage("cpp")}}>
-            <p className={styles.buttonText}>C++</p>
-            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
-          </button>
-          <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
-          <div className={styles.rightAlign}>
-          </div>
-        </div>
-        <br />
-        <Editor
-          className={styles.codeEditor}
-          theme="vs-dark"
-          height="60vh"
-          defaultLanguage="cpp"
-          value={code}
-          onChange={(value) => setCode(value)}
-        />
-      </div>
-      <div className={styles.inputOutputSection}>
-        <div className={styles.tabWrapper}>
-            <div className={styles.buttonRow}>
-              <button 
-                className={styles.buttonTab} 
-                style={{background: inputOutputTab === 'input' ? "#1B1B32" : "#0A0A23", color: "white"}} 
-                onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
-              >
-                <p className={styles.buttonText}>Input</p>
-              </button>
-              <button 
-                className={styles.buttonTab} 
-                style={{background: inputOutputTab === 'output' ? "#1B1B32" : "#0A0A23", color: "white"}} 
-                onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
-              >
-                <p className={styles.buttonText}>Output</p>
-              </button>
-              <div className={styles.rightAlign}>
-                <button 
-                  className={styles.buttonIcon}
-                  onClick={() => {
-                  submitCode();
-                  dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
-                }}>
-                  <p className={styles.buttonText}>SUBMIT</p>
-                </button>
-              </div>
+      <div className={styles.scrollableContent}>
+        <Split
+            className="split"
+            direction="vertical"
+        >
+        <div className={styles.codeEditor}>
+          <div className={styles.buttonRow}>
+            <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
+              <p className={styles.buttonText}>Python</p>
+              <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>
+            </button>
+            <button className={styles.button} style={{background: language === "java" ? BGDARK : UNSELECTED, color: language === "java" ? "white" : "white"}} onClick={() => { setLanguage("java")}}>
+              <p className={styles.buttonText}>Java</p>
+              <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+            </button>
+            <button className={styles.button} style={{background: language === "cpp" ? BGDARK : UNSELECTED, color: language === "cpp" ? "white" : "white"}} onClick={() => { setLanguage("cpp")}}>
+              <p className={styles.buttonText}>C++</p>
+              <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+            </button>
+            <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
+            <div className={styles.rightAlign}>
             </div>
+          </div>
+          <br />
+          <Editor
+            className={styles.codeEditor}
+            theme="vs-dark"
+            height="60vh"
+            defaultLanguage="cpp"
+            value={code}
+            onChange={(value) => setCode(value)}
+          />
         </div>
-        <br />
-        { inputOutputTab === 'input' ? (
-          <div>
-            <Editor
-              className={styles.codeEditor}
-              theme="vs-dark"
-              defaultLanguage="cpp"
-              height="40vh"
-              value={localInputData}
-              onChange={(value) => setLocalInputData(value)}
-            />
+        <div className={styles.inputOutputSection}>
+          <div className={styles.tabWrapper}>
+              <div className={styles.buttonRow}>
+                <button 
+                  className={styles.buttonTab} 
+                  style={{background: inputOutputTab === 'input' ? "#1B1B32" : "#0A0A23", color: "white"}} 
+                  onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
+                >
+                  <p className={styles.buttonText}>Input</p>
+                </button>
+                <button 
+                  className={styles.buttonTab} 
+                  style={{background: inputOutputTab === 'output' ? "#1B1B32" : "#0A0A23", color: "white"}} 
+                  onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
+                >
+                  <p className={styles.buttonText}>Output</p>
+                </button>
+                <div className={styles.rightAlign}>
+                  <button 
+                    className={styles.buttonIcon}
+                    onClick={() => {
+                    submitCode();
+                    dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
+                  }}>
+                    <p className={styles.buttonText}>SUBMIT</p>
+                  </button>
+                </div>
+              </div>
           </div>
-        ) : (
-          <div>
-            <Editor
-              className={styles.codeEditor}
-              theme="vs-dark"
-              defaultLanguage="cpp"
-              height="40vh"
-              value={localOutputData}
-              onChange={(value) => setLocalOutputData(value)}
-            />
-          </div>
-        )}
+          <br />
+          { inputOutputTab === 'input' ? (
+            <div>
+              <Editor
+                className={styles.codeEditor}
+                theme="vs-dark"
+                defaultLanguage="cpp"
+                height="28vh"
+                value={localInputData}
+                onChange={(value) => setLocalInputData(value)}
+              />
+            </div>
+          ) : (
+            <div>
+              <Editor
+                className={styles.codeEditor}
+                theme="vs-dark"
+                defaultLanguage="cpp"
+                height="28vh"
+                value={localOutputData}
+                onChange={(value) => setLocalOutputData(value)}
+              />
+            </div>
+          )}
+        </div>
+        </Split>
       </div>
     </>
   );
