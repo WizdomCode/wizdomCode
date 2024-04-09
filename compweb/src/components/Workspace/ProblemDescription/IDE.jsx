@@ -382,6 +382,21 @@ int main() {
     setResults(data);
   };
 
+  useEffect(() => {
+    console.log("Result data:", results);
+    // Example parsing
+    const problemPassed = () => {
+      for (let test of results) {
+        if (test.status.description !== 'Accepted') {
+          return false;
+        }
+      }
+      return true;  
+    }
+
+    console.log("Problem passed:", problemPassed());
+  }, [results])
+
   const languages = {
     "cpp": 54, // C++ (GCC 9.2.0)
     "python": 71, // Python (3.8.1)
@@ -547,7 +562,7 @@ int main() {
     const elapsedTime = endTime - startTime;
     console.log(`Execution time: ${elapsedTime} milliseconds`);
   };  
-  
+
   return (
     <Split
         className="split"
@@ -560,24 +575,24 @@ int main() {
       <div className={styles.problemStatement}>
         <div className={styles.scrollableContent}>
           { props.currentPage === 'problems' && ( 
-          <div className={styles.tabWrapper}>
-            <div className={styles.buttonRow}>
-              {tabs.map((tab, index) => (
-                <Tab
-                  key={index}
-                  tab={tab}
-                  isActive={currentTab === tab}
-                  onClose={() => dispatch({ type: 'REMOVE_TAB', payload: tab })}
-                />
-              ))}
-              <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
-                <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
-              </button>
-              <div className={styles.rightAlign}>
+            <div className={styles.tabWrapper}>
+              <div className={styles.buttonRow}>
+                {tabs.map((tab, index) => (
+                  <Tab
+                    key={index}
+                    tab={tab}
+                    isActive={currentTab === tab}
+                    onClose={() => dispatch({ type: 'REMOVE_TAB', payload: tab })}
+                  />
+                ))}
+                <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
+                  <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
+                </button>
+                <div className={styles.rightAlign}>
+                </div>
               </div>
             </div>
-          </div>
-          )}
+            )}
           { props.currentPage === 'ccc' || props.currentPage === 'usaco' ? (
             <>
               <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>

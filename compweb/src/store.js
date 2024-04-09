@@ -1,9 +1,10 @@
 // store.js
 import { createStore } from 'redux';
+import { v4 as uuidv4 } from 'uuid';
 
 const initialState = {
   tabs: [
-    { type: 'newTab', data: null },
+    { type: 'newTab', data: null , id: uuidv4() },
   ],
   lessonTabs: [],
   lessonMetaData: {
@@ -37,29 +38,31 @@ initialState.currentTab = initialState.tabs[0];
 function reducer(state = initialState, action) {
   switch (action.type) {
     case 'ADD_TAB':
+      const newTab = { ...action.payload, id: uuidv4() };
       return {
         ...state,
-        tabs: [...state.tabs, action.payload],
-        currentTab: action.payload,
+        tabs: [...state.tabs, newTab],
+        currentTab: newTab,
       };
     case 'ADD_LESSON_TAB':
+      const newLessonTab = { ...action.payload, id: uuidv4() };
       return {
         ...state,
-        lessonTabs: [...state.tabs, action.payload],
-        lessonTab: action.payload,
+        lessonTabs: [...state.tabs, newLessonTab],
+        lessonTab: newLessonTab,
       };
     case 'REMOVE_TAB':
-      const newTabs = state.tabs.filter(tab => tab !== action.payload);
+      const newTabs = state.tabs.filter(tab => tab.id !== action.payload.id);
       let newCurrentTab = state.currentTab;
-      if (state.currentTab === action.payload) {
-        const index = state.tabs.indexOf(action.payload);
+      if (state.currentTab.id === action.payload.id) {
+        const index = state.tabs.findIndex(tab => tab.id === action.payload.id);
         newCurrentTab = index < newTabs.length ? newTabs[index] : newTabs[newTabs.length - 1];
       }
       return {
         ...state,
         tabs: newTabs,
         currentTab: newCurrentTab,
-      };
+      };      
     case 'CLEAR_LESSON_TABS':
       return {
         ...state,

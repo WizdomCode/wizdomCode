@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { forwardRef } from 'react';
+import { useDispatch } from 'react-redux';
 import styles from '../../styles/ProblemDescription.module.css';
 
 const Tab = ({ index, tab, isActive, type }) => {

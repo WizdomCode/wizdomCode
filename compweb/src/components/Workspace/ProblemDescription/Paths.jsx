@@ -437,6 +437,21 @@ const Paths = (props) => {
         setResults(data);
       };
 
+      useEffect(() => {
+        console.log("Result data:", results);
+        // Example parsing
+        const problemPassed = () => {
+          for (let test of results) {
+            if (test.status.description !== 'Accepted') {
+              return false;
+            }
+          }
+          return true;  
+        }
+    
+        console.log("Problem passed:", problemPassed());
+      }, [results])    
+
       function findProblem(data, currentProblemId, direction) {
         for (let unit of data) {
             for (let lesson of unit) {
