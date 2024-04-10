@@ -1,8 +1,8 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import styles from '../../styles/ProblemDescription.module.css';
 
-const Tab = ({ index, tab, isActive, type }) => {
+const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
   const dispatch = useDispatch();
   
   let text;
@@ -20,8 +20,35 @@ const Tab = ({ index, tab, isActive, type }) => {
       text = '';
   }
 
+  const dragStart = (e) => {
+    const target = e.target;
+    e.dataTransfer.setData('tab_id', target.id);
+    setDraggedTab(index);
+    setTimeout(() => {
+      target.style.display = "none";
+    }, 0);
+  }
+
+  const dragEnd = (e) => {
+    e.target.style.display = "flex";
+  }
+
+  const dragEnter = (e) => {
+    e.preventDefault();
+  }
+
+  const dragOver = (e) => {
+    e.preventDefault();
+  }
+
   return (
     <button 
+      id={index}
+      draggable="true"
+      onDragStart={dragStart}
+      onDragEnd={dragEnd}
+      onDragEnter={dragEnter}
+      onDragOver={dragOver}
       className={styles.buttonTab} 
       style={{background: isActive ? "#1B1B32" : "#0A0A23", color: "white"}} 
       onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
@@ -42,7 +69,7 @@ const Tab = ({ index, tab, isActive, type }) => {
         alt="Close tab" 
         style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}
         onClick={(e) => {
-          e.stopPropagation(); // Prevents the click event from bubbling up to the parent button
+          e.stopPropagation();
           dispatch({ type: 'REMOVE_TAB', payload: tab });
         }}            
       />

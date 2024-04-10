@@ -295,16 +295,16 @@ const IDE = (props) => {
             const inputFileName = fileList[i];
             const outputFileName = fileList[i + 1];
   
-            console.log("Processing files:", inputFileName, outputFileName);
+            // console.log("Processing files:", inputFileName, outputFileName);
   
             try {
               const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
               const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
   
-              console.log("Input File Name:", inputFileName);
-              console.log("Output File Name:", outputFileName);
-              console.log("Input Response:", inputResponse.data);
-              console.log("Output Response:", outputResponse.data);
+              // console.log("Input File Name:", inputFileName);
+              // console.log("Output File Name:", outputFileName);
+              // console.log("Input Response:", inputResponse.data);
+              // console.log("Output Response:", outputResponse.data);
   
               testCaseArray.push({
                 key: (i / 2) + 1,
@@ -316,7 +316,7 @@ const IDE = (props) => {
             }
           }
   
-          console.log("Test Cases from problemdesc:", testCaseArray);
+          // console.log("Test Cases from problemdesc:", testCaseArray);
   
           setTestCases(testCaseArray);
           setIsLoading(false); // Set the loading state to false after fetching the test cases data
@@ -563,6 +563,77 @@ int main() {
     console.log(`Execution time: ${elapsedTime} milliseconds`);
   };  
 
+  const state = useSelector(state => state); // Access the state
+
+  const [draggedTab, setDraggedTab] = useState(null); // New state for the dragged tab
+  const [linePosition, setLinePosition] = useState({ index: null, position: null }); // New state for the line position
+  const linePositionRef = useRef(linePosition); // New ref for the line position
+
+  useEffect(() => {
+    console.log("State after dispatch:", state); // Log the state after dispatch
+    }, [state]); // Add state as a dependency to useEffect 
+
+  useEffect(() => {
+    console.log("draggedTab: ", draggedTab); // Log the state after dispatch
+  }, [draggedTab]); // Add state as a dependency to useEffect
+  
+  useEffect(() => {
+    console.log("JUST WHAT IS CHANGING THIS? ", linePosition); // Log the state after dispatch
+    linePositionRef.current = linePosition;
+  }, [linePosition]); // Add state as a dependency to useEffect
+
+    useEffect(() => {
+      console.log("dragged tab:", draggedTab);
+
+      const handleDragOver = (e) => {
+        e.preventDefault();
+        const target = e.target;
+        if (target && target.id && draggedTab !== null) {
+          const draggedTabIndex = draggedTab;
+          const targetTabIndex = target.id;
+          console.log("draggedTabIndex", draggedTabIndex);
+          console.log("target", target);
+          console.log("target.id", target.id);
+          console.log("targetTabIndex", targetTabIndex);
+
+          const middlePoint = e.target.getBoundingClientRect().x + e.target.getBoundingClientRect().width / 2;
+          const linePos = e.clientX < middlePoint ? 'left' : 'right';
+      
+          console.log({ index: targetTabIndex, position: linePos});
+
+          setLinePosition({ index: targetTabIndex, position: linePos});
+        }
+      };
+  
+      window.addEventListener('dragover', handleDragOver);
+      window.addEventListener('dragend', dragEnd);
+      return () => {
+        window.removeEventListener('dragover', handleDragOver);
+        window.removeEventListener('dragend', dragEnd);
+      };
+    }, [draggedTab]);  
+
+  const dragEnd = (e) => {
+    e.preventDefault();
+    console.log("DIPATCHEIOHFJIIO");
+    const linePos = linePositionRef.current;
+    console.log({
+      fromIndex: draggedTab,
+      toIndex: linePos.index, 
+      direction: linePos.position
+    });
+    dispatch({
+      type: 'MOVE_TAB',
+      payload: {
+        fromIndex: draggedTab,
+        toIndex: Number(linePos.index), 
+        direction: linePos.position  
+      }
+    });
+    setDraggedTab(null);
+    setLinePosition({ index: null, position: null });
+  }
+
   return (
     <Split
         className="split"
@@ -576,14 +647,22 @@ int main() {
         <div className={styles.scrollableContent}>
           { props.currentPage === 'problems' && ( 
             <div className={styles.tabWrapper}>
-              <div className={styles.buttonRow}>
+              <div 
+                className={styles.buttonRow}
+                onDragOver={(e) => e.preventDefault()} // Add this line
+              >
                 {tabs.map((tab, index) => (
-                  <Tab
-                    key={index}
-                    tab={tab}
-                    isActive={currentTab === tab}
-                    onClose={() => dispatch({ type: 'REMOVE_TAB', payload: tab })}
-                  />
+                  <>
+                    {linePosition.index === index.toString() && linePosition.position === 'left' && <div className={styles.line} />}
+                    <Tab
+                      key={index}
+                      index={index}
+                      tab={tab}
+                      isActive={currentTab === tab}
+                      setDraggedTab={setDraggedTab}
+                    />
+                    {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
+                  </>
                 ))}
                 <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
                   <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>

@@ -7,12 +7,12 @@ const initialState = {
     { type: 'newTab', data: null , id: uuidv4() },
   ],
   lessonTabs: [],
-  lessonMetaData: {
+  lessonMetaData: [{
     unit: NaN,
     lesson: NaN,
     problem_id: '',
-  },
-  lessonProblemData: {
+  }],
+  lessonProblemData: [{
     contest: '',
     description: '',
     folder: '',
@@ -21,7 +21,7 @@ const initialState = {
     points: NaN,
     title: '',
     topics: [],
-  },
+  }],
   lessonActiveTab: { type: '', data: null },
   codeState: { // modified code state
     language: '',
@@ -81,15 +81,22 @@ function reducer(state = initialState, action) {
     case 'SET_LESSON_META_DATA':
       return {
         ...state,
-        lessonMetaData: {
-          ...state.lessonMetaData,
-          ...action.payload,
-        },
+        lessonMetaData: state.lessonMetaData.map((item, index) => {
+          if(index === action.index) {
+            return { ...item, ...action.payload };
+          }
+          return item;
+        }),
       };
     case 'SET_LESSON_PROBLEM_DATA':
       return {
         ...state,
-        lessonProblemData: action.payload,
+        lessonProblemData: state.lessonProblemData.map((item, index) => {
+          if(index === action.index) {
+            return { ...item, ...action.payload };
+          }
+          return item;
+        }),
       };
     case 'SET_CODE_STATE': // modified case to handle code state
       return {
@@ -119,6 +126,47 @@ function reducer(state = initialState, action) {
         ...state,
         outputData: action.payload,  // Update tabIndex with the new value
       };
+    case 'UPDATE_ARRAY_SIZE':
+      const newSize = action.payload;
+      const defaultMetaData = {
+        unit: NaN,
+        lesson: NaN,
+        problem_id: '',
+      };
+      const defaultProblemData = {
+        contest: '',
+        description: '',
+        folder: '',
+        inputFormat: '',
+        outputFormat: '',
+        points: NaN,
+        title: '',
+        topics: [],
+      };
+      while (state.lessonMetaData.length < newSize) {
+        state.lessonMetaData.push(defaultMetaData);
+      }
+      while (state.lessonProblemData.length < newSize) {
+        state.lessonProblemData.push(defaultProblemData);
+      }
+      return {
+        ...state,
+      };
+    case 'MOVE_TAB':
+      const { fromIndex, toIndex, direction } = action.payload;
+      const tabsCopy = [...state.tabs];
+      let afterMove = [...state.tabs];
+      if (toIndex < fromIndex) {
+        afterMove = tabsCopy.slice(0, direction === 'left' ? toIndex : toIndex + 1).concat([tabsCopy[fromIndex]], tabsCopy.slice(direction === 'left' ? toIndex : toIndex + 1, fromIndex), tabsCopy.slice(fromIndex + 1, ));
+      }
+      else if (toIndex > fromIndex) {
+        afterMove = tabsCopy.slice(0, fromIndex).concat(tabsCopy.slice(fromIndex + 1, direction === 'left' ? toIndex : toIndex + 1), [tabsCopy[fromIndex]], tabsCopy.slice(direction === 'left' ? toIndex : toIndex + 1, ));
+      }
+      console.log(afterMove);
+      return {
+        ...state,
+        tabs: afterMove,
+      };  
     default:
       return state;
   }

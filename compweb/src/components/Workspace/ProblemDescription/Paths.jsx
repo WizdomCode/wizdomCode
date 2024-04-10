@@ -44,6 +44,8 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     const [questions, setQuestions] = useState([]);
     const [lastPressed, setLastPressed] = useState(null);
     const [isQuestionListOpen, setIsQuestionListOpen] = useState(false); // Add this line
+
+    const tabIndex = useSelector(state => state.lessonTabIndex);
     
     const dispatch = useDispatch();
 
@@ -188,6 +190,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                                     window.scrollTo(0, 0); // This will scroll the page to the top
                                     dispatch({
                                         type: 'SET_LESSON_META_DATA',
+                                        index: tabIndex,
                                         payload: {
                                             division: division,
                                             lesson: lastPressed,
@@ -274,6 +277,11 @@ const Paths = (props) => {
         });   
 
         dispatch({
+            type: 'UPDATE_ARRAY_SIZE',
+            payload: initialTabs.length
+        })
+
+        dispatch({
             type: 'SET_LESSON_TAB',
             payload: initialTab
         })
@@ -343,9 +351,10 @@ const Paths = (props) => {
       
       useEffect(() => {
         const fetchData = async () => {
-          const data = await addGroup(lessonMetaData.problem_id);
+          const data = await addGroup(lessonMetaData[tabIndex].problem_id);
           dispatch({
             type: 'SET_LESSON_PROBLEM_DATA',
+            index: tabIndex,
             payload: {
               data: data
             }
@@ -472,8 +481,9 @@ const Paths = (props) => {
     const scrollLeft = () => {
         dispatch({
             type: 'SET_LESSON_META_DATA',
+            index: tabIndex,
             payload: {
-                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData.problem_id, "previous")
+                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData[tabIndex].problem_id, "previous")
             }
         });
     };
@@ -481,8 +491,9 @@ const Paths = (props) => {
     const scrollRight = () => {
         dispatch({
             type: 'SET_LESSON_META_DATA',
+            index: tabIndex,
             payload: {
-                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData.problem_id, "next")
+                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData[tabIndex].problem_id, "next")
             }
         });
     };
@@ -504,7 +515,7 @@ const Paths = (props) => {
                     </div>
                 </div>
             </div>
-            {!lessonProblemData.data ? (
+            {!lessonProblemData[tabIndex].data ? (
                 defaultTabs[tabIndex].data === 'Junior' ? (
                     <>
                         {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
@@ -517,12 +528,12 @@ const Paths = (props) => {
                     </>
                 ) : defaultTabs[tabIndex].data === 'Senior' ? (
                     <>
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
+                        {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
+                            <React.Fragment key={index}>
+                                <ScrollRow lessons={JUNIOR_UNIT_LESSONS[index]} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index] } division='Junior'/>
+                                <br />
+                            </React.Fragment>
+                        ))}
                         <Link to = "/computercontest">CCC senior</Link>
                     </>
                 
@@ -576,7 +587,7 @@ const Paths = (props) => {
                                 <button onClick={scrollLeft} className="scroll-button left">
                                     <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
                                 </button>
-                                <h1 className={styles.title}>{lessonProblemData.data.title}</h1>
+                                <h1 className={styles.title}>{lessonProblemData[tabIndex].data.title}</h1>
                                 <button onClick={scrollRight} className="scroll-button right">
                                     <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
                                 </button>
@@ -584,17 +595,17 @@ const Paths = (props) => {
                         <br />
                         <div className={styles.description}>
                         <h3>Problem Description</h3>
-                        <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={lessonProblemData.data.description.replace(/\\n/g, '\n')} />
+                        <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={lessonProblemData[tabIndex].data.description.replace(/\\n/g, '\n')} />
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Input Format</h3>
-                        <pre className={styles.descriptionText}>{lessonProblemData.data.inputFormat.replace(/\\n/g, '\n')}</pre>
+                        <pre className={styles.descriptionText}>{lessonProblemData[tabIndex].data.inputFormat.replace(/\\n/g, '\n')}</pre>
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Constraints</h3>
                         <ul>
-                            {false && lessonProblemData.data.constraints &&
-                            Object.entries(lessonProblemData.data.constraints).map(([key, value]) => (
+                            {false && lessonProblemData[tabIndex].data.constraints &&
+                            Object.entries(lessonProblemData[tabIndex].data.constraints).map(([key, value]) => (
                                 <li key={key}>
                                 <strong>{key}:</strong> {value}
                                 </li>
@@ -603,11 +614,11 @@ const Paths = (props) => {
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Output Format</h3>
-                        <p>{lessonProblemData.data.outputFormat}</p>
+                        <p>{lessonProblemData[tabIndex].data.outputFormat}</p>
                         <div className={styles.divider}></div>
                         <br />
                         <h3>Points</h3>
-                        <p>{lessonProblemData.data.points}</p>
+                        <p>{lessonProblemData[tabIndex].data.points}</p>
                         </div>
                         <br />
                         <br />

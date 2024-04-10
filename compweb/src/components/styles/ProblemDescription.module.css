@@ -284,3 +284,10 @@ ul {
   justify-content: center;
   align-items: center;
 }
+
+.line {
+  height: 100%;
+  width: 2px;
+  padding: 2px;
+  background-color: white;
+}
