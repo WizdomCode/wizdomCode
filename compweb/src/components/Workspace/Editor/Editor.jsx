@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Split from 'react-split';
 import styles from '../../styles/Editor.module.css';
 import '../../styles/Editor.css';
@@ -19,6 +19,62 @@ const CodeEditor = (props) => {
   const [localOutputData, setLocalOutputData] = useState(outputData);
 
   const dispatch = useDispatch();
+
+  const editorRef = useRef(null);
+
+  const TEMPLATES = {
+    'Insert DFS template':
+  `void dfs(int node) {
+      visited[node] = true;
+      for (int i : adj[node]) {
+          if (!visited[i]) {
+              dfs(i);
+          }
+      }
+  }`,
+    'Insert BFS template':
+  `void bfs(int node) {
+      queue<int> q;
+      visited[node] = true;
+      q.push(node);
+      while (!q.empty()) {
+          int v = q.front();
+          q.pop();
+          for (int i : adj[v]) {
+              if (!visited[i]) {
+                  q.push(i);
+                  visited[i] = true;
+              }
+          }
+      }
+  }`
+  };  
+
+  useEffect(() => {
+    if (editorRef.current) {
+        Object.entries(TEMPLATES).forEach(([label, template], index) => {
+            editorRef.current.addAction({
+                id: `insert-template-${index}`,
+                label: label,
+                keybindings: [
+                    monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | (monaco.KeyCode.KEY_1 + index),
+                ],
+                contextMenuGroupId: 'navigation',
+                contextMenuOrder: 1.5,
+                run: function(ed) {
+                    const position = ed.getPosition();
+                    ed.executeEdits("", [
+                        {
+                            range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+                            text: template
+                        }
+                    ]);
+                    return null;
+                }
+            });
+        });
+    }
+}, [editorRef.current]);
 
   useEffect(() => {
     props.getCode(code, language);
@@ -116,6 +172,7 @@ const CodeEditor = (props) => {
             defaultLanguage="cpp"
             value={code}
             onChange={(value) => setCode(value)}
+            onMount={(editor, monaco) => { editorRef.current = editor; }}
           />
         </div>
         <div className={styles.inputOutputSection}>
