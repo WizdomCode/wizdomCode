@@ -11,6 +11,12 @@ const CodeEditor = (props) => {
   const [code, setCode] = useState(props.boilerPlate);
   const [output, setOutput] = useState([]);
   const [language, setLanguage] = useState("cpp");
+  const languageRef = useRef(language); // Create a ref for the language
+
+  // Update the ref whenever the language changes
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
 
   const inputOutputTab = useSelector(state => state.inputOutputTab);
   const inputData = useSelector(state => state.inputData);
@@ -22,59 +28,74 @@ const CodeEditor = (props) => {
 
   const editorRef = useRef(null);
 
-  const TEMPLATES = {
-    'Insert DFS template':
-  `void dfs(int node) {
-      visited[node] = true;
-      for (int i : adj[node]) {
-          if (!visited[i]) {
-              dfs(i);
-          }
-      }
-  }`,
-    'Insert BFS template':
-  `void bfs(int node) {
-      queue<int> q;
-      visited[node] = true;
-      q.push(node);
-      while (!q.empty()) {
-          int v = q.front();
-          q.pop();
-          for (int i : adj[v]) {
-              if (!visited[i]) {
-                  q.push(i);
-                  visited[i] = true;
-              }
-          }
-      }
-  }`
-  };  
+  const [actions, setActions] = useState([]);
 
-  useEffect(() => {
-    if (editorRef.current) {
-        Object.entries(TEMPLATES).forEach(([label, template], index) => {
-            editorRef.current.addAction({
-                id: `insert-template-${index}`,
-                label: label,
-                keybindings: [
-                    monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | (monaco.KeyCode.KEY_1 + index),
-                ],
-                contextMenuGroupId: 'navigation',
-                contextMenuOrder: 1.5,
-                run: function(ed) {
-                    const position = ed.getPosition();
-                    ed.executeEdits("", [
-                        {
-                            range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
-                            text: template
-                        }
-                    ]);
-                    return null;
-                }
-            });
-        });
+  const TEMPLATES = {
+    'Insert DFS template': {
+      cpp:
+`void dfs(int node) {
+    visited[node] = true;
+    for (int i : adj[node]) {
+        if (!visited[i]) {
+            dfs(i);
+        }
     }
-}, [editorRef.current]);
+}`,
+      python:
+`python dfs template`,
+      java:
+`java dfs template`
+    },
+    'Insert BFS template': {
+      cpp:
+`void bfs(int node) {
+    queue<int> q;
+    visited[node] = true;
+    q.push(node);
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        for (int i : adj[v]) {
+            if (!visited[i]) {
+                q.push(i);
+                visited[i] = true;
+            }
+        }
+    }
+}`,
+      python:
+`python bfs`,
+      java:
+`java bfs`
+    }
+  };  
+  
+  useEffect(() => {
+      if (editorRef.current) {
+          Object.entries(TEMPLATES).forEach(([label, templates], index) => {
+              console.log("AAAAAAAAAAAAAAAAAAH");
+              editorRef.current.addAction({
+                  id: `insert-template-${index}`,
+                  label: label,
+                  keybindings: [
+                      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | (monaco.KeyCode.KEY_1 + index),
+                  ],
+                  contextMenuGroupId: 'navigation',
+                  contextMenuOrder: 1.5,
+                  run: function(ed) {
+                      const position = ed.getPosition();
+                      ed.executeEdits("", [
+                          {
+                              range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+                              text: templates[languageRef.current] // Use the current value of the ref
+                            }
+                      ]);
+                      return null;
+                  }
+              });
+          });
+      }
+  }, [editorRef.current]);  
 
   useEffect(() => {
     props.getCode(code, language);

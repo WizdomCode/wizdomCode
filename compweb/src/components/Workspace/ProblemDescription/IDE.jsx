@@ -25,6 +25,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import remarkGfm from 'remark-gfm';
 
 const IDE = (props) => {
   const dispatch = useDispatch();
@@ -634,6 +635,12 @@ int main() {
     setLinePosition({ index: null, position: null });
   }
 
+  function customParser(text) {
+    // This is just an example. Replace it with your own logic.
+    const newText = text.replace(/`(.*?)`/g, `<span class="${styles.codeSnippet}">$1</span>`);
+    return newText;
+  }
+    
   return (
     <Split
         className="split"
@@ -684,11 +691,11 @@ int main() {
                 <br />
                 <div className={styles.description}>
                   <h3>Problem Description</h3>
-                  <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={currentTab.data.description.replace(/\\n/g, '\n')} />
+                  <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Input Format</h3>
-                  <pre className={styles.descriptionText}>{currentTab.data.inputFormat.replace(/\\n/g, '\n')}</pre>
+                  <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Constraints</h3>
@@ -703,7 +710,7 @@ int main() {
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Output Format</h3>
-                  <p>{currentTab.data.outputFormat}</p>
+                  <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
                   <div className={styles.divider}></div>
                   <br />
                   <h3>Points</h3>
