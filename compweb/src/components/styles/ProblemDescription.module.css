@@ -223,6 +223,17 @@ ul {
   background-color: #0A0A23;
 }
 
+.customLatex {
+  margin: 10px 0;
+  font-family: "Ubuntu Mono";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 27px;
+  background-color: #0A0A23;
+  padding: 2px 5px; /* Adjust this value to make the background larger */
+}
+
 .testCaseEven {
   background-color: var(--dark-bg);
   color: #fff;

@@ -275,52 +275,64 @@ const IDE = (props) => {
   }, [questionID, dispatch]);
   
   useEffect(() => {
-    // Fetch test cases data from TestCaseReader
     const fetchTestCasesData = async () => {
       try {
         let testCaseArray = [];
   
-        // Get the testCaseFolder from the currentProblem
         const testCaseFolder = currentTab.data.folder;
   
-        if (testCaseFolder) {  // Add this check
-          // Fetch the list of files in the test case folder
+        if (testCaseFolder) {
           const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
           const fileList = fileListResponse.data;
   
-          // Sort the file list in alphabetical order
           fileList.sort();
   
-          // Process each file in the sorted list
           for (let i = 0; i < fileList.length; i += 2) {
             const inputFileName = fileList[i];
             const outputFileName = fileList[i + 1];
   
-            // console.log("Processing files:", inputFileName, outputFileName);
-  
             try {
               const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
               const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+              
+              console.log(inputResponse);
+
+              let inputLines, outputLines;
+
+              try {
+                  inputLines = inputResponse.data.split('\n', 106);
+                  outputLines = outputResponse.data.split('\n', 106);
+              } catch (error) {
+                  // Make these strings before trying .split()
+                  inputLines = String(inputResponse.data).split('\n', 106);
+                  outputLines = String(outputResponse.data).split('\n', 106);
+              }
+              
+              // Now inputLines and outputLines can be accessed outside the try/catch block
+              console.log(inputLines, outputLines);
+                
+              if (inputLines.length > 105) {
+                inputLines = inputLines.slice(0, 105);
+                inputLines.push('...(more lines)');
+              }
   
-              // console.log("Input File Name:", inputFileName);
-              // console.log("Output File Name:", outputFileName);
-              // console.log("Input Response:", inputResponse.data);
-              // console.log("Output Response:", outputResponse.data);
+              if (outputLines.length > 105) {
+                outputLines = outputLines.slice(0, 105);
+                outputLines.push('...(more lines)');
+              }
   
               testCaseArray.push({
                 key: (i / 2) + 1,
-                input: inputResponse.data,
-                output: outputResponse.data,
+                input: inputLines.join('\n'),
+                output: outputLines.join('\n'),
               });
             } catch (error) {
               console.error("Error processing files:", inputFileName, outputFileName, error);
             }
           }
   
-          // console.log("Test Cases from problemdesc:", testCaseArray);
-  
           setTestCases(testCaseArray);
-          setIsLoading(false); // Set the loading state to false after fetching the test cases data
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error fetching test cases: ", error);
@@ -328,8 +340,8 @@ const IDE = (props) => {
     };
   
     fetchTestCasesData();
-  }, [currentTab]);  
-
+  }, [currentTab]);
+  
   const boilerPlate = 
 `#include <iostream>
 
@@ -637,7 +649,7 @@ int main() {
 
   function customParser(text) {
     // This is just an example. Replace it with your own logic.
-    const newText = text.replace(/`(.*?)`/g, `<span class="${styles.codeSnippet}">$1</span>`);
+    const newText = text.replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
     return newText;
   }
     
@@ -690,31 +702,50 @@ int main() {
                 <h1 className={styles.title}>{currentTab.data.title}</h1>
                 <br />
                 <div className={styles.description}>
-                  <h3>Problem Description</h3>
-                  <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
-                  <div className={styles.divider}></div>
-                  <br />
-                  <h3>Input Format</h3>
-                  <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
-                  <div className={styles.divider}></div>
-                  <br />
-                  <h3>Constraints</h3>
-                  <ul>
-                    {false && currentTab.data.constraints &&
-                      Object.entries(currentTab.data.constraints).map(([key, value]) => (
-                        <li key={key}>
-                          <strong>{key}:</strong> {value}
-                        </li>
-                      ))}
-                  </ul>
-                  <div className={styles.divider}></div>
-                  <br />
-                  <h3>Output Format</h3>
-                  <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
-                  <div className={styles.divider}></div>
-                  <br />
-                  <h3>Points</h3>
-                  <p>{currentTab.data.points}</p>
+                  {currentTab.data.description && (
+                    <>
+                      {currentTab.data.specificContest && <h3>{currentTab.data.specificContest}</h3>}
+                      <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {currentTab.data.inputFormat && (
+                    <>
+                      <h3>Input Format</h3>
+                      <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {currentTab.data.constraints && (
+                    <>
+                      <h3>Constraints</h3>
+                      <ul>
+                        {Object.entries(currentTab.data.constraints).map(([key, value]) => (
+                          <li key={key}>
+                            <strong>{key}:</strong> {value}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {currentTab.data.outputFormat && (
+                    <>
+                      <h3>Output Format</h3>
+                      <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {currentTab.data.points && (
+                    <>
+                      <h3>Points</h3>
+                      <p>{currentTab.data.points}</p>
+                    </>
+                  )}
                 </div>
                 <br />
                 <br />

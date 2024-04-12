@@ -12,11 +12,6 @@ const Sidebar = ({ onUsacoClick, onCccClick }) => {
             <img src='/question.png' alt="Problems" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
           </button>
         </Link>
-        <Link to="/learningpath" className={styles.img}>
-          <button className={`${styles.button} ${location.pathname === '/learningpath' ? styles.activeTab : ''}`}>
-            <img src='/paths.png' alt="Learning Path" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>
-          </button>
-        </Link>
         <Link to="/usaco" className={styles.img}>
           <button className={`${styles.button} ${location.pathname === '/usaco' ? styles.activeTab : ''}`} onClick={onUsacoClick}>
             <img src='/usaco.png' alt="Usaco Paths" className={styles.img} style={{minWidth: '50px', minHeight: '50px', background: 'transparent'}}/>

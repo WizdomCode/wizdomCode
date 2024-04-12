@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styles from '../../styles/ProblemDescription.module.css';
 
 const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
   const dispatch = useDispatch();
+  const [isHovered, setIsHovered] = useState(false);
   
   let text;
   switch (tab.type) {
@@ -50,7 +51,9 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
       onDragEnter={dragEnter}
       onDragOver={dragOver}
       className={styles.buttonTab} 
-      style={{background: isActive ? "#1B1B32" : "#0A0A23", color: "white"}} 
+      style={{background: isActive ? "#1B1B32" : "#0A0A23", color: "white", width: `${text.length * 1.3}ch`, minWidth: '156px'}} 
+      onMouseOver={() => setIsHovered(true)}
+      onMouseOut={() => setIsHovered(false)}  
       onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
         console.log("type:", type === 'lesson');
         console.log("payload", tab);
@@ -63,6 +66,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
     }}
     >
       <p className={styles.buttonText}>{text}</p>
+      { (isHovered || isActive) &&
       <img 
         className={styles.closeIcon} 
         src='/close.png' 
@@ -73,6 +77,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
           dispatch({ type: 'REMOVE_TAB', payload: tab });
         }}            
       />
+      }
     </button>
   );
 };
