@@ -18,30 +18,38 @@ const SignUp = () => {
 
   const signUp = async (e) => {
     e.preventDefault();
-
+  
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log("User UID:", user.uid);
-
+  
       // Set user information with the same ID as the user's authentication UID
       const userDocRef = doc(db, "Users", user.uid);
-
-      await setDoc(userDocRef, {
+  
+      // Create an empty array called "solved" for each new user
+      const userData = {
         firstName: firstName,
         lastName: lastName,
         country: country,
         city: city,
         age: parseInt(age, 10),
-        points: 0
-      });
-
+        points: 0,
+        solved: [] // Empty array for solved problems
+      };
+  
+      await setDoc(userDocRef, userData);
+  
       console.log("User information added to Firestore successfully!");
-      navigate("/login");
+      
+      // Redirect to the home page after successful sign-up
+      navigate("/"); // Replace "/" with the path of your home page
+  
     } catch (error) {
       console.error("Error signing up:", error);
     }
   };
+  
 
   return (
     <>
