@@ -40,6 +40,7 @@ const Navigation = () => {
             <Nav.Link className={styles.navLink} href="/">Home</Nav.Link>
             <Authentication/>
             <Nav.Link className={styles.navLink} href="/aboutus">AboutUs</Nav.Link>
+            <Nav.Link className={styles.navLink} href="/leaderboard">Leaderboard</Nav.Link>
             <Nav.Link className={styles.navLink} href="/learningpath">LearningPath</Nav.Link>
             <Nav.Link className={styles.navLink} href="/problems">Problems</Nav.Link>
             <Nav.Link className={styles.navLink} href="/addproblem">AddProblems</Nav.Link>

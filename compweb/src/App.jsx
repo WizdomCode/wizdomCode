@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import AboutUs from "./pages/AboutUs";
+import Leaderboard from "./pages/Leaderboard";
 import SignUp from "./pages/SignUp";
 import LearningPath from "./pages/LearningPath";
 import ComputerContest from "./pages/ComputerContests/ComputerContest";
@@ -54,6 +55,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/aboutus" element={<AboutUs />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/learningpath" element={<LearningPath />} />
       <Route path="/computercontest" element={<ComputerContest />} />
       <Route path="/usaco" element={<USACO />} />
