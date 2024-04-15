@@ -149,7 +149,38 @@ const IDE = (props) => {
   const [results, setResults] = useState([]);
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState("cpp");
+  const [userData, setUserData] = useState(null);
+  const [userId, setUserId] = useState(null);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Get the current user
+        const currentUser = auth.currentUser;
+
+        if (currentUser) { // Check if currentUser is not null
+          setUserId(currentUser.uid); // Set the user ID
+
+          // Get the document reference for the current user from Firestore
+          const userDocRef = doc(db, "Users", currentUser.uid);
+
+          // Fetch user data from Firestore
+          const userSnapshot = await getDoc(userDocRef);
+          if (userSnapshot.exists()) {
+            // Extract required user information from the snapshot
+            const userData = userSnapshot.data();
+            setUserData(userData); // Set the user data in the state
+          } else {
+            console.log("No such document!");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
   console.log("Current page:", props.currentPage);
 
   const handleFocus = (name) => {
@@ -1049,7 +1080,8 @@ int main() {
                             <th>Points</th>
                             <th>Topics</th>
                             <th>Contest</th>
-                            <th>Actions</th>
+                            <th>Solved</th>
+                            <th>Problems</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1059,6 +1091,7 @@ int main() {
                               <td>{q.points}</td>
                               <td>{q.topics.join(", ")}</td>
                               <td>{q.contest}</td>
+                                <td>{userData.solved.includes(q.id) ? "yes" : "no"}</td>
                               <td>
                                 <button
                                   type="button"
