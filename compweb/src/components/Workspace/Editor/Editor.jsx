@@ -166,6 +166,7 @@ const CodeEditor = (props) => {
   
     fetchUserData();
   }, []); // Empty dependency array ensures the effect runs only once when the component mounts
+  
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
@@ -304,7 +305,56 @@ const CodeEditor = (props) => {
   const currentTab = useSelector(state => state.currentTab);
   const lessonProblemData = useSelector(state => state.lessonProblemData);
   const tabIndex = useSelector(state => state.lessonTabIndex);
-
+  useEffect(() => {
+    const fetchCode = async () => {
+      let questionName = "";
+  
+      // Determine the question name based on the location and Redux state
+      if (location.pathname === '/problems' && currentTab && currentTab.data) {
+        questionName = currentTab.data.title;
+      } else if (lessonProblemData && lessonProblemData[tabIndex]) {
+        questionName = lessonProblemData[tabIndex].data.title;
+      }
+  
+      // Check if the user is authenticated
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.log("User is not authenticated");
+        return;
+      }
+  
+      // Check if the question name exists
+      if (questionName) {
+        try {
+          // Get the document reference for the current user from Firestore
+          const userDocRef = doc(db, "Users", currentUser.uid);
+  
+          // Fetch user data from Firestore
+          const userSnapshot = await getDoc(userDocRef);
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            const savedCode = userData.questionsIDE?.[questionName]; // Get saved code if it exists
+  
+            if (savedCode) {
+              setCode(savedCode); // Set the code to the saved code
+              console.log("Code loaded for question:", questionName);
+            } else {
+              setCode(props.boilerPlate); // Use default boilerplate code
+              console.log("No saved code found for question. Using default boilerplate.");
+            }
+          } else {
+            console.log("No such document!");
+          }
+        } catch (error) {
+          console.error("Error fetching code:", error);
+        }
+      }
+    };
+  
+    fetchCode();
+  }, [currentTab, lessonProblemData, tabIndex, props.boilerPlate]);
+  
+  
   const saveCode = async () => {
     let questionName = "";
   
@@ -340,9 +390,9 @@ const CodeEditor = (props) => {
         if (userSnapshot.exists()) {
           // Update the questionsIDE map with the word "amongus" inside the key corresponding to the question name
           await updateDoc(userDocRef, {
-            [`questionsIDE.${questionName}`]: "amongus"
+            [`questionsIDE.${questionName}`]: code
           });
-          console.log("Word 'amongus' saved for question:", questionName);
+          console.log("Word", code, "saved for question:", questionName);
         } else {
           console.log("No such document!");
         }
