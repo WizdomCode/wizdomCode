@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Navigation from "../components/Navigation/Navigation";
 import { db } from "../firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import Sidebar from "../components/Navigation/Sidebar";
+import styles from './Leaderboard.module.css';
 
 const Leaderboard = () => {
     const [users, setUsers] = useState([]);
@@ -52,9 +54,8 @@ const Leaderboard = () => {
     };
 
     return (
-        <>
-            <Navigation />
-            <h1>Leaderboard</h1>
+        <div className={styles.leaderboardWrapper}>
+            <h1 className={styles.leaderboardHeader}>Leaderboard</h1>
             <table>
                 <thead>
                     <tr>
@@ -77,7 +78,7 @@ const Leaderboard = () => {
                     ))}
                 </tbody>
             </table>
-        </>
+        </div>
     );
 };
 

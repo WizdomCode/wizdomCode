@@ -66,7 +66,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
     }}
     >
       <p className={styles.buttonText}>{text}</p>
-      { (isHovered || isActive) &&
+      { (isHovered || isActive) && type !== 'lesson' &&
       <img 
         className={styles.closeIcon} 
         src='/close.png' 

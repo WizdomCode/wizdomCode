@@ -44,8 +44,7 @@
     display: flex;
     justify-content: center; /* horizontally center */
     align-items: center; /* vertically center */
-    position: relative; /* add this */
-    background: url('../public/val-3734b\ 1.png') no-repeat center center; 
+    position: relative; /* add this */ 
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -293,4 +292,8 @@ td {
   font-family: "Poppins", sans-serif;
   font-weight: 900;
   font-style: italic;
+}
+
+h3 {
+  color: white;
 }

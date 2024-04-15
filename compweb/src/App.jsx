@@ -46,6 +46,7 @@ import UserProfile from "./pages/UserProfile";
 import Problems from "./pages/Problems";
 import AddProblem from "./pages/AddProblem";
 import CCC from "./pages/ComputerContests/CCC/CCC";
+import LeaderboardPage from "./pages/LeaderboardPage";
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -55,7 +56,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/aboutus" element={<AboutUs />} />
-      <Route path="/leaderboard" element={<Leaderboard />} />
+      <Route path="/leaderboard" element={<LeaderboardPage />} />
       <Route path="/learningpath" element={<LearningPath />} />
       <Route path="/computercontest" element={<ComputerContest />} />
       <Route path="/usaco" element={<USACO />} />

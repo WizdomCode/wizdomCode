@@ -1,0 +1,12 @@
+.leaderboardWrapper {
+    margin-right: 2%;
+    color: white;
+    margin-top: 5%;
+}
+
+.leaderboardHeader {
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2%;
+    margin-left: 1%;
+}

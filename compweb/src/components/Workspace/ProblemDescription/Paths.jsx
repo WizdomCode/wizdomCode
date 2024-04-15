@@ -13,6 +13,8 @@ import 'katex/dist/katex.min.css';
 import axios from "axios";
 import Tab from "./Tab.jsx";
 import { initializeAnalytics } from "firebase/analytics";
+import { JUINOR_UNIT_TITLES, JUINOR_UNIT_DESCRIPTIONS, JUNIOR_UNIT_LESSONS } from '../lessons.js';
+import { SENIOR_UNIT_DESCRIPTIONS, SENIOR_UNIT_LESSONS, SENIOR_UNIT_TITLES } from "../lessons.js";
 
 const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
 
@@ -27,7 +29,7 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
             >
                 <h4 className='lesson-category'>{ props.category }</h4>
                 <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
-                <h3 className={ props.lessonName.length > 20 ? 'long-lesson-name' : 'lesson-name'}>{ props.lessonName }</h3>
+                <h3 className={ props.lessonName.length > 15 ? 'long-lesson-name' : 'lesson-name'}>{ props.lessonName }</h3>
                 <div>
                     <button className="bottom-rectangle" onClick={onButtonClick}>View problems</button>
                 </div>
@@ -137,7 +139,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     
     return (
         <div className="universal">
-            <div className="hero">
+            <div className="hero" style={{background: false ? "url('/val.png') no-repeat center center" : ""}}>
                 <div className="wrapper">
                     <div className="unit-header">
                         <div className="unit-header-left">
@@ -145,7 +147,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                             <br />
                             <p>{unitDescription}</p>
                         </div>
-                        <div className="unit-header-right"><button className="start-button">Start</button></div>
+                        {true && <div className="unit-header-right"><button className="start-button">Start</button></div>}
                     </div>
                 </div>
             </div>
@@ -372,48 +374,6 @@ const Paths = (props) => {
     console.log("State after dispatch:", state); // Log the state after dispatch
     }, [state]); // Add state as a dependency to useEffect
 
-    const lessons = [
-        { category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png" },
-        { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png" },
-        { category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png" },
-        { category: "1 Problem", lessonName: "Arrays", imgPath: "/open.png" },
-        { category: "4 Problems", lessonName: "Basic String Manipulation", imgPath: "/open.png" },
-        { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png" },
-        { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/open.png" },
-    ];
-
-    const unitTitle = "J1 & J2 & J3: Basic Programming";
-    const JUINOR_UNIT_TITLES = ["J1, J2, J3: Basic Programming", "J4: Problem Solving", "J5: Advanced Topics"];
-    const JUINOR_UNIT_DESCRIPTIONS = ["", "", ""];
-    const JUNIOR_UNIT_LESSONS = [
-        [
-            { category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] },
-            { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] },
-            { category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] },
-            { category: "1 Problem", lessonName: "Arrays", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] },
-            { category: "4 Problems", lessonName: "Basic String Manipulation", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] },
-            { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] },
-            { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] },
-        ],
-        [
-            { category: "5 Problems", lessonName: "TEst", imgPath: "/open.png", problemIds: [] },
-            { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: [] },
-            { category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: [] },
-            { category: "1 Problem", lessonName: "Arrays", imgPath: "/open.png", problemIds: [] },
-            { category: "4 Problems", lessonName: "Basic String Manipulation", imgPath: "/open.png", problemIds: [] },
-            { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: [] },
-            { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/open.png", problemIds: [] },
-        ], 
-        [
-            { category: "4 Problems", lessonName: "BFS", imgPath: "/open.png", problemIds: [] },
-            { category: "5 Problems", lessonName: "DFS", imgPath: "/open.png", problemIds: [] },
-            { category: "4 Problems", lessonName: "Recursion", imgPath: "/open.png", problemIds: [] },
-            { category: "2 Problems", lessonName: "Dynamic Programming 1", imgPath: "/open.png", problemIds: [] }
-        ]
-    ];
-
-    const unitDescription = "lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs. lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs. lorem impsum adsfjkdsalfjslajf  jfdskaladsjf  fdsjd jf  afl adfs  adfs.";
-
     const submitCode = async () => {
         console.log("sent data:", JSON.stringify({
           language: code.language,
@@ -573,9 +533,9 @@ const Paths = (props) => {
                         </>
                     ) : defaultTabs[tabIndex].data === 'Senior' ? (
                         <>
-                            {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
+                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={JUNIOR_UNIT_LESSONS[index]} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index] } division='Junior'/>
+                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -584,42 +544,42 @@ const Paths = (props) => {
                     
                     ) : defaultTabs[tabIndex].data === 'Bronze' ? (
                         <>
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
+                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                                <React.Fragment key={index}>
+                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <br />
+                                </React.Fragment>
+                            ))}
                             <Link to = "/computercontest">USACO bronze</Link> 
                         </>
                     ) : defaultTabs[tabIndex].data === 'Silver' ? (
                         <>
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
+                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                                <React.Fragment key={index}>
+                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <br />
+                                </React.Fragment>
+                            ))}
                             <Link to = "/computercontest">USACO silver</Link> 
                         </>
                     ) : defaultTabs[tabIndex].data === 'Gold' ? (
                         <>
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
-                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                            <br />
+                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                                <React.Fragment key={index}>
+                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <br />
+                                </React.Fragment>
+                            ))}
                             <Link to = "/computercontest">USACO gold</Link> 
                         </>
                     ) : (
                     <>
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
+                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                                <React.Fragment key={index}>
+                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <br />
+                                </React.Fragment>
+                            ))}
                         <Link to = "/computercontest">USACO plat</Link> 
                     </>
                     )

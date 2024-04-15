@@ -13,9 +13,8 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  align-items: left; /* Align items to the left */
+  align-items: center; /* Align items to the left */
   justify-content: flex-start; /* Align items to the top */
-  flex: 0.15;
   background: var(--light-bg);
   color: #fff;
   padding: 2rem;
@@ -24,6 +23,7 @@
   top: 0;
   height: 100vh;
   overflow: hidden;
+  width: 85px;
 }
 
 .problemStatement {
@@ -61,6 +61,7 @@
   text-align: left;
   margin-left: -10%;
   flex-direction: column;
+  position: relative;
 }
 
 .label {

@@ -19,6 +19,68 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import InboxIcon from '@mui/icons-material/MoveToInbox';
+import MailIcon from '@mui/icons-material/Mail';
+import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
+import MuiAccordion from '@mui/material/Accordion';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { TEMPLATES } from '../templates.js';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+
+const Accordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  '&:not(:last-child)': {
+    borderBottom: 0,
+  },
+  '&::before': {
+    display: 'none',
+  },
+}));
+
+const AccordionSummary = styled((props) => (
+  <MuiAccordionSummary
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
+    {...props}
+  />
+))(({ theme }) => ({
+  backgroundColor:
+    theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, .05)'
+      : 'rgba(0, 0, 0, .03)',
+  flexDirection: 'row-reverse',
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+    transform: 'rotate(90deg)',
+  },
+  '& .MuiAccordionSummary-content': {
+    marginLeft: theme.spacing(1),
+  },
+}));
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderTop: '1px solid rgba(0, 0, 0, .125)',
+}));
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -62,6 +124,27 @@ const StyledMenu = styled((props) => (
 }));
 
 const CodeEditor = (props) => {
+  const [state, setState] = React.useState({
+    top: false,
+    left: false,
+    bottom: false,
+    right: false,
+  });
+
+  const toggleDrawer = (anchor, open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+
+    setState({ ...state, [anchor]: open });
+  };
+
+  const [expanded, setExpanded] = React.useState('');
+
+  const handleChange = (panel) => (event, newExpanded) => {
+    setExpanded(newExpanded ? panel : false);
+  };
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -91,48 +174,27 @@ const CodeEditor = (props) => {
 
   const editorRef = useRef(null);
 
-  const [actions, setActions] = useState([]);
-
-  const TEMPLATES = {
-    'Insert DFS template': {
-      cpp:
-`void dfs(int node) {
-    visited[node] = true;
-    for (int i : adj[node]) {
-        if (!visited[i]) {
-            dfs(i);
-        }
-    }
-}`,
-      python:
-`python dfs template`,
-      java:
-`java dfs template`
-    },
-    'Insert BFS template': {
-      cpp:
-`void bfs(int node) {
-    queue<int> q;
-    visited[node] = true;
-    q.push(node);
-    while (!q.empty()) {
-        int v = q.front();
-        q.pop();
-        for (int i : adj[v]) {
-            if (!visited[i]) {
-                q.push(i);
-                visited[i] = true;
-            }
-        }
-    }
-}`,
-      python:
-`python bfs`,
-      java:
-`java bfs`
-    }
-  };  
+  const [actions, setActions] = useState([]); 
   
+  const list = (anchor) => (
+    <Box
+      sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
+      role="presentation"
+      onClick={toggleDrawer(anchor, false)}
+      onKeyDown={toggleDrawer(anchor, false)}
+    >
+      <List>
+        {Object.keys(TEMPLATES).map((templateKey) => (
+          <ListItem key={templateKey} disablePadding>
+            <ListItemButton>
+              <ListItemText primary={templateKey} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
   useEffect(() => {
       if (editorRef.current) {
           Object.entries(TEMPLATES).forEach(([label, templates], index) => {
@@ -209,58 +271,95 @@ const CodeEditor = (props) => {
         <div className={styles.buttonRow}>
           <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
             <p className={styles.buttonText}>Python</p>
-            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>
+            {false && <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>}
           </button>
           <button className={styles.button} style={{background: language === "java" ? BGDARK : UNSELECTED, color: language === "java" ? "white" : "white"}} onClick={() => { setLanguage("java")}}>
             <p className={styles.buttonText}>Java</p>
-            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+            {false && <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>}  
           </button>
           <button className={styles.button} style={{background: language === "cpp" ? BGDARK : UNSELECTED, color: language === "cpp" ? "white" : "white"}} onClick={() => { setLanguage("cpp")}}>
             <p className={styles.buttonText}>C++</p>
-            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+            {false && <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>}  
           </button>
-          <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
+          {false && <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>}
           <div className={styles.rightAlign}>
-            <div>
-              <IconButton
-                id="demo-customized-button"
-                aria-controls={open ? 'demo-customized-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                variant="contained"
-                disableElevation
-                onClick={handleClick}
-              >
-                <MoreVertIcon style={{ color: 'white' }}/>
-              </IconButton>
-              <StyledMenu
-                id="demo-customized-menu"
-                MenuListProps={{
-                  'aria-labelledby': 'demo-customized-button',
-                }}
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose} disableRipple>
-                  <EditIcon />
-                  Minimize
-                </MenuItem>
-                <MenuItem onClick={handleClose} disableRipple>
-                  <FileCopyIcon />
-                  Duplicate
-                </MenuItem>
-                <Divider sx={{ my: 0.5 }} />
-                <MenuItem onClick={handleClose} disableRipple>
-                  <ArchiveIcon />
-                  Archive
-                </MenuItem>
-                <MenuItem onClick={handleClose} disableRipple>
-                  <MoreHorizIcon />
-                  More
-                </MenuItem>
-              </StyledMenu>
-            </div>
+            <ThemeProvider theme={darkTheme}>
+              <div>
+                {['right'].map((anchor) => (
+                  <React.Fragment key={anchor}>
+                    <Button onClick={toggleDrawer(anchor, true)}>TEMPLATES</Button>
+                    <Drawer
+                      anchor={anchor}
+                      open={state[anchor]}
+                      onClose={toggleDrawer(anchor, false)}
+                    >
+                      {Object.entries(TEMPLATES).map(([templateName, languages], index) => (
+                        <Accordion expanded={expanded === `${index}`} onChange={handleChange(`${index}`)} key={`${index}`}>
+                          <AccordionSummary aria-controls={`${index}-content`} id={`${index}-header`}>
+                            <Typography>{`Insert ${templateName}`}</Typography>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                          {Object.entries(languages).map(([language, code]) => (
+                            <div key={language}>
+                              <Typography variant="h6">{language.toUpperCase()}</Typography>
+                              <div style={{position: 'relative'}}>
+                                <SyntaxHighlighter language={language.toLowerCase()} style={solarizedlight}>
+                                  {code}
+                                </SyntaxHighlighter>
+                                <CopyToClipboard text={code}>
+                                  <button style={{position: 'absolute', top: 2, right: 2}}><ContentCopyIcon /></button>
+                                </CopyToClipboard>
+                                </div>
+                            </div>
+                          ))}
+                          </AccordionDetails>
+                        </Accordion>
+                      ))}
+                    </Drawer>
+                  </React.Fragment>
+                ))}
+              </div>
+              <div>
+                <IconButton
+                  id="demo-customized-button"
+                  aria-controls={open ? 'demo-customized-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? 'true' : undefined}
+                  variant="contained"
+                  disableElevation
+                  onClick={handleClick}
+                >
+                  <MoreVertIcon style={{ color: 'white' }}/>
+                </IconButton>
+                <StyledMenu
+                  id="demo-customized-menu"
+                  MenuListProps={{
+                    'aria-labelledby': 'demo-customized-button',
+                  }}
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={handleClose} disableRipple>
+                    <EditIcon />
+                    Minimize
+                  </MenuItem>
+                  <MenuItem onClick={handleClose} disableRipple>
+                    <FileCopyIcon />
+                    Duplicate
+                  </MenuItem>
+                  <Divider sx={{ my: 0.5 }} />
+                  <MenuItem onClick={handleClose} disableRipple>
+                    <ArchiveIcon />
+                    Archive
+                  </MenuItem>
+                  <MenuItem onClick={handleClose} disableRipple>
+                    <MoreHorizIcon />
+                    More
+                  </MenuItem>
+                </StyledMenu>
+              </div>
+            </ThemeProvider>
           </div>
         </div>
         <br />

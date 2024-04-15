@@ -38,6 +38,7 @@ import TextField from '@mui/material/TextField';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Input from '@mui/material/Input';
 import SearchIcon from '@mui/icons-material/Search';
+import Leaderboard from '../../../pages/Leaderboard.jsx';
 
 const ariaLabel = { 'aria-label': 'description' };
 
@@ -310,11 +311,17 @@ const IDE = (props) => {
 
     filtered = filtered.filter((q) => q.points >= value[0] && q.points <= value[1]);
 
+    console.log("search", search);
+
     if (search) {
-      filtered = filtered.filter((q) =>
-        q.title.toLowerCase().includes(search.toLowerCase())
-      );
-    }
+      filtered = filtered.filter((q) => {
+        if (q.title) {
+          console.log("q", q);
+          return q.title.toLowerCase().includes(search.toLowerCase());
+        }
+        return false; // return false if there's no title, so it doesn't get included in the filtered array
+      });
+    }    
 
     if (topics.length > 0) {
       filtered = filtered.filter((q) =>
@@ -822,6 +829,10 @@ int main() {
             <>
               <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
             </>
+          ) : props.currentPage === 'leaderboard' ? (
+            <>
+              <Leaderboard />
+            </>
           ) : currentTab.type === 'problem' ? (
             <>
               <div className={styles.wrapper}>
@@ -894,7 +905,7 @@ int main() {
                 </div>
                 <br />
                 <br />
-                <button className={styles.runAll} onClick={submitCode}>Run All Tests (Ctrl + Enter)</button>
+                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
                 <br />
                 <div className={styles.testCases}>
                   {testCases.map((testCase, index) => {
@@ -941,7 +952,7 @@ int main() {
                   <div className="search-rect">
                       <Box sx={{ display: 'flex', alignItems: 'flex-end', width: '100%', m: 1 }}>
                         <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }}/>
-                        <Input fullWidth placeholder="Search problems..." inputProps={ariaLabel} sx={{ color: 'black', width: '100%' }} style={{ color: 'black' }} theme={lightTheme}/>
+                        <Input fullWidth placeholder="Search problems..." inputProps={ariaLabel} sx={{ color: 'black', width: '100%' }} style={{ color: 'black' }} theme={lightTheme} value={search} onChange={(e) => setSearch(e.target.value)}/>
                       </Box>
                   </div>
                   <div className="subsearch-row">
