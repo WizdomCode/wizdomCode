@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import '../../styles/Workspace.css';
 import "../../styles/Paths.css";
 import { useDispatch, useSelector } from 'react-redux';
-import { collection, getDocs, addDoc, getDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { auth, app, db } from "../../../firebase.js";
 import styles from '../../styles/ProblemDescription.module.css';
 import ReactMarkdown from 'react-markdown';
@@ -449,19 +449,52 @@ const Paths = (props) => {
       };
 
       useEffect(() => {
-        console.log("Result data:", results);
+        // Define a function to update the user's document
+        const updateUserSolvedQuestions = async (userUid, questionName, points) => {
+            try {
+                // Get a reference to the user's document
+                const userDocRef = doc(db, "Users", userUid);
+                
+                // Check if the question is already solved by the user
+                const userDocSnapshot = await getDoc(userDocRef);
+                const solvedQuestions = userDocSnapshot.data().solved || [];
+    
+                if (!solvedQuestions.includes(questionName)) {
+                    // Update the user's document to add the solved question and increment points
+                    await updateDoc(userDocRef, {
+                        solved: arrayUnion(questionName), // Add the question name to the solved array
+                        points: points + (userDocSnapshot.data().points || 0) // Increment points
+                    });
+                    console.log(`Question "${questionName}" solved! Points updated.`);
+                } else {
+                    console.log(`Question "${questionName}" already solved.`);
+                }
+            } catch (error) {
+                console.error("Error updating user document:", error);
+            }
+        };
+    
         // Example parsing
         const problemPassed = () => {
-          for (let test of results) {
-            if (test.status.description !== 'Accepted') {
-              return false;
+            for (let test of results) {
+                if (test.status.description !== 'Accepted') {
+                    return false;
+                }
             }
-          }
-          return true;  
-        }
+            return true;
+        };
     
         console.log("Problem passed:", problemPassed());
-      }, [results])    
+    
+        // If the problem is solved, update the user's document
+        if (problemPassed()) {
+            const questionName = lessonProblemData[tabIndex].data.title; // Assuming the question name is stored here
+            const pointsEarned = lessonProblemData[tabIndex].data.points; // Assuming the points earned for solving the question are stored here
+            const userUid = auth.currentUser.uid; // Get the current user's UID
+    
+            updateUserSolvedQuestions(userUid, questionName, pointsEarned);
+        }
+    }, [results, lessonProblemData, tabIndex, db, auth]);
 
       function findProblem(data, currentProblemId, direction) {
         for (let unit of data) {
