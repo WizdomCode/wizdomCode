@@ -39,7 +39,6 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import Input from '@mui/material/Input';
 import SearchIcon from '@mui/icons-material/Search';
 import Leaderboard from '../../../pages/Leaderboard.jsx';
-import UserProfile from '../../../pages/UserProfile.jsx';
 
 const ariaLabel = { 'aria-label': 'description' };
 
@@ -869,10 +868,6 @@ int main() {
             <>
               <div>home</div>
             </>
-          ) : props.currentPage === 'profile' ? (
-            <>
-              <UserProfile />
-            </>
           ) : currentTab.type === 'problem' ? (
             <>
               <div className={styles.wrapper}>
@@ -1100,7 +1095,7 @@ int main() {
                               <td>{q.points}</td>
                               <td>{q.topics.join(", ")}</td>
                               <td>{q.contest}</td>
-                                { userData && userData.solved ? <td>{userData.solved.includes(q.id) ? "yes" : "no"}</td> : <td>no</td> }
+                                <td>{userData.solved.includes(q.id) ? "yes" : "no"}</td>
                               <td>
                                 <button
                                   type="button"

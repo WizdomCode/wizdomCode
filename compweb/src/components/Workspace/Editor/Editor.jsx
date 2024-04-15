@@ -7,6 +7,8 @@ import axios from 'axios';
 import * as monaco from 'monaco-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { auth, app, db } from "../../../firebase.js";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { styled, alpha } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -47,6 +49,7 @@ const darkTheme = createTheme({
     mode: 'dark',
   },
 });
+
 
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -132,7 +135,37 @@ const CodeEditor = (props) => {
     bottom: false,
     right: false,
   });
-
+  const [userData, setUserData] = useState(null);
+  const [userId, setUserId] = useState(null);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Get the current user
+        const currentUser = auth.currentUser;
+  
+        if (currentUser) { // Check if currentUser is not null
+          setUserId(currentUser.uid); // Set the user ID
+  
+          // Get the document reference for the current user from Firestore
+          const userDocRef = doc(db, "Users", currentUser.uid);
+  
+          // Fetch user data from Firestore
+          const userSnapshot = await getDoc(userDocRef);
+          if (userSnapshot.exists()) {
+            // Extract required user information from the snapshot
+            const userData = userSnapshot.data();
+            setUserData(userData); // Set the user data in the state
+          } else {
+            console.log("No such document!");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+  
+    fetchUserData();
+  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
@@ -272,23 +305,53 @@ const CodeEditor = (props) => {
   const lessonProblemData = useSelector(state => state.lessonProblemData);
   const tabIndex = useSelector(state => state.lessonTabIndex);
 
-  const saveCode = () => {
+  const saveCode = async () => {
+    let questionName = "";
+  
+    // Determine the question name based on the location and Redux state
     if (location.pathname === '/problems' && currentTab && currentTab.data) {
       console.log("a");
       console.log("This is the question name:", currentTab.data.title);
-    }
-    else if (lessonProblemData && lessonProblemData[tabIndex]) {
+      questionName = currentTab.data.title;
+    } else if (lessonProblemData && lessonProblemData[tabIndex]) {
       console.log("b");
       console.log("This is the question name:", lessonProblemData[tabIndex].data.title);
+      questionName = lessonProblemData[tabIndex].data.title;
+    } else {
+      console.log("No active question");
+      return; // Exit the function if there's no active question
     }
-    else {
-      console.log("No active question", );
-      console.log("location", location);
-      console.log("currentTab", currentTab);
-      console.log("lessonProblemData", lessonProblemData);
-      console.log("tabIndex", tabIndex);
+  
+    // Check if the user is authenticated
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.log("User is not authenticated");
+      return;
+    }
+  
+    // Check if the question name exists
+    if (questionName) {
+      try {
+        // Get the document reference for the current user from Firestore
+        const userDocRef = doc(db, "Users", currentUser.uid);
+  
+        // Fetch user data from Firestore
+        const userSnapshot = await getDoc(userDocRef);
+        if (userSnapshot.exists()) {
+          // Update the questionsIDE map with the word "amongus" inside the key corresponding to the question name
+          await updateDoc(userDocRef, {
+            [`questionsIDE.${questionName}`]: "amongus"
+          });
+          console.log("Word 'amongus' saved for question:", questionName);
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error saving code:", error);
+      }
     }
   }
+  
 
   return (
     <>
