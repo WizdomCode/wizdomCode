@@ -47,6 +47,7 @@ import Problems from "./pages/Problems";
 import AddProblem from "./pages/AddProblem";
 import CCC from "./pages/ComputerContests/CCC/CCC";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import UserProfilePage from "./pages/UserProfilePage";
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -105,7 +106,7 @@ function App() {
       <Route path="/computationalgeometry" element={<ComputationalGeometry />} />
       <Route path="/matrixexponentiation" element={<MatrixExponentiation />} />
 
-      <Route path="/userprofile" element={<UserProfile />} />
+      <Route path="/userprofile" element={<UserProfilePage />} />
       <Route path="/problems" element={<Problems />} />
       <Route path="/addproblem" element={<AddProblem />} />
     </Routes>

@@ -40,6 +40,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { TEMPLATES } from '../templates.js';
 import SaveIcon from '@mui/icons-material/Save';
+import { useLocation } from "react-router-dom";
 
 const darkTheme = createTheme({
   palette: {
@@ -266,6 +267,29 @@ const CodeEditor = (props) => {
   const BGDARK = "#1B1B32";
   const UNSELECTED = "#0A0A23";
 
+  const location = useLocation();
+  const currentTab = useSelector(state => state.currentTab);
+  const lessonProblemData = useSelector(state => state.lessonProblemData);
+  const tabIndex = useSelector(state => state.lessonTabIndex);
+
+  const saveCode = () => {
+    if (location.pathname === '/problems' && currentTab && currentTab.data) {
+      console.log("a");
+      console.log("This is the question name:", currentTab.data.title);
+    }
+    else if (lessonProblemData && lessonProblemData[tabIndex]) {
+      console.log("b");
+      console.log("This is the question name:", lessonProblemData[tabIndex].data.title);
+    }
+    else {
+      console.log("No active question", );
+      console.log("location", location);
+      console.log("currentTab", currentTab);
+      console.log("lessonProblemData", lessonProblemData);
+      console.log("tabIndex", tabIndex);
+    }
+  }
+
   return (
     <>
       <div className={styles.scrollableContent}>
@@ -325,7 +349,7 @@ const CodeEditor = (props) => {
                   className={styles.buttonIcon}
                   onClick={() => {
                 }}>
-                  <SaveIcon style={{color: 'white'}}/>
+                  <SaveIcon style={{color: 'white'}} onClick={() => { saveCode() }}/>
                 </IconButton>
               </div>
               <div>

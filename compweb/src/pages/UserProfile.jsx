@@ -47,7 +47,6 @@ const UserProfile = () => {
 
   return (
     <>
-      <Navigation />
       <h1>User Profile</h1>
       {userData && (
         <div>
