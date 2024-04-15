@@ -30,7 +30,8 @@ const initialState = {
   lessonTabIndex: 0,
   inputOutputTab: 'input',
   inputData: '',
-  outputData: ''
+  outputData: '',
+  authenticatedUser: null
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -167,6 +168,11 @@ function reducer(state = initialState, action) {
         ...state,
         tabs: afterMove,
       };  
+    case 'SET_USER_DATA':
+      return {
+        ...state,
+        authenticatedUser: action.payload,  // Update tabIndex with the new value
+      };
     default:
       return state;
   }

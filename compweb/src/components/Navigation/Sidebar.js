@@ -54,7 +54,9 @@ const Sidebar = ({ onUsacoClick, onCccClick }) => {
         </Link>
         <Link to="/leaderboard" className={styles.img}>
           <button className={`${styles.button} ${location.pathname === '/leaderboard' ? styles.activeTab : ''}`}>
-            <img src='/leaderboard.png' alt="Leaderboard" className={styles.img} style={{width: '50px', height: '50px', background: 'transparent'}}/>
+            <BootstrapTooltip title="Leaderboard" placement="right">
+              <img src='/leaderboard.png' alt="Leaderboard" className={styles.img} style={{width: '50px', height: '50px', background: 'transparent'}}/>
+            </BootstrapTooltip>
           </button>
         </Link>
         <Link to="/signup" className={styles.img}>

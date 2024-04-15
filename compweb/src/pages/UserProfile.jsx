@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import Navigation from "../components/Navigation/Navigation";
 import { doc, getDoc } from "firebase/firestore";
+import { useDispatch, useSelector } from 'react-redux';
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
+
+  const authenticatedUser = useSelector(state => state.authenticatedUser);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -35,12 +38,12 @@ const UserProfile = () => {
     };
 
     fetchUserData();
-  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
+  }, [auth.currentUser]); // Empty dependency array ensures the effect runs only once when the component mounts
 
-  // Log user ID whenever it changes
+  // Log user data whenever it changes
   useEffect(() => {
-    console.log("User ID:", userId);
-  }, [userId]);
+    console.log("User Data:", userData);
+  }, [userData]);
 
   return (
     <>

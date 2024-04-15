@@ -864,6 +864,10 @@ int main() {
             <>
               <Leaderboard />
             </>
+          ) : props.currentPage === 'home' ? (
+            <>
+              <div>home</div>
+            </>
           ) : currentTab.type === 'problem' ? (
             <>
               <div className={styles.wrapper}>

@@ -39,6 +39,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { TEMPLATES } from '../templates.js';
+import SaveIcon from '@mui/icons-material/Save';
 
 const darkTheme = createTheme({
   palette: {
@@ -318,6 +319,14 @@ const CodeEditor = (props) => {
                     </Drawer>
                   </React.Fragment>
                 ))}
+              </div>
+              <div>
+                <IconButton
+                  className={styles.buttonIcon}
+                  onClick={() => {
+                }}>
+                  <SaveIcon style={{color: 'white'}}/>
+                </IconButton>
               </div>
               <div>
                 <IconButton

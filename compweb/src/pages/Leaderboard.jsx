@@ -55,7 +55,7 @@ const Leaderboard = () => {
 
     return (
         <div className={styles.leaderboardWrapper}>
-            <h1 className={styles.leaderboardHeader}>Leaderboard</h1>
+            <h1 className={styles.leaderboardHeader}>Global Rankings</h1>
             <table>
                 <thead>
                     <tr>

@@ -6,9 +6,12 @@ import Navbar from 'react-bootstrap/Navbar';
 import { Link } from "react-router-dom";
 import { onAuthStateChanged, signOut} from "firebase/auth";
 import styles from '../styles/Navigation.module.css';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Authentication = () => {
   const [authenticatedUser, setauthenticatedUser] = useState("");
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const listenAuth = onAuthStateChanged(auth, (user) =>{
@@ -27,6 +30,14 @@ const Authentication = () => {
   const userSignOut = () => {
     signOut(auth)
   }
+
+  useEffect(() => {
+    console.log("authenticatedUser:", authenticatedUser);
+    dispatch({
+      type: 'SET_USER_DATA',
+      payload: authenticatedUser
+    });
+  }, [authenticatedUser]);
 
   return (
     <>
