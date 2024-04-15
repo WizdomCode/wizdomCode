@@ -496,7 +496,7 @@ const Paths = (props) => {
         console.log("lessonProblemData[tabIndex]", lessonProblemData[tabIndex]);
 
         // If the problem is solved, update the user's document
-        if (problemPassed()) {
+        if (problemPassed() && lessonProblemData[tabIndex]) {
             const questionName = lessonProblemData[tabIndex].title; // Assuming the question name is stored here
             const pointsEarned = lessonProblemData[tabIndex].points; // Assuming the points earned for solving the question are stored here
             const userUid = auth.currentUser.uid; // Get the current user's UID

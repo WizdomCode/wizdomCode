@@ -528,7 +528,7 @@ int main() {
     console.log("currentTabData", currentTab);
   
     // If the problem is solved, update the user's document
-    if (problemPassed()) {
+    if (problemPassed() && currentTab.data) {
       const questionName = currentTab.data.title; // Assuming the question name is stored in the `title` field of the tab data
       const pointsEarned = currentTab.data.points; // Assuming the points earned for solving the question are stored in the `points` field of the tab data
       const userUid = auth.currentUser.uid; // Get the current user's UID
