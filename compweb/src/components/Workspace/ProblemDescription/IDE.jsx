@@ -8,7 +8,7 @@
 import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect, useRef } from "react";
 import { auth, app, db } from "../../../firebase.js";
-import { collection, getDocs, addDoc, getDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
 import "../../../Fonts.css";
 import Select from "react-select";
 import { Link } from "react-router-dom";
@@ -396,7 +396,31 @@ int main() {
   };
 
   useEffect(() => {
-    console.log("Result data:", results);
+    // Define a function to update the user's document
+    const updateUserSolvedQuestions = async (userUid, questionName, points) => {
+      try {
+        // Get a reference to the user's document
+        const userDocRef = doc(db, "Users", userUid);
+        
+        // Check if the question is already solved by the user
+        const userDocSnapshot = await getDoc(userDocRef);
+        const solvedQuestions = userDocSnapshot.data().solved || [];
+  
+        if (!solvedQuestions.includes(questionName)) {
+          // Update the user's document to add the solved question and increment points
+          await updateDoc(userDocRef, {
+            solved: arrayUnion(questionName), // Add the question name to the solved array
+            points: points + (userDocSnapshot.data().points || 0) // Increment points
+          });
+          console.log(`Question "${questionName}" solved! Points updated.`);
+        } else {
+          console.log(`Question "${questionName}" already solved.`);
+        }
+      } catch (error) {
+        console.error("Error updating user document:", error);
+      }
+    };
+  
     // Example parsing
     const problemPassed = () => {
       for (let test of results) {
@@ -404,12 +428,21 @@ int main() {
           return false;
         }
       }
-      return true;  
-    }
-
+      return true;
+    };
+  
     console.log("Problem passed:", problemPassed());
-  }, [results])
-
+  
+    // If the problem is solved, update the user's document
+    if (problemPassed()) {
+      const currentTabData = tabs.find(tab => tab.id === currentTab); // Assuming `currentTab` is the ID of the current tab
+      const questionName = currentTabData.data.title; // Assuming the question name is stored in the `title` field of the tab data
+      const pointsEarned = currentTabData.data.points; // Assuming the points earned for solving the question are stored in the `points` field of the tab data
+      const userUid = auth.currentUser.uid; // Get the current user's UID
+  
+      updateUserSolvedQuestions(userUid, questionName, pointsEarned);
+    }
+  }, [results, tabs, currentTab, db, auth]);
   const languages = {
     "cpp": 54, // C++ (GCC 9.2.0)
     "python": 71, // Python (3.8.1)
