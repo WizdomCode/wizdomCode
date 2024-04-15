@@ -6,8 +6,71 @@ import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import * as monaco from 'monaco-editor';
 import { useDispatch, useSelector } from 'react-redux';
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { styled, alpha } from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import EditIcon from '@mui/icons-material/Edit';
+import Divider from '@mui/material/Divider';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import IconButton from '@mui/material/IconButton';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+
+const StyledMenu = styled((props) => (
+  <Menu
+    elevation={0}
+    anchorOrigin={{
+      vertical: 'bottom',
+      horizontal: 'right',
+    }}
+    transformOrigin={{
+      vertical: 'top',
+      horizontal: 'right',
+    }}
+    {...props}
+  />
+))(({ theme }) => ({
+  '& .MuiPaper-root': {
+    borderRadius: 6,
+    marginTop: theme.spacing(1),
+    minWidth: 180,
+    color: theme.palette.grey[300],
+    backgroundColor: theme.palette.grey[900],
+    boxShadow:
+      'rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
+    '& .MuiMenu-list': {
+      padding: '4px 0',
+    },
+    '& .MuiMenuItem-root': {
+      '& .MuiSvgIcon-root': {
+        fontSize: 18,
+        color: '#ffffff',
+        marginRight: theme.spacing(1.5),
+      },
+      '&:active': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          theme.palette.action.selectedOpacity,
+        ),
+      },
+    },
+  },
+}));
 
 const CodeEditor = (props) => {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const [code, setCode] = useState(props.boilerPlate);
   const [output, setOutput] = useState([]);
   const [language, setLanguage] = useState("cpp");
@@ -137,65 +200,94 @@ const CodeEditor = (props) => {
     setLocalOutputData(data[0].stdout + `\nExecution time: ${data[0].time}s`);
   };  
 
-  /* load monaco */
-
-  fetch('/themes/Monokai.json')
-  .then(data => data.json())
-  .then(data => {
-    monaco.editor.defineTheme('monokai', data);
-    monaco.editor.setTheme('monokai');
-  })
-
-  monaco.editor.defineTheme('my-custom-theme', {
-    base: 'vs-dark',
-    inherit: true,
-    rules: [
-      
-    ],
-    colors: {}
-  });
-
-  monaco.editor.setTheme('my-custom-theme');
-
   const BGDARK = "#1B1B32";
   const UNSELECTED = "#0A0A23";
 
   return (
     <>
       <div className={styles.scrollableContent}>
-        <Split
-            className="split"
-            direction="vertical"
-        >
-        <div className={styles.codeEditor}>
-          <div className={styles.buttonRow}>
-            <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
-              <p className={styles.buttonText}>Python</p>
-              <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>
-            </button>
-            <button className={styles.button} style={{background: language === "java" ? BGDARK : UNSELECTED, color: language === "java" ? "white" : "white"}} onClick={() => { setLanguage("java")}}>
-              <p className={styles.buttonText}>Java</p>
-              <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
-            </button>
-            <button className={styles.button} style={{background: language === "cpp" ? BGDARK : UNSELECTED, color: language === "cpp" ? "white" : "white"}} onClick={() => { setLanguage("cpp")}}>
-              <p className={styles.buttonText}>C++</p>
-              <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
-            </button>
-            <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
-            <div className={styles.rightAlign}>
+        <div className={styles.buttonRow}>
+          <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
+            <p className={styles.buttonText}>Python</p>
+            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>
+          </button>
+          <button className={styles.button} style={{background: language === "java" ? BGDARK : UNSELECTED, color: language === "java" ? "white" : "white"}} onClick={() => { setLanguage("java")}}>
+            <p className={styles.buttonText}>Java</p>
+            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+          </button>
+          <button className={styles.button} style={{background: language === "cpp" ? BGDARK : UNSELECTED, color: language === "cpp" ? "white" : "white"}} onClick={() => { setLanguage("cpp")}}>
+            <p className={styles.buttonText}>C++</p>
+            <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>  
+          </button>
+          <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>
+          <div className={styles.rightAlign}>
+            <div>
+              <IconButton
+                id="demo-customized-button"
+                aria-controls={open ? 'demo-customized-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                variant="contained"
+                disableElevation
+                onClick={handleClick}
+              >
+                <MoreVertIcon style={{ color: 'white' }}/>
+              </IconButton>
+              <StyledMenu
+                id="demo-customized-menu"
+                MenuListProps={{
+                  'aria-labelledby': 'demo-customized-button',
+                }}
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleClose} disableRipple>
+                  <EditIcon />
+                  Minimize
+                </MenuItem>
+                <MenuItem onClick={handleClose} disableRipple>
+                  <FileCopyIcon />
+                  Duplicate
+                </MenuItem>
+                <Divider sx={{ my: 0.5 }} />
+                <MenuItem onClick={handleClose} disableRipple>
+                  <ArchiveIcon />
+                  Archive
+                </MenuItem>
+                <MenuItem onClick={handleClose} disableRipple>
+                  <MoreHorizIcon />
+                  More
+                </MenuItem>
+              </StyledMenu>
             </div>
           </div>
-          <br />
+        </div>
+        <br />
+        <PanelGroup direction="vertical">
+        <Panel>
+        <div className={styles.codeEditor}>
           <Editor
-            className={styles.codeEditor}
-            theme="vs-dark"
-            height="60vh"
+            theme="night-owl"
+            height="100%"
             defaultLanguage="cpp"
             value={code}
             onChange={(value) => setCode(value)}
-            onMount={(editor, monaco) => { editorRef.current = editor; }}
+            onMount={(editor, monaco) => {
+              editorRef.current = editor;
+              fetch('/themes/Night Owl.json')
+                .then(data => data.json())
+                .then(data => {
+                  console.log("theme data:", data);
+                  monaco.editor.defineTheme('night-owl', data);
+                  editor.updateOptions({ theme: 'night-owl' });
+                })
+            }}
           />
         </div>
+        </Panel>
+        <PanelResizeHandle style={{ position: 'relative', cursor: 'row-resize', background: '#ccc', height: '10px', zIndex: 1 }}/>
+        <Panel>
         <div className={styles.inputOutputSection}>
           <div className={styles.tabWrapper}>
               <div className={styles.buttonRow}>
@@ -227,30 +319,25 @@ const CodeEditor = (props) => {
           </div>
           <br />
           { inputOutputTab === 'input' ? (
-            <div>
-              <Editor
-                className={styles.codeEditor}
-                theme="vs-dark"
-                defaultLanguage="cpp"
-                height="28vh"
-                value={localInputData}
-                onChange={(value) => setLocalInputData(value)}
-              />
-            </div>
+            <Editor
+              theme="vs-dark"
+              defaultLanguage="cpp"
+              height="80%"
+              value={localInputData}
+              onChange={(value) => setLocalInputData(value)}
+            />
           ) : (
-            <div>
-              <Editor
-                className={styles.codeEditor}
-                theme="vs-dark"
-                defaultLanguage="cpp"
-                height="28vh"
-                value={localOutputData}
-                onChange={(value) => setLocalOutputData(value)}
-              />
-            </div>
+            <Editor
+              theme="vs-dark"
+              defaultLanguage="cpp"
+              height="80%"
+              value={localOutputData}
+              onChange={(value) => setLocalOutputData(value)}
+            />
           )}
         </div>
-        </Split>
+        </Panel>
+        </PanelGroup>
       </div>
     </>
   );

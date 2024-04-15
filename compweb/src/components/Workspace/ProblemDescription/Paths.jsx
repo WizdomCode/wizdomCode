@@ -17,18 +17,20 @@ import { initializeAnalytics } from "firebase/analytics";
 const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
 
     return (
-        <div 
-            className={`lesson-background-rect ${ isFocused ? 'hovered' : ''}`}
-            onClick={() => {
-                onButtonClick();
-            }}
-            tabIndex="0" // Add this to make the div focusable
-        >
-            <h4 className='lesson-category'>{ props.category }</h4>
-            <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
-            <h3 className={ props.lessonName.length > 20 ? 'long-lesson-name' : 'lesson-name'}>{ props.lessonName }</h3>
-            <div>
-                <button className="bottom-rectangle" onClick={onButtonClick}>View problems</button>
+        <div className="universal">
+            <div 
+                className={`lesson-background-rect ${ isFocused ? 'hovered' : ''}`}
+                onClick={() => {
+                    onButtonClick();
+                }}
+                tabIndex="0" // Add this to make the div focusable
+            >
+                <h4 className='lesson-category'>{ props.category }</h4>
+                <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
+                <h3 className={ props.lessonName.length > 20 ? 'long-lesson-name' : 'lesson-name'}>{ props.lessonName }</h3>
+                <div>
+                    <button className="bottom-rectangle" onClick={onButtonClick}>View problems</button>
+                </div>
             </div>
         </div>
     );
@@ -134,7 +136,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     }, [lastPressed]);
     
     return (
-        <>
+        <div className="universal">
             <div className="hero">
                 <div className="wrapper">
                     <div className="unit-header">
@@ -211,7 +213,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                 </div>
               </div>
             )}
-        </>
+        </div>
     );
 };
 
@@ -499,171 +501,173 @@ const Paths = (props) => {
     };
 
     return (
-        <>
-            <div className={styles.tabWrapper}>
-                <div className={styles.buttonRow}>
-                    {defaultTabs.map((tab, index) => (
-                        <Tab
-                            key={index}
-                            index={index}
-                            tab={tab}
-                            isActive={tabIndex === index}
-                            type='lesson'
-                        />
-                    ))}
-                    <div className={styles.rightAlign}>
+        <div className="universal">
+            <div className={styles.paths}>
+                <div className={styles.tabWrapper}>
+                    <div className={styles.buttonRow}>
+                        {defaultTabs.map((tab, index) => (
+                            <Tab
+                                key={index}
+                                index={index}
+                                tab={tab}
+                                isActive={tabIndex === index}
+                                type='lesson'
+                            />
+                        ))}
+                        <div className={styles.rightAlign}>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {!lessonProblemData[tabIndex].data ? (
-                defaultTabs[tabIndex].data === 'Junior' ? (
-                    <>
-                        {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
-                            <React.Fragment key={index}>
-                                <ScrollRow lessons={JUNIOR_UNIT_LESSONS[index]} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index] } division='Junior'/>
-                                <br />
-                            </React.Fragment>
-                        ))}
-                        <Link to = "/computercontest">CCC junior</Link> 
-                    </>
-                ) : defaultTabs[tabIndex].data === 'Senior' ? (
-                    <>
-                        {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
-                            <React.Fragment key={index}>
-                                <ScrollRow lessons={JUNIOR_UNIT_LESSONS[index]} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index] } division='Junior'/>
-                                <br />
-                            </React.Fragment>
-                        ))}
-                        <Link to = "/computercontest">CCC senior</Link>
-                    </>
-                
-                ) : defaultTabs[tabIndex].data === 'Bronze' ? (
-                    <>
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <Link to = "/computercontest">USACO bronze</Link> 
-                    </>
-                ) : defaultTabs[tabIndex].data === 'Silver' ? (
-                    <>
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <Link to = "/computercontest">USACO silver</Link> 
-                    </>
-                ) : defaultTabs[tabIndex].data === 'Gold' ? (
-                    <>
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                        <br />
-                        <Link to = "/computercontest">USACO gold</Link> 
-                    </>
-                ) : (
-                <>
-                    <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                    <br />
-                    <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                    <br />
-                    <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
-                    <br />
-                    <Link to = "/computercontest">USACO plat</Link> 
-                </>
-                )
-            ) : (
-                <>
-                    { true && (
-                    <div className={styles.wrapper}>
-                        <br />
-                            <div className={styles.problemTitleRow}>
-                                <button onClick={scrollLeft} className="scroll-button left">
-                                    <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
-                                </button>
-                                <h1 className={styles.title}>{lessonProblemData[tabIndex].data.title}</h1>
-                                <button onClick={scrollRight} className="scroll-button right">
-                                    <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
-                                </button>
-                            </div>
-                        <br />
-                        <div className={styles.description}>
-                        <h3>Problem Description</h3>
-                        <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={lessonProblemData[tabIndex].data.description.replace(/\\n/g, '\n')} />
-                        <div className={styles.divider}></div>
-                        <br />
-                        <h3>Input Format</h3>
-                        <pre className={styles.descriptionText}>{lessonProblemData[tabIndex].data.inputFormat.replace(/\\n/g, '\n')}</pre>
-                        <div className={styles.divider}></div>
-                        <br />
-                        <h3>Constraints</h3>
-                        <ul>
-                            {false && lessonProblemData[tabIndex].data.constraints &&
-                            Object.entries(lessonProblemData[tabIndex].data.constraints).map(([key, value]) => (
-                                <li key={key}>
-                                <strong>{key}:</strong> {value}
-                                </li>
-                            ))}
-                        </ul>
-                        <div className={styles.divider}></div>
-                        <br />
-                        <h3>Output Format</h3>
-                        <p>{lessonProblemData[tabIndex].data.outputFormat}</p>
-                        <div className={styles.divider}></div>
-                        <br />
-                        <h3>Points</h3>
-                        <p>{lessonProblemData[tabIndex].data.points}</p>
-                        </div>
-                        <br />
-                        <br />
-                        <button className={styles.runAll} onClick={submitCode}>Run All Tests (Ctrl + Enter)</button>
-                        <br />
-                        <div className={styles.testCases}>
-                        {testCases.map((testCase, index) => {
-                            const status = results[index]?.status?.description;
-                            const className = status === 'Accepted' ? styles.testCasePassed : status === 'Wrong Answer' ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
-
-                            return (
-                            <div key={testCase.key} className={className}>
-                                <br />
-                                <h3 className={className}>
-                                Case {testCase.key}
-                                {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}>✔️</span>}
-                                {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}>❌</span>}
-                                </h3>
-                                {results[index] && (
-                                    <>
-                                        <h5 className={className}>[ {results[index].time}s ]</h5>
-                                    </>
-                                )}
-                                <br />
-                                <h4 className={className}>Input:</h4>
-                                <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
-                                <br />
-                                <h4 className={className}>Expected Output:</h4>
-                                <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
-                                {results[index] && results[index].status.description === 'Wrong Answer' && (
-                                <>
+                {!lessonProblemData[tabIndex].data ? (
+                    defaultTabs[tabIndex].data === 'Junior' ? (
+                        <>
+                            {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
+                                <React.Fragment key={index}>
+                                    <ScrollRow lessons={JUNIOR_UNIT_LESSONS[index]} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index] } division='Junior'/>
                                     <br />
-                                    <h4 className={className}>Actual Output:</h4>
-                                    <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
-                                </>
-                                )}
+                                </React.Fragment>
+                            ))}
+                            <Link to = "/computercontest">CCC junior</Link> 
+                        </>
+                    ) : defaultTabs[tabIndex].data === 'Senior' ? (
+                        <>
+                            {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
+                                <React.Fragment key={index}>
+                                    <ScrollRow lessons={JUNIOR_UNIT_LESSONS[index]} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index] } division='Junior'/>
+                                    <br />
+                                </React.Fragment>
+                            ))}
+                            <Link to = "/computercontest">CCC senior</Link>
+                        </>
+                    
+                    ) : defaultTabs[tabIndex].data === 'Bronze' ? (
+                        <>
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <Link to = "/computercontest">USACO bronze</Link> 
+                        </>
+                    ) : defaultTabs[tabIndex].data === 'Silver' ? (
+                        <>
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <Link to = "/computercontest">USACO silver</Link> 
+                        </>
+                    ) : defaultTabs[tabIndex].data === 'Gold' ? (
+                        <>
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                            <br />
+                            <Link to = "/computercontest">USACO gold</Link> 
+                        </>
+                    ) : (
+                    <>
+                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                        <br />
+                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                        <br />
+                        <ScrollRow lessons={lessons} unitTitle={unitTitle} unitDescription={unitDescription} />
+                        <br />
+                        <Link to = "/computercontest">USACO plat</Link> 
+                    </>
+                    )
+                ) : (
+                    <>
+                        { true && (
+                        <div className={styles.wrapper}>
+                            <br />
+                                <div className={styles.problemTitleRow}>
+                                    <button onClick={scrollLeft} className="scroll-button left">
+                                        <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
+                                    </button>
+                                    <h1 className={styles.title}>{lessonProblemData[tabIndex].data.title}</h1>
+                                    <button onClick={scrollRight} className="scroll-button right">
+                                        <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
+                                    </button>
+                                </div>
+                            <br />
+                            <div className={styles.description}>
+                            <h3>Problem Description</h3>
+                            <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={lessonProblemData[tabIndex].data.description.replace(/\\n/g, '\n')} />
+                            <div className={styles.divider}></div>
+                            <br />
+                            <h3>Input Format</h3>
+                            <pre className={styles.descriptionText}>{lessonProblemData[tabIndex].data.inputFormat.replace(/\\n/g, '\n')}</pre>
+                            <div className={styles.divider}></div>
+                            <br />
+                            <h3>Constraints</h3>
+                            <ul>
+                                {false && lessonProblemData[tabIndex].data.constraints &&
+                                Object.entries(lessonProblemData[tabIndex].data.constraints).map(([key, value]) => (
+                                    <li key={key}>
+                                    <strong>{key}:</strong> {value}
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className={styles.divider}></div>
+                            <br />
+                            <h3>Output Format</h3>
+                            <p>{lessonProblemData[tabIndex].data.outputFormat}</p>
+                            <div className={styles.divider}></div>
+                            <br />
+                            <h3>Points</h3>
+                            <p>{lessonProblemData[tabIndex].data.points}</p>
                             </div>
-                            );                
-                        })}
+                            <br />
+                            <br />
+                            <button className={styles.runAll} onClick={submitCode}>Run All Tests (Ctrl + Enter)</button>
+                            <br />
+                            <div className={styles.testCases}>
+                            {testCases.map((testCase, index) => {
+                                const status = results[index]?.status?.description;
+                                const className = status === 'Accepted' ? styles.testCasePassed : status === 'Wrong Answer' ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
+
+                                return (
+                                <div key={testCase.key} className={className}>
+                                    <br />
+                                    <h3 className={className}>
+                                    Case {testCase.key}
+                                    {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}>✔️</span>}
+                                    {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}>❌</span>}
+                                    </h3>
+                                    {results[index] && (
+                                        <>
+                                            <h5 className={className}>[ {results[index].time}s ]</h5>
+                                        </>
+                                    )}
+                                    <br />
+                                    <h4 className={className}>Input:</h4>
+                                    <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
+                                    <br />
+                                    <h4 className={className}>Expected Output:</h4>
+                                    <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
+                                    {results[index] && results[index].status.description === 'Wrong Answer' && (
+                                    <>
+                                        <br />
+                                        <h4 className={className}>Actual Output:</h4>
+                                        <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
+                                    </>
+                                    )}
+                                </div>
+                                );                
+                            })}
+                            </div>
                         </div>
-                    </div>
-                    )} 
-                </>
-            )}
-        </>
+                        )} 
+                    </>
+                )}
+            </div>
+        </div>
     );
 };
 

@@ -26,8 +26,91 @@ import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import remarkGfm from 'remark-gfm';
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
+import TablePagination from '@mui/material/TablePagination';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import MuiInput from '@mui/material/Input';
+import { styled } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import Input from '@mui/material/Input';
+import SearchIcon from '@mui/icons-material/Search';
+
+const ariaLabel = { 'aria-label': 'description' };
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+
+const lightTheme = createTheme({
+  palette: {
+    mode: 'light',
+  },
+});
+
+const marks = [
+  {
+    value: 1,
+    label: '1',
+  },
+  {
+    value: 10,
+    label: '10',
+  },
+  {
+    value: 20,
+    label: '20',
+  },
+  {
+    value: 50,
+    label: '50',
+  },
+];
+
+function valuetext(value) {
+  return `${value} Points`;
+}
 
 const IDE = (props) => {
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const [value, setValue] = React.useState([1, 10]);
+
+  const handleSliderChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const handleInputChangeMin = (event) => {
+    setValue([event.target.value === '' ? 0 : Number(event.target.value), value[1]]);
+  };
+
+  const handleInputChangeMax = (event) => {
+    setValue([value[0], event.target.value === '' ? 0 : Number(event.target.value)]);
+  };
+
+  const handleBlurring = () => {
+    if (value[0] < 1) {
+      setValue([1, value[1]]);
+    } else if (value[1] > 50) {
+      setValue([value[0], 50]);
+    }
+  };
+
   const dispatch = useDispatch();
   const tabs = useSelector(state => state.tabs);
   const currentTab = useSelector(state => state.currentTab);
@@ -225,9 +308,7 @@ const IDE = (props) => {
   useEffect(() => {
     let filtered = questions;
 
-    if (searchPoints) {
-      filtered = filtered.filter((q) => q.points === parseInt(searchPoints, 10));
-    }
+    filtered = filtered.filter((q) => q.points >= value[0] && q.points <= value[1]);
 
     if (search) {
       filtered = filtered.filter((q) =>
@@ -246,7 +327,13 @@ const IDE = (props) => {
     }
 
     setFilteredQuestions(filtered);
-  }, [questions, searchPoints, search, topics, contests]);
+  }, [questions, value, search, topics, contests]);
+
+  // Calculate the number of pages
+  const noOfPages = Math.ceil(filteredQuestions.length / rowsPerPage);
+
+  // Get the data for the current page
+  const currentPageData = filteredQuestions.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
 
   // Modify the useEffect hook for fetching problem data
   useEffect(() => {
@@ -718,7 +805,7 @@ int main() {
                       <br />
                     </>
                   )}
-                  {currentTab.data.constraints && (
+                  {false && currentTab.data.constraints && (
                     <>
                       <h3>Constraints</h3>
                       <ul>
@@ -744,6 +831,24 @@ int main() {
                     <>
                       <h3>Points</h3>
                       <p>{currentTab.data.points}</p>
+                    </>
+                  )}
+                  {currentTab.data.sample1 && (
+                    <>
+                      <h3>Sample Input 1</h3>
+                      <pre className={styles.codeSnippet}>{currentTab.data.sample1.input.replace(/\\n/g, '\n')}</pre>
+                      <br />
+                      <h3>Output for Sample Input 1</h3>
+                      <pre className={styles.codeSnippet}>{currentTab.data.sample1.output.replace(/\\n/g, '\n')}</pre>
+                    </>
+                  )}
+                  {currentTab.data.sample2 && (
+                    <>
+                      <h3>Sample Input 2</h3>
+                      <pre className={styles.codeSnippet}>{currentTab.data.sample2.input.replace(/\\n/g, '\n')}</pre>
+                      <br />
+                      <h3>Output for Sample Input 2</h3>
+                      <pre className={styles.codeSnippet}>{currentTab.data.sample2.output.replace(/\\n/g, '\n')}</pre>
                     </>
                   )}
                 </div>
@@ -794,51 +899,91 @@ int main() {
                 <div className={styles.description}>
                   <h2 className="title">Problems</h2>
                   <div className="search-rect">
-                    <input
-                      type="text"
-                      value={searchPoints}
-                      onChange={(e) => setSearchPoints(e.target.value)}
-                    />
+                      <Box sx={{ display: 'flex', alignItems: 'flex-end', width: '100%', m: 1 }}>
+                        <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }}/>
+                        <Input fullWidth placeholder="Search problems..." inputProps={ariaLabel} sx={{ color: 'black', width: '100%' }} style={{ color: 'black' }} theme={lightTheme}/>
+                      </Box>
                   </div>
                   <div className="subsearch-row">
                     <div className="search-container">
                       <div className="column1">
-                        <Select 
-                          placeholder="Topics..."
-                          styles={SELECT_STYLES}
-                          options={TOPICS.map(opt => ({ label: opt, value: opt }))}
-                          isMulti
-                          onChange={(selected) => setTopics(selected.map((s) => s.value))}
-                          onFocus={() => handleFocus('topics')}
-                          onBlur={() => handleBlur('topics')}
-                        />
-                        {!topics.length && !isFocused.topics && <div className="dropdown-placeholder">Topic</div>}
+                        <div style={{position: 'relative'}}>
+                          <Select 
+                            placeholder="Topics..."
+                            styles={SELECT_STYLES}
+                            options={TOPICS.map(opt => ({ label: opt, value: opt }))}
+                            isMulti
+                            onChange={(selected) => setTopics(selected.map((s) => s.value))}
+                            onFocus={() => handleFocus('topics')}
+                            onBlur={() => handleBlur('topics')}
+                          />
+                          {!topics.length && !isFocused.topics && <div className="dropdown-placeholder">Topic</div>}
+                        </div>
+                        <div style={{position: 'relative'}}>
+                          <Select 
+                            styles={SELECT_STYLES}
+                            options={CONTESTS.map(opt => ({ label: opt, value: opt }))}
+                            isMulti
+                            onChange={(selected) => setContests(selected.map((s) => s.value))}
+                            placeholder="Contests..."
+                            onFocus={() => handleFocus('contests')}
+                            onBlur={() => handleBlur('contests')}
+                          />
+                          {!contests.length && !isFocused.contests && <div className="dropdown-placeholder">Contest</div>}
+                        </div>
                       </div>
                       <div className="column2">
-                        <Select 
-                          styles={SELECT_STYLES}
-                          options={CONTESTS.map(opt => ({ label: opt, value: opt }))}
-                          isMulti
-                          onChange={(selected) => setContests(selected.map((s) => s.value))}
-                          placeholder="Contests..."
-                          onFocus={() => handleFocus('contests')}
-                          onBlur={() => handleBlur('contests')}
-                        />
-                        {!contests.length && !isFocused.contests && <div className="dropdown-placeholder">Contest</div>}
-                      </div>
-                      <div className="column3">
-                        <Select 
-                          styles={SELECT_STYLES}
-                          options={contests}
-                          onChange={(selected) => setSearchPoints(selected.value)}
-                          placeholder="Points"
-                          onFocus={() => handleFocus('points')}
-                          onBlur={() => handleBlur('points')}
-                        />
-                        {!searchPoints && !isFocused.searchPoints && <div className="dropdown-placeholder">Points</div>}
+                        <ThemeProvider theme={darkTheme}>
+                          <Box sx={{ width: 350, ml: 2 }}>
+                            <Typography id="input-slider" gutterBottom>
+                              Points Range
+                            </Typography>
+                            <Grid container spacing={2} alignItems="center">
+                              <Grid item xs>
+                                <Slider
+                                  value={value}
+                                  onChange={handleSliderChange}
+                                  aria-labelledby="input-slider"
+                                  min={1}
+                                  max={50}
+                                  marks={marks}
+                                />
+                              </Grid>
+                              <Grid item style={{ marginTop: '-25px' }}>
+                                <Input
+                                  value={value[0]}
+                                  size="small"
+                                  onChange={handleInputChangeMin}
+                                  onBlur={handleBlurring}
+                                  inputProps={{
+                                    step: 1,
+                                    min: 1,
+                                    max: 50,
+                                    type: 'number',
+                                    'aria-labelledby': 'input-slider',
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item style={{ marginTop: '-25px' }}>
+                                <Input
+                                  value={value[1]}
+                                  size="small"
+                                  onChange={handleInputChangeMax}
+                                  onBlur={handleBlurring}
+                                  inputProps={{
+                                    step: 1,
+                                    min: 1,
+                                    max: 50,
+                                    type: 'number',
+                                    'aria-labelledby': 'input-slider',
+                                  }}
+                                />
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </ThemeProvider>
                       </div>
                     </div>
-                    <div className="subsearch-text"></div>
                   </div>
                 </div>
               </div>
@@ -857,7 +1002,7 @@ int main() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredQuestions.map((q) => (
+                          {currentPageData.map((q) => (
                             <tr key={q.id}>
                               <td>{q.title}</td>
                               <td>{q.points}</td>
@@ -884,6 +1029,19 @@ int main() {
                   </div>
                 </div>
               </div>
+              <div className='pagination'>
+                <ThemeProvider theme={darkTheme}>
+                  <TablePagination
+                    component="div"
+                    count={filteredQuestions.length} // Update the total count
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </ThemeProvider>
+              </div>
+              <br />
             </div>
           ) : (
             <div className={styles.wrapper}>

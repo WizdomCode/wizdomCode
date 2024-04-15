@@ -7,13 +7,13 @@
 
 .img {
     background: transparent;
-    width: 90%;
+    width: 100%;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Align items to the left */
+  align-items: left; /* Align items to the left */
   justify-content: flex-start; /* Align items to the top */
   flex: 0.15;
   background: var(--light-bg);
@@ -23,7 +23,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .problemStatement {
@@ -59,6 +59,12 @@
   border: none;
   cursor: pointer;
   text-align: left;
+  margin-left: -10%;
+  flex-direction: column;
+}
+
+.label {
+  margin-top: 10px;
 }
 
 .button:hover,

@@ -13,8 +13,7 @@ root.render(
     <BrowserRouter>
       <Provider store={store}>
         <App />
-      </Provider>,
-      document.getElementById('root')
+      </Provider>
     </BrowserRouter>
   </React.StrictMode>
 );
