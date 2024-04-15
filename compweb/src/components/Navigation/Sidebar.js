@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import styles from '../styles/Sidebar.module.css';
 import Button from '@mui/material/Button';
@@ -25,11 +25,25 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
 const Sidebar = ({ onUsacoClick, onCccClick }) => {
   const location = useLocation();
 
-  const authenticatedUser = useSelector(state => state.authenticatedUser);
+  const [authenticatedUser, setauthenticatedUser] = useState("");
 
   useEffect(() => {
-    console.log("sidebar auth.currentUser percep:", auth.currentUser);
-  }, [auth.currentUser]);
+    const listenAuth = onAuthStateChanged(auth, (user) =>{
+      if (user){
+        setauthenticatedUser(user)
+      } else {
+        setauthenticatedUser(null)
+      }
+    }
+    )
+    return () => {
+      listenAuth();
+    }
+  },[])
+  
+  const userSignOut = () => {
+    signOut(auth)
+  }
 
   useEffect(() => {
     console.log("sidebar authenticatedUser percep:", authenticatedUser);
@@ -72,7 +86,7 @@ const Sidebar = ({ onUsacoClick, onCccClick }) => {
             </BootstrapTooltip>
           </button>
         </Link>
-        { !auth.currentUser ? (
+        { !authenticatedUser ? (
           <>
             <Link to="/signup" className={styles.img}>
               <button className={`${styles.button} ${location.pathname === '/signup' ? styles.activeTab : ''}`}>
@@ -91,17 +105,17 @@ const Sidebar = ({ onUsacoClick, onCccClick }) => {
           </>
         ) : (
           <>
-            <Link to="/" className={styles.img}>
-              <button className={`${styles.button} ${location.pathname === '/logout' ? styles.activeTab : ''}`} onClick={signOut(auth)}>
-                <BootstrapTooltip title="Logout" placement="right">
-                  <LogoutIcon style={{width: '50px', height: '50px', background: 'transparent', color: 'white'}}/>
-                </BootstrapTooltip>
-              </button>
-            </Link>
             <Link to="/userprofile" className={styles.img}>
               <button className={`${styles.button} ${location.pathname === '/userprofile' ? styles.activeTab : ''}`}>
                 <BootstrapTooltip title="Profile" placement="right">
                   <img src='/profile.png' alt="Profile" className={styles.img} style={{width: '50px', height: '50px', background: 'transparent'}}/>
+                </BootstrapTooltip>
+              </button>
+            </Link>
+            <Link to="/" className={styles.img}>
+              <button className={`${styles.button} ${location.pathname === '/logout' ? styles.activeTab : ''}`} onClick={userSignOut}>
+                <BootstrapTooltip title="Logout" placement="right">
+                  <LogoutIcon style={{width: '50px', height: '50px', background: 'transparent', color: 'white'}}/>
                 </BootstrapTooltip>
               </button>
             </Link>
