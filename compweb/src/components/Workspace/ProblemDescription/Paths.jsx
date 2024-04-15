@@ -473,23 +473,32 @@ const Paths = (props) => {
                 console.error("Error updating user document:", error);
             }
         };
+
+        console.log("dewfaluts results", results);
     
         // Example parsing
         const problemPassed = () => {
-            for (let test of results) {
-                if (test.status.description !== 'Accepted') {
-                    return false;
+            if (results && results.length !== 0) {
+                for (let test of results) {
+                    if (test.status.description !== 'Accepted') {
+                        return false;
+                    }
                 }
+                return true;
             }
-            return true;
+            else {
+                return false;
+            }
         };
     
         console.log("Problem passed:", problemPassed());
     
+        console.log("lessonProblemData[tabIndex]", lessonProblemData[tabIndex]);
+
         // If the problem is solved, update the user's document
         if (problemPassed()) {
-            const questionName = lessonProblemData[tabIndex].data.title; // Assuming the question name is stored here
-            const pointsEarned = lessonProblemData[tabIndex].data.points; // Assuming the points earned for solving the question are stored here
+            const questionName = lessonProblemData[tabIndex].title; // Assuming the question name is stored here
+            const pointsEarned = lessonProblemData[tabIndex].points; // Assuming the points earned for solving the question are stored here
             const userUid = auth.currentUser.uid; // Get the current user's UID
     
             updateUserSolvedQuestions(userUid, questionName, pointsEarned);

@@ -510,26 +510,33 @@ int main() {
   
     // Example parsing
     const problemPassed = () => {
-      for (let test of results) {
-        if (test.status.description !== 'Accepted') {
-          return false;
-        }
+      if (results && results.length !== 0) {
+          for (let test of results) {
+              if (test.status.description !== 'Accepted') {
+                  return false;
+              }
+          }
+          return true;
       }
-      return true;
+      else {
+          return false;
+      }
     };
-  
+
     console.log("Problem passed:", problemPassed());
+
+    console.log("currentTabData", currentTab);
   
     // If the problem is solved, update the user's document
     if (problemPassed()) {
-      const currentTabData = tabs.find(tab => tab.id === currentTab); // Assuming `currentTab` is the ID of the current tab
-      const questionName = currentTabData.data.title; // Assuming the question name is stored in the `title` field of the tab data
-      const pointsEarned = currentTabData.data.points; // Assuming the points earned for solving the question are stored in the `points` field of the tab data
+      const questionName = currentTab.data.title; // Assuming the question name is stored in the `title` field of the tab data
+      const pointsEarned = currentTab.data.points; // Assuming the points earned for solving the question are stored in the `points` field of the tab data
       const userUid = auth.currentUser.uid; // Get the current user's UID
   
       updateUserSolvedQuestions(userUid, questionName, pointsEarned);
     }
   }, [results, tabs, currentTab, db, auth]);
+
   const languages = {
     "cpp": 54, // C++ (GCC 9.2.0)
     "python": 71, // Python (3.8.1)
