@@ -15,25 +15,207 @@ import Tab from "./Tab.jsx";
 import { initializeAnalytics } from "firebase/analytics";
 import { JUINOR_UNIT_TITLES, JUINOR_UNIT_DESCRIPTIONS, JUNIOR_UNIT_LESSONS } from '../lessons.js';
 import { SENIOR_UNIT_DESCRIPTIONS, SENIOR_UNIT_LESSONS, SENIOR_UNIT_TITLES } from "../lessons.js";
+import { TEST_UNIT_LESSONS } from "../lessons.js";
+import Button from '@mui/material/Button';
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
+import Paper from '@mui/material/Paper';
+import { dark } from "@mui/material/styles/createPalette.js";
+
+const Item = styled(Paper)(({ theme }) => ({
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+}));
+
+const darkTheme = createTheme({ palette: { mode: 'dark' } });
+
+const HtmlTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: '#f5f5f9',
+      color: 'rgba(0, 0, 0, 0.87)',
+      maxWidth: 'none',
+      fontSize: theme.typography.pxToRem(12),
+      border: '1px solid #dadde9',
+      width: '100%',
+      height: '100%',
+    },
+  }));  
 
 const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
+    const [userData, setUserData] = useState(null);
+  
+    useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          // Get the current user
+          const currentUser = auth.currentUser;
+  
+          if (currentUser) { // Check if currentUser is not null
+  
+            // Get the document reference for the current user from Firestore
+            const userDocRef = doc(db, "Users", currentUser.uid);
+  
+            // Fetch user data from Firestore
+            const userSnapshot = await getDoc(userDocRef);
+            if (userSnapshot.exists()) {
+              // Extract required user information from the snapshot
+              const userData = userSnapshot.data();
+              console.log("LESSONBACKGROUND RECT userData", userData);
+              setUserData(userData); // Set the user data in the state
+            } else {
+              console.log("No such document!");
+            }
+          }
+          else {
+            console.log("NO CURRENT USER UH OH", currentUser)
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+  
+      fetchUserData();
+    }, [auth.currentUser]); // Empty dependency array ensures the effect runs only once when the component mounts  
+
+    useEffect(() => {
+        console.log("CHANGE IN USERDATA PATHS BGRECT", userData);
+    }, [userData]);
+
+    const [open, setOpen] = React.useState(false);
+    const [questions, setQuestions] = useState([]);
+    const tabIndex = useSelector(state => state.lessonTabIndex);
+
+    const dispatch = useDispatch();
+
+    const handleTooltipClose = () => {
+      setOpen(false);
+    };
+  
+    const handleTooltipOpen = () => {
+      setOpen(true);
+    };  
+
+    const fetchProblemData = async (questionID) => {
+        if (questionID) {
+          try {
+            const docRef = await getDoc(doc(db, "Questions", questionID));
+            if (docRef.exists()) {
+                let problemData = docRef.data();
+                return problemData;
+            } else {
+              console.log("No such document!");
+            }
+          } catch (error) {
+            console.error("Error fetching document: ", error);
+          }
+        }
+      };
+
+    const addGroup = async (problemIds) => {
+        const problemDataPromises = problemIds.map(problem_id => fetchProblemData(problem_id));
+        const problemsData = await Promise.all(problemDataPromises);
+        problemsData.forEach((problemData, index) => {
+            console.log(`Problem data for id ${problemIds[index]}:`, problemData);
+        });
+        return problemsData;
+    };
+
+    useEffect(() => {
+        if (open) {
+            const fetchData = async () => {
+                const data = await addGroup(props.problemIds);
+                setQuestions(data);
+            };
+        
+            fetchData();
+        }
+    }, [open]);
 
     return (
         <div className="universal">
-            <div 
-                className={`lesson-background-rect ${ isFocused ? 'hovered' : ''}`}
-                onClick={() => {
-                    onButtonClick();
-                }}
-                tabIndex="0" // Add this to make the div focusable
-            >
-                <h4 className='lesson-category'>{ props.category }</h4>
-                <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
-                <h3 className={ props.lessonName.length > 15 ? 'long-lesson-name' : 'lesson-name'}>{ props.lessonName }</h3>
+            <ClickAwayListener onClickAway={handleTooltipClose}>
                 <div>
-                    <button className="bottom-rectangle" onClick={onButtonClick}>View problems</button>
+                    <HtmlTooltip
+                        title={
+                            <React.Fragment>
+                                {questions.length !== 0 && (
+                                    <div className="question-list-rect">
+                                        <div>
+                                        <table>
+                                            <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Points</th>
+                                                <th>Topics</th>
+                                                <th>Contest</th>
+                                                <th>Solved</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {questions.map((q) => (
+                                                <tr key={q.id}>
+                                                <td>{q.title}</td>
+                                                <td>{q.points}</td>
+                                                <td>{q.topics.join(", ")}</td>
+                                                <td>{q.contest}</td>
+                                                { userData && userData.solved ? <td>{userData.solved.includes(q.title) ? "yes" : "no"}</td> : <td>no</td> }
+                                                <td>
+                                                    <button
+                                                    type="button"
+                                                    className='open-question'
+                                                    onClick={() => {
+                                                        window.scrollTo(0, 0); // This will scroll the page to the top
+                                                        dispatch({
+                                                            type: 'SET_LESSON_META_DATA',
+                                                            index: tabIndex,
+                                                            payload: {
+                                                                division: props.division,
+                                                                lesson: props.lessonName,
+                                                                problem_id: q.title // TODO: This becomes problem if question id in firebase differs from question title
+                                                            },
+                                                        })
+                                                    }}
+                                                    >
+                                                    <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
+                                                    </button>
+                                                </td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </React.Fragment>
+                        }
+                        PopperProps={{
+                            disablePortal: true,
+                        }}
+                        onClose={handleTooltipClose}
+                        open={open}
+                        disableFocusListener
+                        disableHoverListener
+                        disableTouchListener
+                        arrow
+                    >
+                        <div 
+                            className={`lesson-background-rect ${ open ? 'hovered' : ''}`}
+                            onClick={handleTooltipOpen}
+                            tabIndex="0" // Add this to make the div focusable
+                        >
+                            <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
+                            <div>
+                                <Item className={`bottom-rectangle ${props.lessonName.length > 15 ? 'long-lesson-name' : 'lesson-name'}`} onClick={onButtonClick}>{ props.lessonName }</Item>
+                            </div>
+                        </div>
+                    </HtmlTooltip>
                 </div>
-            </div>
+            </ClickAwayListener>
         </div>
     );
 };
@@ -140,30 +322,44 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     return (
         <div className="universal">
             <div className="hero" style={{background: false ? "url('/val.png') no-repeat center center" : ""}}>
-                <div className="wrapper">
-                    <div className="unit-header">
-                        <div className="unit-header-left">
-                            <h1 className='unit-title'>{unitTitle}</h1>
-                            <br />
-                            <p>{unitDescription}</p>
+                <ThemeProvider theme={darkTheme}>
+                    <Item elevation={5}>
+                        <div className="unit-header">
+                            <div className="unit-header-left">
+                                <h1 className='unit-title'>{unitTitle}</h1>
+                                <br />
+                                <p>{unitDescription}</p>
+                            </div>
+                            {true && <div className="unit-header-right"><button className="start-button">Start</button></div>}
                         </div>
-                        {true && <div className="unit-header-right"><button className="start-button">Start</button></div>}
-                    </div>
-                </div>
+                    </Item>
+                </ThemeProvider>
             </div>
-            <div className='scroll-row'>
-                <button onClick={scrollLeft} className="scroll-button left">
+                { false && <button onClick={scrollLeft} className="scroll-button left">
                     <img src='/leftarrow.png' alt='Left' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/>
-                </button>
-                <div className="lesson-wrapper" ref={scrollContainer}>
-                    {lessons.map((lesson, index) => (
-                        <LessonBackgroundRect key={index} {...lesson} onButtonClick={() => handleButtonClick(index)} isFocused={index === lastPressed && isQuestionListOpen}/>
-                    ))}
+                </button>}
+                <div className="unit-lessons-wrapper" ref={scrollContainer}>
+                    {console.log('Scroll Container:', scrollContainer)}
+                    {lessons.map((row, rowIndex) => {
+                        console.log(`Row ${rowIndex}:`, row);
+                        return (
+                            <div className='lesson-row'>
+                                {row.map((lesson, lessonIndex) => {
+                                    console.log(`Lesson ${lessonIndex} in Row ${rowIndex}:`, lesson);
+                                    return (
+                                        <LessonBackgroundRect key={lessonIndex} {...lesson} onButtonClick={() => {
+                                            console.log(`Button clicked in Lesson ${lessonIndex} in Row ${rowIndex}`);
+                                            handleButtonClick(lessonIndex);
+                                        }} isFocused={lessonIndex === lastPressed && isQuestionListOpen} division={division}/>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
                 </div>
-                <button onClick={scrollRight} className="scroll-button right">
+                { false && <button onClick={scrollRight} className="scroll-button right">
                     <img src='/rightarrow.png' alt='Right' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/>
-                </button>
-            </div>
+                </button>}
             {isQuestionListOpen && questions.length !== 0 && (
                 <div className="question-list">
                 <div className="wrapper">
@@ -457,8 +653,8 @@ const Paths = (props) => {
 
         // If the problem is solved, update the user's document
         if (problemPassed() && lessonProblemData[tabIndex]) {
-            const questionName = lessonProblemData[tabIndex].title; // Assuming the question name is stored here
-            const pointsEarned = lessonProblemData[tabIndex].points; // Assuming the points earned for solving the question are stored here
+            const questionName = lessonProblemData[tabIndex].data.title; // Assuming the question name is stored here
+            const pointsEarned = lessonProblemData[tabIndex].data.points; // Assuming the points earned for solving the question are stored here
             const userUid = auth.currentUser.uid; // Get the current user's UID
     
             updateUserSolvedQuestions(userUid, questionName, pointsEarned);
@@ -523,9 +719,9 @@ const Paths = (props) => {
                 {!lessonProblemData[tabIndex].data ? (
                     defaultTabs[tabIndex].data === 'Junior' ? (
                         <>
-                            {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
+                            {TEST_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={JUNIOR_UNIT_LESSONS[index]} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index] } division='Junior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index]} division='Junior'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -533,9 +729,9 @@ const Paths = (props) => {
                         </>
                     ) : defaultTabs[tabIndex].data === 'Senior' ? (
                         <>
-                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                            {TEST_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -544,9 +740,9 @@ const Paths = (props) => {
                     
                     ) : defaultTabs[tabIndex].data === 'Bronze' ? (
                         <>
-                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                            {TEST_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -554,9 +750,9 @@ const Paths = (props) => {
                         </>
                     ) : defaultTabs[tabIndex].data === 'Silver' ? (
                         <>
-                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                            {TEST_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -564,9 +760,9 @@ const Paths = (props) => {
                         </>
                     ) : defaultTabs[tabIndex].data === 'Gold' ? (
                         <>
-                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                            {TEST_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -574,9 +770,9 @@ const Paths = (props) => {
                         </>
                     ) : (
                     <>
-                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
+                            {TEST_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={SENIOR_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
                                     <br />
                                 </React.Fragment>
                             ))}

@@ -1,5 +1,4 @@
 import React, {useState} from "react";
-import Navigation from "../components/Navigation/Navigation";
 import {auth, app} from "../firebase"
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +22,6 @@ const Login = () => {
     }
     return (
         <>
-            <Navigation/>
             <div className="container-signin">
                 <section class = "wrapper">
                     <div class = "heading">

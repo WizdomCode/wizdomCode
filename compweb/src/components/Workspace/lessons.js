@@ -56,3 +56,19 @@ export const SENIOR_UNIT_LESSONS = [
         { category: "2 Problems", lessonName: "Dynamic Programming 1", imgPath: "/open.png", problemIds: [] }
     ]
 ];
+
+export const TEST_UNIT_LESSONS = [
+    [
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],
+        [{ category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],
+    ],
+    [
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],
+        [{ category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],    ], 
+    [
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],
+        [{ category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }, { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Next in line", "Cupcake Party", "Conveyor Belt Sushi", "Squares", "Who is in the Middle?"] }],    ]
+];

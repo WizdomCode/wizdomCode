@@ -128,6 +128,7 @@ input:focus {
 .question-list-rect {
   background-color: var(--light-bg); /* Use RGBA to set the opacity of the background */
   height: 100%;
+  width: 100%;
   border: 2.5px solid var(--code-bg); /* Use RGBA to set the opacity of the border */
   margin: 0;
   padding: 0;

@@ -48,14 +48,16 @@ import AddProblem from "./pages/AddProblem";
 import CCC from "./pages/ComputerContests/CCC/CCC";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import UserProfilePage from "./pages/UserProfilePage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<SignUp />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
       <Route path="/aboutus" element={<AboutUs />} />
       <Route path="/leaderboard" element={<LeaderboardPage />} />
       <Route path="/learningpath" element={<LearningPath />} />

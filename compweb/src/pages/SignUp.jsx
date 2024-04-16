@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Navigation from "../components/Navigation/Navigation";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -53,7 +52,6 @@ const SignUp = () => {
 
   return (
     <>
-      <Navigation />
       <div className="container-signin">
         <section className="wrapper">
           <div className="heading">

@@ -40,6 +40,8 @@ import Input from '@mui/material/Input';
 import SearchIcon from '@mui/icons-material/Search';
 import Leaderboard from '../../../pages/Leaderboard.jsx';
 import UserProfile from '../../../pages/UserProfile.jsx';
+import Login from '../../../pages/Login.jsx';
+import SignUp from '../../../pages/SignUp.jsx';
 
 const ariaLabel = { 'aria-label': 'description' };
 
@@ -872,6 +874,14 @@ int main() {
           ) : props.currentPage === 'profile' ? (
             <>
               <UserProfile />
+            </>          
+          ) : props.currentPage === 'login' ? (
+            <>
+              <Login />
+            </>          
+          ) : props.currentPage === 'signup' ? (
+            <>
+              <SignUp />
             </>          
           ) : currentTab.type === 'problem' ? (
             <>
