@@ -1,5 +1,4 @@
 {
-  "homepage": "https://comprogger.github.io/cp-learner/",
   "name": "scholarly",
   "version": "0.1.0",
   "private": true,
@@ -47,8 +46,6 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "predeploy": "npm run build",
-    "deploy" : "gh-pages -d build",
     "server": "cd ../judge-backend && python server.py",
     "dev": "concurrently \"npm run start\" \"npm run server\"",
     "build": "react-scripts build",
