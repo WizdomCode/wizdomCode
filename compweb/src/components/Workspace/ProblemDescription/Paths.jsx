@@ -16,6 +16,10 @@ import { initializeAnalytics } from "firebase/analytics";
 import { JUINOR_UNIT_TITLES, JUINOR_UNIT_DESCRIPTIONS, JUNIOR_UNIT_LESSONS } from '../lessons.js';
 import { SENIOR_UNIT_DESCRIPTIONS, SENIOR_UNIT_LESSONS, SENIOR_UNIT_TITLES } from "../lessons.js";
 import { TEST_UNIT_LESSONS } from "../lessons.js";
+import { BRONZE_UNIT_DESCRIPTIONS, BRONZE_UNIT_LESSONS, BRONZE_UNIT_TITLES } from "../lessons.js";
+import { SILVER_UNIT_DESCRIPTIONS, SILVER_UNIT_LESSONS, SILVER_UNIT_TITLES } from "../lessons.js";
+import { GOLD_UNIT_DESCRIPTIONS, GOLD_UNIT_LESSONS, GOLD_UNIT_TITLES } from "../lessons.js";
+import { PLAT_UNIT_DESCRIPTIONS, PLAT_UNIT_LESSONS, PLAT_UNIT_TITLES } from "../lessons.js";
 import Button from '@mui/material/Button';
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
@@ -210,7 +214,7 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                         >
                             <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
                             <div>
-                                <Item className={`bottom-rectangle ${props.lessonName.length > 15 ? 'long-lesson-name' : 'lesson-name'}`} onClick={onButtonClick}>{ props.lessonName }</Item>
+                                <Item className={`bottom-rectangle ${props.lessonName.length > 12 ? 'long-lesson-name' : 'lesson-name'}`} onClick={onButtonClick}>{ props.lessonName }</Item>
                             </div>
                         </div>
                     </HtmlTooltip>
@@ -719,7 +723,7 @@ const Paths = (props) => {
                 {!lessonProblemData[tabIndex].data ? (
                     defaultTabs[tabIndex].data === 'Junior' ? (
                         <>
-                            {TEST_UNIT_LESSONS.map((lessons, index) => (
+                            {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
                                     <ScrollRow lessons={lessons} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index]} division='Junior'/>
                                     <br />
@@ -729,9 +733,9 @@ const Paths = (props) => {
                         </>
                     ) : defaultTabs[tabIndex].data === 'Senior' ? (
                         <>
-                            {TEST_UNIT_LESSONS.map((lessons, index) => (
+                            {SENIOR_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -740,9 +744,9 @@ const Paths = (props) => {
                     
                     ) : defaultTabs[tabIndex].data === 'Bronze' ? (
                         <>
-                            {TEST_UNIT_LESSONS.map((lessons, index) => (
+                            {BRONZE_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={BRONZE_UNIT_TITLES[index]} unitDescription={BRONZE_UNIT_DESCRIPTIONS[index] } division='Bronze'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -750,9 +754,9 @@ const Paths = (props) => {
                         </>
                     ) : defaultTabs[tabIndex].data === 'Silver' ? (
                         <>
-                            {TEST_UNIT_LESSONS.map((lessons, index) => (
+                            {SILVER_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={SILVER_UNIT_TITLES[index]} unitDescription={SILVER_UNIT_DESCRIPTIONS[index] } division='Silver'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -760,9 +764,9 @@ const Paths = (props) => {
                         </>
                     ) : defaultTabs[tabIndex].data === 'Gold' ? (
                         <>
-                            {TEST_UNIT_LESSONS.map((lessons, index) => (
+                            {GOLD_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={GOLD_UNIT_TITLES[index]} unitDescription={GOLD_UNIT_DESCRIPTIONS[index] } division='Gold'/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -770,9 +774,9 @@ const Paths = (props) => {
                         </>
                     ) : (
                     <>
-                            {TEST_UNIT_LESSONS.map((lessons, index) => (
+                            {PLAT_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={TEST_UNIT_LESSONS[index]} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={PLAT_UNIT_TITLES[index]} unitDescription={PLAT_UNIT_DESCRIPTIONS[index] } division='Platinum'/>
                                     <br />
                                 </React.Fragment>
                             ))}

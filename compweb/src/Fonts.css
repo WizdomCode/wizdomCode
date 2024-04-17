@@ -49,6 +49,7 @@
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
+    gap: 5px;
 }
 
 .search-rect {

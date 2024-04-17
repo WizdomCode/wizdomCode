@@ -313,7 +313,9 @@ const CodeEditor = (props) => {
       if (location.pathname === '/problems' && currentTab && currentTab.data) {
         questionName = currentTab.data.title;
       } else if (lessonProblemData && lessonProblemData[tabIndex]) {
-        questionName = lessonProblemData[tabIndex].data.title;
+        if (lessonProblemData[tabIndex].data && lessonProblemData[tabIndex].data.title) {
+          questionName = lessonProblemData[tabIndex].data.title;
+        }
       }
   
       // Check if the user is authenticated

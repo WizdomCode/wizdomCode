@@ -42,6 +42,35 @@ import Leaderboard from '../../../pages/Leaderboard.jsx';
 import UserProfile from '../../../pages/UserProfile.jsx';
 import Login from '../../../pages/Login.jsx';
 import SignUp from '../../../pages/SignUp.jsx';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Button from '@mui/material/Button';
+import CardMedia from '@mui/material/CardMedia';
+
+const card = (
+  <React.Fragment>
+    <Card sx={{ maxWidth: 345 }}>
+      <CardMedia
+        sx={{ height: 140 }}
+        image="/val.png"
+        title="green iguana"
+      />
+      <CardContent>
+        <Typography gutterBottom variant="h5" component="div">
+          Problem database
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Study from over 1 hand-picked problems on the ultimate platform for preparing for competitive programming contests.
+        </Typography>
+      </CardContent>
+      <CardActions>
+        <Button size="small">Learn More</Button>
+      </CardActions>
+    </Card>
+  </React.Fragment>
+);
+
 
 const ariaLabel = { 'aria-label': 'description' };
 
@@ -403,71 +432,73 @@ const IDE = (props) => {
   }, [questionID, dispatch]);
   
   useEffect(() => {
-    const fetchTestCasesData = async () => {
-      try {
-        let testCaseArray = [];
-  
-        const testCaseFolder = currentTab.data.folder;
-  
-        if (testCaseFolder) {
-          const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
-          const fileList = fileListResponse.data;
-  
-          fileList.sort();
-  
-          for (let i = 0; i < fileList.length; i += 2) {
-            const inputFileName = fileList[i];
-            const outputFileName = fileList[i + 1];
-  
-            try {
-              const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-              const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
-              
-              console.log(inputResponse);
-
-              let inputLines, outputLines;
-
+    if (currentTab.type === 'problem') {
+      const fetchTestCasesData = async () => {
+        try {
+          let testCaseArray = [];
+    
+          const testCaseFolder = currentTab.data.folder;
+    
+          if (testCaseFolder) {
+            const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+            const fileList = fileListResponse.data;
+    
+            fileList.sort();
+    
+            for (let i = 0; i < fileList.length; i += 2) {
+              const inputFileName = fileList[i];
+              const outputFileName = fileList[i + 1];
+    
               try {
-                  inputLines = inputResponse.data.split('\n', 106);
-                  outputLines = outputResponse.data.split('\n', 106);
-              } catch (error) {
-                  // Make these strings before trying .split()
-                  inputLines = String(inputResponse.data).split('\n', 106);
-                  outputLines = String(outputResponse.data).split('\n', 106);
-              }
-              
-              // Now inputLines and outputLines can be accessed outside the try/catch block
-              console.log(inputLines, outputLines);
+                const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
                 
-              if (inputLines.length > 105) {
-                inputLines = inputLines.slice(0, 105);
-                inputLines.push('...(more lines)');
+                console.log(inputResponse);
+
+                let inputLines, outputLines;
+
+                try {
+                    inputLines = inputResponse.data.split('\n', 106);
+                    outputLines = outputResponse.data.split('\n', 106);
+                } catch (error) {
+                    // Make these strings before trying .split()
+                    inputLines = String(inputResponse.data).split('\n', 106);
+                    outputLines = String(outputResponse.data).split('\n', 106);
+                }
+                
+                // Now inputLines and outputLines can be accessed outside the try/catch block
+                console.log(inputLines, outputLines);
+                  
+                if (inputLines.length > 105) {
+                  inputLines = inputLines.slice(0, 105);
+                  inputLines.push('...(more lines)');
+                }
+    
+                if (outputLines.length > 105) {
+                  outputLines = outputLines.slice(0, 105);
+                  outputLines.push('...(more lines)');
+                }
+    
+                testCaseArray.push({
+                  key: (i / 2) + 1,
+                  input: inputLines.join('\n'),
+                  output: outputLines.join('\n'),
+                });
+              } catch (error) {
+                console.error("Error processing files:", inputFileName, outputFileName, error);
               }
-  
-              if (outputLines.length > 105) {
-                outputLines = outputLines.slice(0, 105);
-                outputLines.push('...(more lines)');
-              }
-  
-              testCaseArray.push({
-                key: (i / 2) + 1,
-                input: inputLines.join('\n'),
-                output: outputLines.join('\n'),
-              });
-            } catch (error) {
-              console.error("Error processing files:", inputFileName, outputFileName, error);
             }
+    
+            setTestCases(testCaseArray);
+            setIsLoading(false);
           }
-  
-          setTestCases(testCaseArray);
-          setIsLoading(false);
+        } catch (error) {
+          console.error("Error fetching test cases: ", error);
         }
-      } catch (error) {
-        console.error("Error fetching test cases: ", error);
-      }
-    };
-  
-    fetchTestCasesData();
+      };
+    
+      fetchTestCasesData();
+    }
   }, [currentTab]);
   
   const boilerPlate = 
@@ -868,9 +899,96 @@ int main() {
               <Leaderboard />
             </>
           ) : props.currentPage === 'home' ? (
-            <>
-              <div>home</div>
-            </>
+            <div className='universal'>
+              <div className={styles.wrapper}>
+                <div className='hero'>
+                  <div>
+                    <br />
+                    <h1>Learn competitive programming.</h1>
+                    <h1>Master any contest.</h1>
+                    <br />
+                    <p className={styles.customLatex}>Study from over 1 hand-picked problems 
+                    on the ultimate platform for preparing for competitive programming contests.</p>
+                    <br />
+                    <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Get started</button>
+                    <br /> 
+                  </div>
+                </div>
+                <br /> 
+                <ThemeProvider theme={darkTheme}>
+                  <Box sx={{ width: '100%' }}>
+                    <Card variant="outlined">
+                      <CardMedia
+                        sx={{ height: 140 }}
+                        image="/val.png"
+                        title="green iguana"
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="div">
+                          Problem database
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Study from over 1 hand-picked problems on the ultimate platform for preparing for competitive programming contests.
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button size="small">Learn More</Button>
+                      </CardActions>
+                    </Card>
+                  </Box>
+                  <br />
+                  <Box sx={{ width: '100%' }}>
+                    <Card variant="outlined">
+                    <CardMedia
+                        sx={{ height: 140 }}
+                        image="/val.png"
+                        title="green iguana"
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="div">
+                          Learning paths
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Waste no time learning topics in a logical progression.
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button size="small">Learn More</Button>
+                      </CardActions>
+                    </Card>
+                  </Box>
+                  <br />
+                  <Box sx={{ width: '100%' }}>
+                    <Card variant="outlined">
+                    <CardMedia
+                        sx={{ height: 140 }}
+                        image="/val.png"
+                        title="green iguana"
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="div">
+                          Feature-rich workspace
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Instantly test code against official problem data or custom inputs.
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button size="small">Learn More</Button>
+                      </CardActions>
+                    </Card>
+                  </Box>
+                </ThemeProvider>
+                <br />
+                <br />
+                <h1>Start from a contest</h1>
+                <br />
+                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>CCC</button>
+                <br />
+                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>USACO</button>
+                <br />
+              </div>
+            </div>
           ) : props.currentPage === 'profile' ? (
             <>
               <UserProfile />
@@ -960,7 +1078,7 @@ int main() {
                 <div className={styles.testCases}>
                   {testCases.map((testCase, index) => {
                     const status = results[index]?.status?.description;
-                    const className = status === 'Accepted' ? styles.testCasePassed : status === 'Wrong Answer' ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
+                    const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
                     return (
                       <div key={testCase.key} className={className}>
@@ -969,6 +1087,7 @@ int main() {
                           Case {testCase.key}
                           {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
                           {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
+                          {results[index] && results[index].status.description === 'Time limit exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
                         </h3>
                         {results[index] && (
                             <>
