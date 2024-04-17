@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/cp-learner/static/css/main.473eb20a.css",
-    "main.js": "/cp-learner/static/js/main.a6f4774c.js",
+    "main.css": "/cp-learner/static/css/main.ee7ed4d9.css",
+    "main.js": "/cp-learner/static/js/main.8badf515.js",
     "static/js/9553.809d5fd7.chunk.js": "/cp-learner/static/js/9553.809d5fd7.chunk.js",
     "static/js/4473.39c61d47.chunk.js": "/cp-learner/static/js/4473.39c61d47.chunk.js",
     "static/js/3439.80eea058.chunk.js": "/cp-learner/static/js/3439.80eea058.chunk.js",
@@ -149,8 +149,8 @@
     "static/media/KaTeX_Size3-Regular.woff": "/cp-learner/static/media/KaTeX_Size3-Regular.7947224e8a9914fa332b.woff",
     "static/media/KaTeX_Size3-Regular.woff2": "/cp-learner/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
     "index.html": "/cp-learner/index.html",
-    "main.473eb20a.css.map": "/cp-learner/static/css/main.473eb20a.css.map",
-    "main.a6f4774c.js.map": "/cp-learner/static/js/main.a6f4774c.js.map",
+    "main.ee7ed4d9.css.map": "/cp-learner/static/css/main.ee7ed4d9.css.map",
+    "main.8badf515.js.map": "/cp-learner/static/js/main.8badf515.js.map",
     "9553.809d5fd7.chunk.js.map": "/cp-learner/static/js/9553.809d5fd7.chunk.js.map",
     "4473.39c61d47.chunk.js.map": "/cp-learner/static/js/4473.39c61d47.chunk.js.map",
     "3439.80eea058.chunk.js.map": "/cp-learner/static/js/3439.80eea058.chunk.js.map",
@@ -238,7 +238,7 @@
     "6453.de6cca08.chunk.js.map": "/cp-learner/static/js/6453.de6cca08.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.473eb20a.css",
-    "static/js/main.a6f4774c.js"
+    "static/css/main.ee7ed4d9.css",
+    "static/js/main.8badf515.js"
   ]
 }
