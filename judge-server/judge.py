@@ -9,46 +9,30 @@ import signal
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import queue
+import threading
 
 app = Flask(__name__)
 CORS(app)
-
-TIME_LIMIT = 5
 
 class TimeoutException(Exception): pass
 
 def handler(signum, frame):
     raise TimeoutException()
 
-if os.name == 'nt':
-    def execute_with_time_limit(func, args):
-        from threading import Thread
-        res = [None]
-        def target():
-            try:
-                res[0] = func(*args)
-            except Exception as e:
-                res[0] = str(e)
-        thread = Thread(target=target)
-        thread.start()
-        thread.join(TIME_LIMIT)
-        if thread.is_alive():
-            return 'Time limit exceeded'
-        return res[0]
-else:
+def execute_with_time_limit(func, args, time_limit):
     signal.signal(signal.SIGALRM, handler)
-    def execute_with_time_limit(func, args):
-        signal.alarm(TIME_LIMIT)
-        try:
-            res = func(*args)
-            signal.alarm(0)
-            return res
-        except TimeoutException:
-            return 'Time limit exceeded'
-        except Exception as e:
-            return str(e)
+    signal.alarm(time_limit)
+    try:
+        res = func(*args)
+        signal.alarm(0)
+        return res
+    except TimeoutException:
+        return 'Time limit exceeded'
+    except Exception as e:
+        return str(e)
 
-def execute_code(code, test_cases, language):
+def execute_code(code, test_cases, language, time_limit):
     results = []
     compiled_code = None
 
@@ -64,11 +48,11 @@ def execute_code(code, test_cases, language):
 
         start_time = time.time()
         if language == 'python':
-            result = execute_with_time_limit(execute_python_code, (compiled_code, input_data))
+            result = execute_with_time_limit(execute_python_code, (compiled_code, input_data), time_limit)
         elif language == 'java':
-            result = execute_with_time_limit(execute_java_code, (compiled_code, input_data))
+            result = execute_with_time_limit(execute_java_code, (compiled_code, input_data), time_limit)
         elif language == 'cpp':
-            result = execute_with_time_limit(execute_cpp_code, (compiled_code, input_data))
+            result = execute_with_time_limit(execute_cpp_code, (compiled_code, input_data), time_limit)
         else:
             result = 'Unsupported lang ' + language
         execution_time = time.time() - start_time
@@ -144,16 +128,39 @@ def execute_cpp_code(compiled_code, input_data):
         return output.decode()
     except Exception as e:
         return str(e)
-    
+
+request_queue = queue.Queue()
+results = []
+
+def worker():
+    while True:
+        item = request_queue.get()
+        if item is None:
+            break
+        language, code, test_cases, time_limit = item
+        result = execute_code(code, test_cases, language, time_limit)
+        results.append(result)
+        request_queue.task_done()
+
+# Start worker threads
+num_worker_threads = 4
+for i in range(num_worker_threads):
+    t = threading.Thread(target=worker)
+    t.daemon = True
+    t.start()
+
 @app.route('/execute', methods=['POST'])
 def execute():
     data = request.get_json()
     language = data.get('language', 'python')
     code = data.get('code', '')
     test_cases = data.get('test_cases', [])
+    time_limit = data.get('time_limit', 5)  # Default time limit is 5 seconds
+
+    # Put the request in the queue
+    request_queue.put((language, code, test_cases, time_limit))
     
-    results = execute_code(code, test_cases, language)
-    return jsonify(results)
+    return jsonify({'message': 'Request received and is being processed'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
