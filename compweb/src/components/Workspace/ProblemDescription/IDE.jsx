@@ -7,8 +7,9 @@
 
 import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect, useRef } from "react";
-import { auth, app, db } from "../../../firebase.js";
+import { auth, app, db, storage } from "../../../firebase.js";
 import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { getStorage, ref, listAll, getDownloadURL } from 'firebase/storage';
 import "../../../Fonts.css";
 import Select from "react-select";
 import { Link } from "react-router-dom";
@@ -436,76 +437,46 @@ const IDE = (props) => {
       const fetchTestCasesData = async () => {
         try {
           let testCaseArray = [];
-    
+  
           const testCaseFolder = currentTab.data.folder;
-    
+  
           if (testCaseFolder) {
-            const fileListResponse = await axios.get(`/TestCaseData/${testCaseFolder}`);
-            let fileList = fileListResponse.data;
-            
-            if (!Array.isArray(fileList)) {
-              // If fileList is not an array, print its type and content
-              console.log("Type of fileList:", typeof fileList);
-              console.log("Content of fileList:", fileList);
-          
-              // Convert fileList to an array
-              fileList = Object.keys(fileList);
-            }
-                    
-            fileList.sort();
-    
-            for (let i = 0; i < fileList.length; i += 2) {
-              const inputFileName = fileList[i];
-              const outputFileName = fileList[i + 1];
-    
+            // Get the reference to the folder in Firebase Storage
+            const testCaseFolderRef = ref(storage, `TestCaseData/${testCaseFolder}`);
+  
+            // Get the list of all files in the folder
+            const fileList = await listAll(testCaseFolderRef);
+  
+            // Sort the file names
+            fileList.items.sort((a, b) => a.name.localeCompare(b.name));
+  
+            for (let i = 0; i < fileList.items.length; i += 2) {
+              const inputFileName = fileList.items[i];
+              const outputFileName = fileList.items[i + 1];
+  
               try {
-                const inputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                const outputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${outputFileName}`);
-                
-                console.log(inputResponse);
+                // Get the file content from Firebase Storage
+                const inputResponse = await getDownloadURL(inputFileName);
+                const outputResponse = await getDownloadURL(outputFileName);
 
-                let inputLines, outputLines;
-
-                try {
-                    inputLines = inputResponse.data.split('\n', 106);
-                    outputLines = outputResponse.data.split('\n', 106);
-                } catch (error) {
-                    // Make these strings before trying .split()
-                    inputLines = String(inputResponse.data).split('\n', 106);
-                    outputLines = String(outputResponse.data).split('\n', 106);
-                }
-                
-                // Now inputLines and outputLines can be accessed outside the try/catch block
-                console.log(inputLines, outputLines);
-                  
-                if (inputLines.length > 105) {
-                  inputLines = inputLines.slice(0, 105);
-                  inputLines.push('...(more lines)');
-                }
-    
-                if (outputLines.length > 105) {
-                  outputLines = outputLines.slice(0, 105);
-                  outputLines.push('...(more lines)');
-                }
-    
                 testCaseArray.push({
                   key: (i / 2) + 1,
-                  input: inputLines.join('\n'),
-                  output: outputLines.join('\n'),
+                  input: inputResponse,
+                  output: outputResponse,
                 });
               } catch (error) {
-                console.error("Error processing files:", inputFileName, outputFileName, error);
+                console.error(error);
               }
             }
-    
+
             setTestCases(testCaseArray);
             setIsLoading(false);
           }
         } catch (error) {
-          console.error("Error fetching test cases: ", error);
+          console.error(error);
         }
       };
-    
+  
       fetchTestCasesData();
     }
   }, [currentTab]);
@@ -1165,10 +1136,10 @@ int main() {
                           )}
                         <br />
                         <h4 className={className}>Input:</h4>
-                        <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
+                        <iframe src={testCase.input} style={{margin: '10px 0', width: '100%'}}/>
                         <br />
                         <h4 className={className}>Expected Output:</h4>
-                        <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
+                        <iframe src={testCase.output} style={{margin: '10px 0', width: '100%'}}/>
                         {results[index] && results[index].status.description === 'Wrong Answer' && (
                           <>
                             <br />
