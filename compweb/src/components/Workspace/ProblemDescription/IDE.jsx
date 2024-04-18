@@ -440,7 +440,7 @@ const IDE = (props) => {
           const testCaseFolder = currentTab.data.folder;
     
           if (testCaseFolder) {
-            const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+            const fileListResponse = await axios.get(`/TestCaseData/${testCaseFolder}`);
             let fileList = fileListResponse.data;
             
             if (!Array.isArray(fileList)) {
@@ -459,8 +459,8 @@ const IDE = (props) => {
               const outputFileName = fileList[i + 1];
     
               try {
-                const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+                const inputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                const outputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${outputFileName}`);
                 
                 console.log(inputResponse);
 

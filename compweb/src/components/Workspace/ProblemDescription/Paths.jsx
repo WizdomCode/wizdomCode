@@ -511,7 +511,7 @@ const Paths = (props) => {
                   const testCaseFolder = problemData.folder; // Get the testCaseFolder from the problemData
       
                   if (testCaseFolder) {  // Add this check
-                    const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+                    const fileListResponse = await axios.get(`/TestCaseData/${testCaseFolder}`);
                     let fileList = fileListResponse.data;
 
                     if (!Array.isArray(fileList)) {
@@ -530,8 +530,8 @@ const Paths = (props) => {
                       const outputFileName = fileList[i + 1];
       
                       try {
-                        const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                        const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+                        const inputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                        const outputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${outputFileName}`);
       
                         testCaseArray.push({
                           key: (i / 2) + 1,
