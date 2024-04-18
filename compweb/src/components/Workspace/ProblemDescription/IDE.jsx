@@ -436,27 +436,28 @@ const IDE = (props) => {
       const fetchTestCasesData = async () => {
         try {
           let testCaseArray = [];
-    
+  
           const testCaseFolder = currentTab.data.folder;
-    
+  
           if (testCaseFolder) {
-            const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+            const baseUrl = process.env.NODE_ENV === 'development' ? process.env.PUBLIC_URL : process.env.REACT_APP_PUBLIC_URL;
+            const fileListResponse = await axios.get(`${baseUrl}/TestCaseData/${testCaseFolder}`);
             const fileList = fileListResponse.data;
-    
+  
             fileList.sort();
-    
+  
             for (let i = 0; i < fileList.length; i += 2) {
               const inputFileName = fileList[i];
               const outputFileName = fileList[i + 1];
-    
+  
               try {
-                const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+                const inputResponse = await axios.get(`${baseUrl}/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                const outputResponse = await axios.get(`${baseUrl}/TestCaseData/${testCaseFolder}/${outputFileName}`);
                 
                 console.log(inputResponse);
-
+  
                 let inputLines, outputLines;
-
+  
                 try {
                     inputLines = inputResponse.data.split('\n', 106);
                     outputLines = outputResponse.data.split('\n', 106);
@@ -473,12 +474,12 @@ const IDE = (props) => {
                   inputLines = inputLines.slice(0, 105);
                   inputLines.push('...(more lines)');
                 }
-    
+  
                 if (outputLines.length > 105) {
                   outputLines = outputLines.slice(0, 105);
                   outputLines.push('...(more lines)');
                 }
-    
+  
                 testCaseArray.push({
                   key: (i / 2) + 1,
                   input: inputLines.join('\n'),
@@ -488,7 +489,7 @@ const IDE = (props) => {
                 console.error("Error processing files:", inputFileName, outputFileName, error);
               }
             }
-    
+  
             setTestCases(testCaseArray);
             setIsLoading(false);
           }
@@ -496,10 +497,10 @@ const IDE = (props) => {
           console.error("Error fetching test cases: ", error);
         }
       };
-    
+  
       fetchTestCasesData();
     }
-  }, [currentTab]);
+  }, [currentTab]);  
   
   const boilerPlate = 
 `#include <iostream>

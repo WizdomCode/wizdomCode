@@ -511,7 +511,8 @@ const Paths = (props) => {
                   const testCaseFolder = problemData.folder; // Get the testCaseFolder from the problemData
       
                   if (testCaseFolder) {  // Add this check
-                    const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+                    const baseUrl = process.env.NODE_ENV === 'development' ? process.env.PUBLIC_URL : process.env.REACT_APP_PUBLIC_URL;
+                    const fileListResponse = await axios.get(`${baseUrl}/TestCaseData/${testCaseFolder}`);
                     const fileList = fileListResponse.data;
                     fileList.sort();
       
@@ -520,8 +521,8 @@ const Paths = (props) => {
                       const outputFileName = fileList[i + 1];
       
                       try {
-                        const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                        const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+                        const inputResponse = await axios.get(`${baseUrl}/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                        const outputResponse = await axios.get(`${baseUrl}/TestCaseData/${testCaseFolder}/${outputFileName}`);
       
                         testCaseArray.push({
                           key: (i / 2) + 1,
@@ -552,7 +553,7 @@ const Paths = (props) => {
           }
         }
       };
-      
+                  
       const addGroup = async (problemId) => {
         const problemData = await fetchProblemData(problemId);
         console.log(`Problem data for id ${problemId}:`, problemData);
