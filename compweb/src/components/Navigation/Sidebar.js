@@ -122,13 +122,11 @@ const Sidebar = ({ onUsacoClick, onCccClick }) => {
             </Link>
           </>
         )}
-        <Link to="/settings" className={styles.img}>
           <button className={`${styles.button} ${location.pathname === '/settings' ? styles.activeTab : ''}`}>
             <BootstrapTooltip title="Settings" placement="right">
               <img src='/settings.png' alt="Settings" className={styles.img} style={{width: '50px', height: '50px', background: 'transparent'}}/>
             </BootstrapTooltip>
           </button>
-        </Link>
     </div>
   )
 }

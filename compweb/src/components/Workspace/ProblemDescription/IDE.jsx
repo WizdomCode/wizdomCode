@@ -907,10 +907,11 @@ int main() {
                     <h1>Learn competitive programming.</h1>
                     <h1>Master any contest.</h1>
                     <br />
-                    <p className={styles.customLatex}>Study from over 1 hand-picked problems 
-                    on the ultimate platform for preparing for competitive programming contests.</p>
+                    <p className={styles.customLatex}>Notice: This is a conceptual version. This project is very early in development and we welcome any and all feedback or suggestions. Contact us: competitive.programming2197@gmail.com</p>
                     <br />
-                    <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Get started</button>
+                    <Link to="/signup" className={styles.img}>
+                      <button className={styles.runAll} style={{color: 'white'}}>Get started</button>
+                    </Link>
                     <br /> 
                   </div>
                 </div>
@@ -920,7 +921,7 @@ int main() {
                     <Card variant="outlined">
                       <CardMedia
                         sx={{ height: 140 }}
-                        image="/val.png"
+                        image="/problems.png"
                         title="green iguana"
                       />
                       <CardContent>
@@ -928,11 +929,13 @@ int main() {
                           Problem database
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Study from over 1 hand-picked problems on the ultimate platform for preparing for competitive programming contests.
+                          Study from 10+ hand-picked problems on the ultimate platform for preparing for competitive programming contests.
                         </Typography>
                       </CardContent>
                       <CardActions>
-                        <Button size="small">Learn More</Button>
+                        <Link to="/problems" className={styles.img}>
+                          <Button size="small">Get Started</Button>
+                        </Link>
                       </CardActions>
                     </Card>
                   </Box>
@@ -941,7 +944,7 @@ int main() {
                     <Card variant="outlined">
                     <CardMedia
                         sx={{ height: 140 }}
-                        image="/val.png"
+                        image="/duopaths.png"
                         title="green iguana"
                       />
                       <CardContent>
@@ -953,7 +956,12 @@ int main() {
                         </Typography>
                       </CardContent>
                       <CardActions>
-                        <Button size="small">Learn More</Button>
+                        <Link to="/ccc" className={styles.img}>
+                          <Button size="small">CCC Topics</Button>
+                        </Link>
+                        <Link to="/usaco" className={styles.img}>
+                          <Button size="small">USACO Topics</Button>
+                        </Link>
                       </CardActions>
                     </Card>
                   </Box>
@@ -962,7 +970,7 @@ int main() {
                     <Card variant="outlined">
                     <CardMedia
                         sx={{ height: 140 }}
-                        image="/val.png"
+                        image="/workspace.png"
                         title="green iguana"
                       />
                       <CardContent>
@@ -978,14 +986,39 @@ int main() {
                       </CardActions>
                     </Card>
                   </Box>
+                  <br />
+                  <Box sx={{ width: '100%' }}>
+                    <Card variant="outlined">
+                    <CardMedia
+                        sx={{ height: 140 }}
+                        image="/templates.png"
+                        title="green iguana"
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="div">
+                          Code Templates
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Waste no time crafting solutions with our extensive collection of code templates.
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button size="small">Learn More</Button>
+                      </CardActions>
+                    </Card>
+                  </Box>
                 </ThemeProvider>
                 <br />
                 <br />
                 <h1>Start from a contest</h1>
                 <br />
-                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>CCC</button>
+                <Link to="/ccc" className={styles.img}>
+                  <button className={styles.runAll} style={{color: 'white'}}>CCC</button>
+                </Link>
                 <br />
-                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>USACO</button>
+                <Link to="/usaco" className={styles.img}>
+                  <button className={styles.runAll} style={{color: 'white'}}>USACO</button>
+                </Link>
                 <br />
               </div>
             </div>
@@ -1046,28 +1079,55 @@ int main() {
                       <br />
                     </>
                   )}
-                  {currentTab.data.points && (
-                    <>
-                      <h3>Points</h3>
-                      <p>{currentTab.data.points}</p>
-                    </>
-                  )}
-                  {currentTab.data.sample1 && (
+                  {currentTab.data.sample1 && currentTab.data.sample1.input && (
                     <>
                       <h3>Sample Input 1</h3>
                       <pre className={styles.codeSnippet}>{currentTab.data.sample1.input.replace(/\\n/g, '\n')}</pre>
                       <br />
                       <h3>Output for Sample Input 1</h3>
                       <pre className={styles.codeSnippet}>{currentTab.data.sample1.output.replace(/\\n/g, '\n')}</pre>
+                      <br />
+                      <h3>Explanation for Sample 1</h3>
+                      {currentTab.data.sample1.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} />}
+                      <br />
+                      <div className={styles.divider}></div>
+                      <br />
                     </>
                   )}
-                  {currentTab.data.sample2 && (
+                  {currentTab.data.sample2 && currentTab.data.sample2.input && (
                     <>
                       <h3>Sample Input 2</h3>
                       <pre className={styles.codeSnippet}>{currentTab.data.sample2.input.replace(/\\n/g, '\n')}</pre>
                       <br />
                       <h3>Output for Sample Input 2</h3>
                       <pre className={styles.codeSnippet}>{currentTab.data.sample2.output.replace(/\\n/g, '\n')}</pre>
+                      <br />
+                      <h3>Explanation for Sample 2</h3>
+                      {currentTab.data.sample2.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} />}
+                      <br />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {currentTab.data.sample3 && currentTab.data.sample3.input && (
+                    <>
+                      <h3>Sample Input 3</h3>
+                      <pre className={styles.codeSnippet}>{currentTab.data.sample3.input.replace(/\\n/g, '\n')}</pre>
+                      <br />
+                      <h3>Output for Sample Input 3</h3>
+                      <pre className={styles.codeSnippet}>{currentTab.data.sample3.output.replace(/\\n/g, '\n')}</pre>
+                      <br />
+                      <h3>Explanation for Sample 3</h3>
+                      {currentTab.data.sample3.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} />}
+                      <br />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {currentTab.data.points && (
+                    <>
+                      <h3>Points</h3>
+                      <p>{currentTab.data.points}</p>
                     </>
                   )}
                 </div>

@@ -3,12 +3,12 @@ export const JUINOR_UNIT_DESCRIPTIONS = ["", "", ""];
 export const JUNIOR_UNIT_LESSONS = [
     [
         [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] },
-        { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] }],
-        [{ category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] },
-        { category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] }],
-        [{ category: "1 Problem", lessonName: "Arrays", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] }],
-        [{ category: "4 Problems", lessonName: "Basic String Manipulation", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] },
-        { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] }],
+        { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
+        [{ category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Tournament Selection"] },
+        { category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Special Day"] }],
+        [{ category: "1 Problem", lessonName: "Arrays", imgPath: "/open.png", problemIds: ["Occupy parking"] }],
+        [{ category: "4 Problems", lessonName: "Basic String Manipulation", imgPath: "/open.png", problemIds: ["Happy or Sad"] },
+        { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/open.png", problemIds: ["Smile with Similes"] }],
     ],
     [
         [{ category: "4 Problems", lessonName: "Time Complexity", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
@@ -17,8 +17,8 @@ export const JUNIOR_UNIT_LESSONS = [
         [{ category: "1 Problem", lessonName: "Greedy", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
     ], 
     [
-        [{ category: "4 Problems", lessonName: "BFS", imgPath: "/open.png", problemIds: ["Epidemiology"] },
-        { category: "5 Problems", lessonName: "DFS", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
+        [{ category: "4 Problems", lessonName: "BFS", imgPath: "/open.png", problemIds: ["Strategic Bombing"] },
+        { category: "5 Problems", lessonName: "DFS", imgPath: "/open.png", problemIds: ["Unfriend"] }],
         [{ category: "4 Problems", lessonName: "Recursion", imgPath: "/open.png", problemIds: ["Epidemiology"] },
         { category: "2 Problems", lessonName: "Dynamic Programming 1", imgPath: "/open.png", problemIds: ["Epidemiology"] }]
     ]

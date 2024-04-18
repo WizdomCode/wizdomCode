@@ -467,46 +467,6 @@ const CodeEditor = (props) => {
                   <SaveIcon style={{color: 'white'}} onClick={() => { saveCode() }}/>
                 </IconButton>
               </div>
-              <div>
-                <IconButton
-                  id="demo-customized-button"
-                  aria-controls={open ? 'demo-customized-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
-                  variant="contained"
-                  disableElevation
-                  onClick={handleClick}
-                >
-                  <MoreVertIcon style={{ color: 'white' }}/>
-                </IconButton>
-                <StyledMenu
-                  id="demo-customized-menu"
-                  MenuListProps={{
-                    'aria-labelledby': 'demo-customized-button',
-                  }}
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
-                >
-                  <MenuItem onClick={handleClose} disableRipple>
-                    <EditIcon />
-                    Minimize
-                  </MenuItem>
-                  <MenuItem onClick={handleClose} disableRipple>
-                    <FileCopyIcon />
-                    Duplicate
-                  </MenuItem>
-                  <Divider sx={{ my: 0.5 }} />
-                  <MenuItem onClick={handleClose} disableRipple>
-                    <ArchiveIcon />
-                    Archive
-                  </MenuItem>
-                  <MenuItem onClick={handleClose} disableRipple>
-                    <MoreHorizIcon />
-                    More
-                  </MenuItem>
-                </StyledMenu>
-              </div>
             </ThemeProvider>
           </div>
         </div>
@@ -559,7 +519,7 @@ const CodeEditor = (props) => {
                     submitCode();
                     dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
                   }}>
-                    <p className={styles.buttonText}>SUBMIT</p>
+                    <p className={styles.buttonText}>RUN</p>
                   </button>
                 </div>
               </div>

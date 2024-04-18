@@ -1,3 +1,4 @@
-.todo,todo-container,header,input {
-    color: white;
+textarea {
+    height: 200px; /* This sets the default height */
+    resize: vertical; /* This allows the textarea to be resized vertically */
 }

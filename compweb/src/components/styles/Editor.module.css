@@ -121,6 +121,7 @@
   display: flex;
   background-color: var(--dark-bg);
   padding: 8px 16px;
+  align-items: center;
 }
 
 .button {

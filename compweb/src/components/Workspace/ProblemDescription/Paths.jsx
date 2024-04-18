@@ -10,6 +10,8 @@ import styles from '../../styles/ProblemDescription.module.css';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import axios from "axios";
 import Tab from "./Tab.jsx";
 import { initializeAnalytics } from "firebase/analytics";
@@ -420,6 +422,10 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
 };
 
 const Paths = (props) => {
+    function customParser(text) {
+        const newText = text.replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
+        return newText;
+      }
 
     const lessonMetaData = useSelector(state => state.lessonMetaData); // This is what is actually used to keep track of which problem is active, contains all problem data
     const code = useSelector(state => state.codeState);
@@ -665,16 +671,47 @@ const Paths = (props) => {
         }
     }, [results, lessonProblemData, tabIndex, db, auth]);
 
-      function findProblem(data, currentProblemId, direction) {
+      function findProblem(currentProblemId, direction) {
+
+        let data;
+        switch (defaultTabs[tabIndex].data) {
+            case 'Junior':
+                data = JUNIOR_UNIT_LESSONS;
+                break;
+            case 'Senior':
+                data = SENIOR_UNIT_LESSONS;
+                break;
+            case 'Bronze':
+                data = BRONZE_UNIT_LESSONS;
+                break;
+            case 'Silver':
+                data = SILVER_UNIT_LESSONS;
+                break;
+            case 'Gold':
+                data = GOLD_UNIT_LESSONS;
+                break;
+            case 'Platinum':
+                data = PLAT_UNIT_LESSONS;
+                break;
+            default:
+                data = null;
+        }
+
         for (let unit of data) {
-            for (let lesson of unit) {
-                let problemIds = lesson.problemIds;
-                let currentIndex = problemIds.indexOf(currentProblemId);
-                if (currentIndex !== -1) {
-                    if (direction === 'next' && currentIndex < problemIds.length - 1) {
-                        return problemIds[currentIndex + 1];
-                    } else if (direction === 'previous' && currentIndex > 0) {
-                        return problemIds[currentIndex - 1];
+            for (let row of unit) {
+                for (let lesson of row) {
+                    console.log("lesson", lesson);
+                    console.log("currentProblemId", currentProblemId);
+                    let problemIds = lesson.problemIds;
+                    if (problemIds.includes(currentProblemId)) {
+                        let currentIndex = problemIds.indexOf(currentProblemId);
+                        if (currentIndex !== -1) {
+                            if (direction === 'next' && currentIndex < problemIds.length - 1) {
+                                return problemIds[currentIndex + 1];
+                            } else if (direction === 'previous' && currentIndex > 0) {
+                                return problemIds[currentIndex - 1];
+                            }
+                        }
                     }
                 }
             }
@@ -687,7 +724,7 @@ const Paths = (props) => {
             type: 'SET_LESSON_META_DATA',
             index: tabIndex,
             payload: {
-                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData[tabIndex].problem_id, "previous")
+                problem_id: findProblem(lessonMetaData[tabIndex].problem_id, "previous")
             }
         });
     };
@@ -697,7 +734,7 @@ const Paths = (props) => {
             type: 'SET_LESSON_META_DATA',
             index: tabIndex,
             payload: {
-                problem_id: findProblem(JUNIOR_UNIT_LESSONS, lessonMetaData[tabIndex].problem_id, "next")
+                problem_id: findProblem(lessonMetaData[tabIndex].problem_id, "next")
             }
         });
     };
@@ -799,70 +836,135 @@ const Paths = (props) => {
                                 </div>
                             <br />
                             <div className={styles.description}>
-                            <h3>Problem Description</h3>
-                            <ReactMarkdown className={styles.descriptionText} rehypePlugins={[rehypeKatex]} children={lessonProblemData[tabIndex].data.description.replace(/\\n/g, '\n')} />
-                            <div className={styles.divider}></div>
-                            <br />
-                            <h3>Input Format</h3>
-                            <pre className={styles.descriptionText}>{lessonProblemData[tabIndex].data.inputFormat.replace(/\\n/g, '\n')}</pre>
-                            <div className={styles.divider}></div>
-                            <br />
-                            <h3>Constraints</h3>
-                            <ul>
-                                {false && lessonProblemData[tabIndex].data.constraints &&
-                                Object.entries(lessonProblemData[tabIndex].data.constraints).map(([key, value]) => (
-                                    <li key={key}>
-                                    <strong>{key}:</strong> {value}
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className={styles.divider}></div>
-                            <br />
-                            <h3>Output Format</h3>
-                            <p>{lessonProblemData[tabIndex].data.outputFormat}</p>
-                            <div className={styles.divider}></div>
-                            <br />
-                            <h3>Points</h3>
-                            <p>{lessonProblemData[tabIndex].data.points}</p>
-                            </div>
-                            <br />
-                            <br />
-                            <button className={styles.runAll} onClick={submitCode}>Run All Tests (Ctrl + Enter)</button>
-                            <br />
-                            <div className={styles.testCases}>
-                            {testCases.map((testCase, index) => {
-                                const status = results[index]?.status?.description;
-                                const className = status === 'Accepted' ? styles.testCasePassed : status === 'Wrong Answer' ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
-
-                                return (
-                                <div key={testCase.key} className={className}>
-                                    <br />
-                                    <h3 className={className}>
-                                    Case {testCase.key}
-                                    {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}>✔️</span>}
-                                    {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}>❌</span>}
-                                    </h3>
-                                    {results[index] && (
-                                        <>
-                                            <h5 className={className}>[ {results[index].time}s ]</h5>
-                                        </>
-                                    )}
-                                    <br />
-                                    <h4 className={className}>Input:</h4>
-                                    <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
-                                    <br />
-                                    <h4 className={className}>Expected Output:</h4>
-                                    <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
-                                    {results[index] && results[index].status.description === 'Wrong Answer' && (
+                                {lessonProblemData[tabIndex].data.description && (
                                     <>
-                                        <br />
-                                        <h4 className={className}>Actual Output:</h4>
-                                        <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
+                                    {lessonProblemData[tabIndex].data.specificContest && <h3>{lessonProblemData[tabIndex].data.specificContest}</h3>}
+                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.description.replace(/\\n/g, '\n'))} />
+                                    <div className={styles.divider}></div>
+                                    <br />
                                     </>
-                                    )}
+                                )}
+                                {lessonProblemData[tabIndex].data.inputFormat && (
+                                    <>
+                                    <h3>Input Format</h3>
+                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.inputFormat.replace(/\\n/g, '\n'))} />
+                                    <div className={styles.divider}></div>
+                                    <br />
+                                    </>
+                                )}
+                                {false && lessonProblemData[tabIndex].data.constraints && (
+                                    <>
+                                    <h3>Constraints</h3>
+                                    <ul>
+                                        {Object.entries(lessonProblemData[tabIndex].data.constraints).map(([key, value]) => (
+                                        <li key={key}>
+                                            <strong>{key}:</strong> {value}
+                                        </li>
+                                        ))}
+                                    </ul>
+                                    <div className={styles.divider}></div>
+                                    <br />
+                                    </>
+                                )}
+                                {lessonProblemData[tabIndex].data.outputFormat && (
+                                    <>
+                                    <h3>Output Format</h3>
+                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.outputFormat.replace(/\\n/g, '\n'))} />
+                                    <div className={styles.divider}></div>
+                                    <br />
+                                    </>
+                                )}
+                                {lessonProblemData[tabIndex].data.sample1 && lessonProblemData[tabIndex].data.sample1.input && (
+                                    <>
+                                    <h3>Sample Input 1</h3>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample1.input.replace(/\\n/g, '\n')}</pre>
+                                    <br />
+                                    <h3>Output for Sample Input 1</h3>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample1.output.replace(/\\n/g, '\n')}</pre>
+                                    <br />
+                                    <h3>Explanation for Sample 1</h3>
+                                    {lessonProblemData[tabIndex].data.sample1.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.sample1.explanation.replace(/\\n/g, '\n'))} />}
+                                    <br />
+                                    <div className={styles.divider}></div>
+                                    <br />
+                                    </>
+                                )}
+                                {lessonProblemData[tabIndex].data.sample2 && lessonProblemData[tabIndex].data.sample2.input && (
+                                    <>
+                                    <h3>Sample Input 2</h3>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample2.input.replace(/\\n/g, '\n')}</pre>
+                                    <br />
+                                    <h3>Output for Sample Input 2</h3>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample2.output.replace(/\\n/g, '\n')}</pre>
+                                    <br />
+                                    <h3>Explanation for Sample 2</h3>
+                                    {lessonProblemData[tabIndex].data.sample2.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.sample2.explanation.replace(/\\n/g, '\n'))} />}
+                                    <br />
+                                    <div className={styles.divider}></div>
+                                    <br />
+                                    </>
+                                )}
+                                {lessonProblemData[tabIndex].data.sample3 && lessonProblemData[tabIndex].data.sample3.input && (
+                                    <>
+                                    <h3>Sample Input 3</h3>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample3.input.replace(/\\n/g, '\n')}</pre>
+                                    <br />
+                                    <h3>Output for Sample Input 3</h3>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample3.output.replace(/\\n/g, '\n')}</pre>
+                                    <br />
+                                    <h3>Explanation for Sample 3</h3>
+                                    {lessonProblemData[tabIndex].data.sample3.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.sample3.explanation.replace(/\\n/g, '\n'))} />}
+                                    <br />
+                                    <div className={styles.divider}></div>
+                                    <br />
+                                    </>
+                                )}
+                                {lessonProblemData[tabIndex].data.points && (
+                                    <>
+                                    <h3>Points</h3>
+                                    <p>{lessonProblemData[tabIndex].data.points}</p>
+                                    </>
+                                )}
                                 </div>
-                                );                
-                            })}
+                                <br />
+                                <br />
+                                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
+                                <br />
+                                <div className={styles.testCases}>
+                                {testCases.map((testCase, index) => {
+                                    const status = results[index]?.status?.description;
+                                    const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
+
+                                    return (
+                                    <div key={testCase.key} className={className}>
+                                        <br />
+                                        <h3 className={className}>
+                                        Case {testCase.key}
+                                        {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
+                                        {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
+                                        {results[index] && results[index].status.description === 'Time limit exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
+                                        </h3>
+                                        {results[index] && (
+                                            <>
+                                            <h5 className={className}>[ {results[index].time}s ]</h5>
+                                            </>
+                                        )}
+                                        <br />
+                                        <h4 className={className}>Input:</h4>
+                                        <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
+                                        <br />
+                                        <h4 className={className}>Expected Output:</h4>
+                                        <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
+                                        {results[index] && results[index].status.description === 'Wrong Answer' && (
+                                        <>
+                                            <br />
+                                            <h4 className={className}>Actual Output:</h4>
+                                            <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
+                                        </>
+                                        )}
+                                    </div>
+                                    );                
+                                })}
                             </div>
                         </div>
                         )} 
