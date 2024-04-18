@@ -503,56 +503,6 @@ const Paths = (props) => {
             const docRef = await getDoc(doc(db, "Questions", questionID));
             if (docRef.exists()) {
               let problemData = docRef.data();
-      
-              // Fetch test cases data from TestCaseReader
-              const fetchTestCasesData = async () => {
-                try {
-                  let testCaseArray = [];
-                  const testCaseFolder = problemData.folder; // Get the testCaseFolder from the problemData
-      
-                  if (testCaseFolder) {  // Add this check
-                    const fileListResponse = await axios.get(`/TestCaseData/${testCaseFolder}`);
-                    let fileList = fileListResponse.data;
-
-                    if (!Array.isArray(fileList)) {
-                        // If fileList is not an array, print its type and content
-                        console.log("Type of fileList:", typeof fileList);
-                        console.log("Content of fileList:", fileList);
-                    
-                        // Convert fileList to an array
-                        fileList = Object.keys(fileList);
-                      }                    
-
-                    fileList.sort();
-      
-                    for (let i = 0; i < fileList.length; i += 2) {
-                      const inputFileName = fileList[i];
-                      const outputFileName = fileList[i + 1];
-      
-                      try {
-                        const inputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                        const outputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${outputFileName}`);
-      
-                        testCaseArray.push({
-                          key: (i / 2) + 1,
-                          input: inputResponse.data,
-                          output: outputResponse.data,
-                        });
-                      } catch (error) {
-                        console.error("Error processing files:", inputFileName, outputFileName, error);
-                      }
-                    }
-      
-                    console.log("Test Cases from problemdesc:", testCaseArray);
-                    setTestCases(testCaseArray);
-                  }
-                } catch (error) {
-                  console.error("Error fetching test cases: ", error);
-                }
-              };
-      
-              await fetchTestCasesData(); // Call the fetchTestCasesData function here
-      
               return problemData;
             } else {
               console.log("No such document!");
@@ -587,8 +537,10 @@ const Paths = (props) => {
     const state = useSelector(state => state); // Access the state
 
     useEffect(() => {
-    console.log("State after dispatch:", state); // Log the state after dispatch
-    }, [state]); // Add state as a dependency to useEffect
+        if (lessonProblemData && lessonProblemData[tabIndex] && lessonProblemData[tabIndex].data && lessonProblemData[tabIndex].data.testCases) {
+            setTestCases(lessonProblemData[tabIndex].data.testCases);
+        }
+    }, [tabIndex]); // Add state as a dependency to useEffect
 
     const submitCode = async () => {
         console.log("sent data:", JSON.stringify({
@@ -941,7 +893,7 @@ const Paths = (props) => {
                                 <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
                                 <br />
                                 <div className={styles.testCases}>
-                                {testCases.map((testCase, index) => {
+                                {lessonProblemData[tabIndex].data.testCases ? lessonProblemData[tabIndex].data.testCases.map((testCase, index) => {
                                     const status = results[index]?.status?.description;
                                     const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
@@ -974,7 +926,12 @@ const Paths = (props) => {
                                         )}
                                     </div>
                                     );                
-                                })}
+                                }) : (
+                                    <div>
+                                        <h2>Test cases for this problem are coming soon!</h2>
+                                        <br />
+                                    </div>              
+                                )}
                             </div>
                         </div>
                         )} 

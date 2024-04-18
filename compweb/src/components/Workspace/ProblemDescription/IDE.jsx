@@ -7,9 +7,8 @@
 
 import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect, useRef } from "react";
-import { auth, app, db, storage } from "../../../firebase.js";
-import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
-import { getStorage, ref, listAll, getDownloadURL } from 'firebase/storage';
+import { auth, app, db } from "../../../firebase.js";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
 import "../../../Fonts.css";
 import Select from "react-select";
 import { Link } from "react-router-dom";
@@ -431,53 +430,10 @@ const IDE = (props) => {
   
     fetchProblemData();
   }, [questionID, dispatch]);
-  
+
   useEffect(() => {
-    if (currentTab.type === 'problem') {
-      const fetchTestCasesData = async () => {
-        try {
-          let testCaseArray = [];
-  
-          const testCaseFolder = currentTab.data.folder;
-  
-          if (testCaseFolder) {
-            // Get the reference to the folder in Firebase Storage
-            const testCaseFolderRef = ref(storage, `TestCaseData/${testCaseFolder}`);
-  
-            // Get the list of all files in the folder
-            const fileList = await listAll(testCaseFolderRef);
-  
-            // Sort the file names
-            fileList.items.sort((a, b) => a.name.localeCompare(b.name));
-  
-            for (let i = 0; i < fileList.items.length; i += 2) {
-              const inputFileName = fileList.items[i];
-              const outputFileName = fileList.items[i + 1];
-  
-              try {
-                // Get the file content from Firebase Storage
-                const inputResponse = await getDownloadURL(inputFileName);
-                const outputResponse = await getDownloadURL(outputFileName);
-
-                testCaseArray.push({
-                  key: (i / 2) + 1,
-                  input: inputResponse,
-                  output: outputResponse,
-                });
-              } catch (error) {
-                console.error(error);
-              }
-            }
-
-            setTestCases(testCaseArray);
-            setIsLoading(false);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-  
-      fetchTestCasesData();
+    if (currentTab.data && currentTab.data.testCases) {
+      setTestCases(currentTab.data.testCases);
     }
   }, [currentTab]);
   
@@ -1116,7 +1072,7 @@ int main() {
                 <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
                 <br />
                 <div className={styles.testCases}>
-                  {testCases.map((testCase, index) => {
+                  {currentTab.data.testCases ? currentTab.data.testCases.map((testCase, index) => {
                     const status = results[index]?.status?.description;
                     const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
@@ -1136,10 +1092,10 @@ int main() {
                           )}
                         <br />
                         <h4 className={className}>Input:</h4>
-                        <iframe src={testCase.input} style={{margin: '10px 0', width: '100%'}}/>
+                        <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
                         <br />
                         <h4 className={className}>Expected Output:</h4>
-                        <iframe src={testCase.output} style={{margin: '10px 0', width: '100%'}}/>
+                        <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
                         {results[index] && results[index].status.description === 'Wrong Answer' && (
                           <>
                             <br />
@@ -1149,7 +1105,12 @@ int main() {
                         )}
                       </div>
                     );                
-                  })}
+                  }): (
+                    <div>
+                      <h2>Test cases for this problem are coming soon!</h2>
+                      <br />
+                    </div>
+                  )}
                 </div>
               </div> 
             </>

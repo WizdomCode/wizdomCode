@@ -13,6 +13,7 @@ const SignUp = () => {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [age, setAge] = useState("");
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
   const signUp = async (e) => {
@@ -28,6 +29,7 @@ const SignUp = () => {
   
       // Create an empty array called "solved" for each new user
       const userData = {
+        username: username,
         firstName: firstName,
         lastName: lastName,
         country: country,
@@ -68,6 +70,11 @@ const SignUp = () => {
             </p>
           </div>
           <form onSubmit={signUp}>
+                        <div class="input-control">
+                            <input
+                                type = "text" placeholder="Enter username" value={username} onChange = {(e) => setUsername(e.target.value)} class="input-field">
+                            </input>
+                        </div>
                         <div class="input-control">
                             <input
                                 type = "text" placeholder="Enter your first name" value={firstName} onChange = {(e) => setFirstName(e.target.value)} class="input-field">
