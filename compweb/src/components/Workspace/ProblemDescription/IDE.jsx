@@ -440,9 +440,15 @@ const IDE = (props) => {
           const testCaseFolder = currentTab.data.folder;
   
           if (testCaseFolder) {
+            console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+            console.log("process.env.PUBLIC_URL", process.env.PUBLIC_URL);
+            console.log("process.env.REACT_APP_PUBLIC_URL", process.env.REACT_APP_PUBLIC_URL);
+
             const baseUrl = process.env.NODE_ENV === 'development' ? process.env.PUBLIC_URL : process.env.REACT_APP_PUBLIC_URL;
             const fileListResponse = await axios.get(`${baseUrl}/TestCaseData/${testCaseFolder}`);
             const fileList = fileListResponse.data;
+
+            console.log("baseUrl", baseUrl);
   
             fileList.sort();
   
