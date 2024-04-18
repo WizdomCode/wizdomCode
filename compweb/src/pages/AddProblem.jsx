@@ -3,6 +3,7 @@ import Navigation from "../components/Navigation/Navigation";
 import { db } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
 import "./Add.css";
+import axios from "axios";
 
 const AddProblem = () => {
     const [title, setTitle] = useState("");
@@ -56,6 +57,59 @@ const AddProblem = () => {
         } catch (error) {
             console.error("Error adding document: ", error);
         }
+
+        const fetchTestCasesData = async () => {
+            try {
+                let testCaseArray = [];
+    
+                const testCaseFolder = folder;
+    
+                if (testCaseFolder) {
+                    const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+                    const fileList = fileListResponse.data;
+                    
+                    fileList.sort();
+        
+                    for (let i = 0; i < fileList.length; i += 2) {
+                        const inputFileName = fileList[i];
+                        const outputFileName = fileList[i + 1];
+        
+                        try {
+                            const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                            const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+        
+                            console.log("inputResponse", inputResponse);
+                            console.log("outputResponse", outputResponse);
+        
+                            testCaseArray.push({
+                                key: (i / 2) + 1,
+                                input: inputResponse.data,
+                                output: outputResponse.data,
+                            });
+                        } catch (error) {
+                            console.error("Error processing files:", inputFileName, outputFileName, error);
+                        }
+                    }
+    
+                // Access the Questions collection in Firestore
+                const questionDocRef = doc(db, "Questions", title);
+    
+                console.log("testCaseArray", testCaseArray);
+    
+                // Update the document with the testCases field
+                await setDoc(questionDocRef, {
+                    testCases: testCaseArray
+                }, { merge: true });
+    
+                console.log("WROTE TEST CASE DATA");
+    
+                }
+            } catch (error) {
+                console.error("Error fetching test cases: ", error);
+            }
+        };
+    
+        fetchTestCasesData();
     }
 
     return (
