@@ -198,6 +198,7 @@ const CodeEditor = (props) => {
   // Update the ref whenever the language changes
   useEffect(() => {
     languageRef.current = language;
+    console.log("language", language);
   }, [language]);
 
   const inputOutputTab = useSelector(state => state.inputOutputTab);

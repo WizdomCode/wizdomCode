@@ -462,33 +462,51 @@ int main() {
       code: code,
       test_cases: testCases
     }));
-    //rESTRART
-    // Start the timer
-    const startTime = performance.now();
 
-    const response = await fetch('https://e816-66-22-164-190.ngrok-free.app/execute', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        language: language,
-        code: code,
-        test_cases: testCases
-      })
-    });
+    try {
+        const response = await fetch('https://2a42-99-208-67-206.ngrok-free.app/execute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            language: language,
+            code: code,
+            test_cases: testCases
+          })
+        });
 
-    // End the timer and calculate the elapsed time
-    const endTime = performance.now();
-    const elapsedTime = endTime - startTime;
-    console.log(`Execution time: ${elapsedTime} milliseconds`);
+        if (response.ok && response.headers.get('Content-Type') === 'application/json') {
+          const data = await response.json();
+          const requestId = data.request_id;
 
-    console.log("sent code");
-    const data = await response.json();
-    console.log(data);
+          // Poll the server for results
+          const getResult = async () => {
+            const response = await fetch(`https://2a42-99-208-67-206.ngrok-free.app/results/${requestId}.txt`);
+            if (response.ok) {
+              const data = await response.json();
+              setResults(data);
+            } else if (response.status === 404) {
+              setTimeout(getResult, 1000); // Try again in 1 second
+            } else {
+              console.error('Error:', response.status, response.statusText);
+              // Log the error
+              console.error('Response:', await response.text());
+            }
+          };
 
-    setResults(data);
-  };
+          getResult();
+        } else {
+          console.error('Error:', response.status, response.statusText);
+          // Log the error
+          console.error('Response:', await response.text());
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // Log the error
+    }
+};
+
 
   useEffect(() => {
     // Define a function to update the user's document
