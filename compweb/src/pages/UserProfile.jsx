@@ -50,6 +50,7 @@ const UserProfile = () => {
       <h1>User Profile</h1>
       {userData && (
         <div>
+          <p>User: {userData.username}</p>
           <p>First Name: {userData.firstName}</p>
           <p>Last Name: {userData.lastName}</p>
           <p>Points: {userData.points}</p>

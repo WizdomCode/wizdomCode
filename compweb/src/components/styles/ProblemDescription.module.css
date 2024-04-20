@@ -211,6 +211,10 @@ ul {
   width: 100%;
 }
 
+.testCases {
+  color: white;
+}
+
 .codeSnippet {
   margin: 10px 0;
   color: #7EC699;

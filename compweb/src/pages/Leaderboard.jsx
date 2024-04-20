@@ -60,8 +60,7 @@ const Leaderboard = () => {
                 <thead>
                     <tr>
                         <th>Rank</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
+                        <th>User</th>
                         <th>Points</th>
                         <th>Country</th>
                     </tr>
@@ -70,8 +69,7 @@ const Leaderboard = () => {
                     {users.map((user, index) => (
                         <tr key={index}>
                             <td>{user.rank}</td>
-                            <td>{user.firstName}</td>
-                            <td>{user.lastName}</td>
+                            <td>{user.username}</td>
                             <td>{user.points}</td>
                             <td>{user.country}</td>
                         </tr>

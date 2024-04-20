@@ -8,7 +8,7 @@
 import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect, useRef } from "react";
 import { auth, app, db } from "../../../firebase.js";
-import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
 import "../../../Fonts.css";
 import Select from "react-select";
 import { Link } from "react-router-dom";
@@ -430,74 +430,10 @@ const IDE = (props) => {
   
     fetchProblemData();
   }, [questionID, dispatch]);
-  
+
   useEffect(() => {
-    if (currentTab.type === 'problem') {
-      const fetchTestCasesData = async () => {
-        try {
-          let testCaseArray = [];
-    
-          const testCaseFolder = currentTab.data.folder;
-    
-          if (testCaseFolder) {
-            const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
-            const fileList = fileListResponse.data;
-    
-            fileList.sort();
-    
-            for (let i = 0; i < fileList.length; i += 2) {
-              const inputFileName = fileList[i];
-              const outputFileName = fileList[i + 1];
-    
-              try {
-                const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
-                
-                console.log(inputResponse);
-
-                let inputLines, outputLines;
-
-                try {
-                    inputLines = inputResponse.data.split('\n', 106);
-                    outputLines = outputResponse.data.split('\n', 106);
-                } catch (error) {
-                    // Make these strings before trying .split()
-                    inputLines = String(inputResponse.data).split('\n', 106);
-                    outputLines = String(outputResponse.data).split('\n', 106);
-                }
-                
-                // Now inputLines and outputLines can be accessed outside the try/catch block
-                console.log(inputLines, outputLines);
-                  
-                if (inputLines.length > 105) {
-                  inputLines = inputLines.slice(0, 105);
-                  inputLines.push('...(more lines)');
-                }
-    
-                if (outputLines.length > 105) {
-                  outputLines = outputLines.slice(0, 105);
-                  outputLines.push('...(more lines)');
-                }
-    
-                testCaseArray.push({
-                  key: (i / 2) + 1,
-                  input: inputLines.join('\n'),
-                  output: outputLines.join('\n'),
-                });
-              } catch (error) {
-                console.error("Error processing files:", inputFileName, outputFileName, error);
-              }
-            }
-    
-            setTestCases(testCaseArray);
-            setIsLoading(false);
-          }
-        } catch (error) {
-          console.error("Error fetching test cases: ", error);
-        }
-      };
-    
-      fetchTestCasesData();
+    if (currentTab.data && currentTab.data.testCases) {
+      setTestCases(currentTab.data.testCases);
     }
   }, [currentTab]);
   
@@ -526,7 +462,7 @@ int main() {
       code: code,
       test_cases: testCases
     }));
-
+    //rESTRART
     // Start the timer
     const startTime = performance.now();
 
@@ -1136,7 +1072,7 @@ int main() {
                 <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
                 <br />
                 <div className={styles.testCases}>
-                  {testCases.map((testCase, index) => {
+                  {currentTab.data.testCases ? currentTab.data.testCases.map((testCase, index) => {
                     const status = results[index]?.status?.description;
                     const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
@@ -1169,7 +1105,12 @@ int main() {
                         )}
                       </div>
                     );                
-                  })}
+                  }): (
+                    <div>
+                      <h2>Test cases for this problem are coming soon!</h2>
+                      <br />
+                    </div>
+                  )}
                 </div>
               </div> 
             </>
