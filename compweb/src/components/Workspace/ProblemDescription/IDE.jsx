@@ -25,6 +25,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import socketIOClient from 'socket.io-client';
 import remarkGfm from 'remark-gfm';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
@@ -456,54 +457,64 @@ int main() {
     setLanguage(language);
   }
 
-  const submitCode = async () => {
+  const pollResults = async (requestId) => {
+    try {
+        const response = await fetch(`https://2a42-99-208-67-206.ngrok-free.app/get_results/${requestId}`);
+        if (response.ok && response.headers.get('Content-Type') === 'application/json') {
+            const data = await response.json();
+            console.log('Received results:', data);
+            setResults(data);
+        } else if (response.ok && response.headers.get('Content-Type') === 'application/jsonl') {
+            // If response is in JSONL format, read each line and parse JSON
+            const text = await response.text();
+            const lines = text.split('\n').filter(line => line.trim() !== ''); // Split lines and remove empty lines
+            const results = lines.map(line => JSON.parse(line)); // Parse each line as JSON
+            console.log('Received results:', results);
+            setResults(results);
+        } else {
+            console.error('Error:', response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
+
+const submitCode = async () => {
     console.log("sent data:", JSON.stringify({
-      language: language,
-      code: code,
-      test_cases: testCases
+        language: language,
+        code: code,
+        test_cases: testCases
     }));
 
     try {
         const response = await fetch('https://2a42-99-208-67-206.ngrok-free.app/execute', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            language: language,
-            code: code,
-            test_cases: testCases
-          })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                language: language,
+                code: code,
+                test_cases: testCases
+            })
         });
 
         if (response.ok && response.headers.get('Content-Type') === 'application/json') {
-          const data = await response.json();
-          const requestId = data.request_id;
+            const data = await response.json();
+            const requestId = data.request_id;
+            console.log("DATA", data)
+            console.log("RequestID", requestId)
 
-          // Poll the server for results
-          const getResult = async () => {
-            const response = await fetch(`https://2a42-99-208-67-206.ngrok-free.app/results/${requestId}.txt`);
-            if (response.ok) {
-              const data = await response.json();
-              setResults(data);
-            } else if (response.status === 404) {
-              setTimeout(getResult, 1000); // Try again in 1 second
-            } else {
-              console.error('Error:', response.status, response.statusText);
-              // Log the error
-              console.error('Response:', await response.text());
-            }
-          };
+            // Poll for results periodically
+            const intervalId = setInterval(() => pollResults(requestId), 2000); // Poll every 2 seconds
 
-          getResult();
+            // Stop polling after 60 seconds (optional)
+            setTimeout(() => clearInterval(intervalId), 60000);
         } else {
-          console.error('Error:', response.status, response.statusText);
-          // Log the error
-          console.error('Response:', await response.text());
+            console.error('Error:', response.status, response.statusText);
         }
     } catch (error) {
         console.error('Error:', error);
-        // Log the error
     }
 };
 

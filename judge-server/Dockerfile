@@ -11,5 +11,7 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 RUN pip install Flask-CORS
+RUN pip install socket
+RUN pip install Flask-CORS gunicorn
 
-CMD [ "python", "judge.py" ]
+CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "judge.py"]
