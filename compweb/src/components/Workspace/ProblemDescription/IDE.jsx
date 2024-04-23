@@ -479,17 +479,8 @@ int main() {
     }
 };
 
-<<<<<<< HEAD
 const submitCode = async () => {
     console.log("sent data:", JSON.stringify({
-=======
-    const response = await fetch('https://e816-66-22-164-190.ngrok-free.app/execute', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
->>>>>>> parent of 0afa21d5 (Firebase storage integration with 150+ new problems)
         language: language,
         code: code,
         test_cases: testCases
