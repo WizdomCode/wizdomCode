@@ -171,7 +171,7 @@ const IDE = (props) => {
   const [isFocused, setIsFocused] = useState({topics: false, contests: false, points: false});
   const [questionID, setQuestionID] = useState(null);
   const [testCaseFolder, setTestCaseFolder] = useState(null);
-
+  const xdata = [];
   const [testCases, setTestCases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -462,50 +462,72 @@ int main() {
       code: code,
       test_cases: testCases
     }));
-
-    try {
-        const response = await fetch('https://2a42-99-208-67-206.ngrok-free.app/execute', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            language: language,
-            code: code,
-            test_cases: testCases
-          })
-        });
-
-        if (response.ok && response.headers.get('Content-Type') === 'application/json') {
-          const data = await response.json();
-          const requestId = data.request_id;
-
-          // Poll the server for results
-          const getResult = async () => {
-            const response = await fetch(`https://2a42-99-208-67-206.ngrok-free.app/results/${requestId}.txt`);
-            if (response.ok) {
-              const data = await response.json();
-              setResults(data);
-            } else if (response.status === 404) {
-              setTimeout(getResult, 1000); // Try again in 1 second
-            } else {
-              console.error('Error:', response.status, response.statusText);
-              // Log the error
-              console.error('Response:', await response.text());
+  
+    // Start the timer
+    const startTime = performance.now();
+  
+    const response = await fetch('https://f140-99-208-67-206.ngrok-free.app/execute', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        language: language,
+        code: code,
+        test_cases: testCases
+      })
+    });
+  
+    // End the timer and calculate the elapsed time
+    const endTime = performance.now();
+    const elapsedTime = endTime - startTime;
+    console.log(`Execution time: ${elapsedTime} milliseconds`);
+  
+    console.log("sent code");
+  
+    // Extract request_id from response
+    const { request_id } = await response.json();
+    console.log(request_id);
+  
+    // Continuously fetch data from Firestore until the condition is met
+    let stopFetching = false;
+    while (!stopFetching) {
+      // Fetch data from Firestore using request_id
+      const docRef = doc(db, "Results", request_id);
+      const rdata = await getDoc(docRef);
+      if (rdata.exists) {
+        const ndata = rdata.data();
+      
+        // Check if results array exists in ndata
+        if (ndata && ndata.results && Array.isArray(ndata.results)) {
+          // Iterate over results
+          for (let result of ndata.results) {
+            console.log("result: ", result);
+            if (result.key === "stop") {
+              stopFetching = true;
+              break; // Exit loop if condition is met
             }
-          };
-
-          getResult();
+            xdata.push(result);
+          }
         } else {
-          console.error('Error:', response.status, response.statusText);
-          // Log the error
-          console.error('Response:', await response.text());
+          console.log("Results not found or not in expected format in ndata.");
         }
-    } catch (error) {
-        console.error('Error:', error);
-        // Log the error
+      
+        if (!stopFetching) {
+          // Delay before next fetch to avoid overwhelming the server
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } else {
+        console.log("Document not found!");
+        break;
+      }
     }
-};
+    // Once the condition is met, set results to the data received so far
+    setResults(xdata);
+  };
+  
+
+
 
 
   useEffect(() => {

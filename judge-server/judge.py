@@ -9,12 +9,20 @@ import json
 import signal
 import uuid
 import subprocess
+import firebase_admin
+from firebase_admin import credentials, firestore
 from io import StringIO
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask import send_file
+from flask import send_from_directory
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+cred = credentials.Certificate('serviceAccountKey.json')
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
 TIME_LIMIT = 2
 
@@ -134,6 +142,16 @@ def execute_cpp_code(compiled_code, input_data):
     except Exception as e:
         return str(e)
 
+@app.route('/get_data')
+def get_data(id):
+    # Example: Get data from Firestore
+    doc_ref = db.collection('Requests').document(id)
+    doc = doc_ref.get()
+    if doc.exists:
+        return jsonify(doc.to_dict())
+    else:
+        return 'Document does not exist', 404
+
 def process_queue():
     while True:
         # Check if there are any new requests in the queue
@@ -146,21 +164,31 @@ def process_queue():
                 language = data['language']
                 code = data['code']
                 test_cases = data['test_cases']
-
                 # Process the request
                 results = execute_code(code, test_cases, language)
 
-                # Write the results to a new file
+                # Add "stop" to the results array
+                results.append({'key': 'stop', 'status': {'description': 'Processing complete', 'id': 5}, 'stdout': '', 'time': 0})
+
+                # Update Firestore document with results
                 request_id = file[:-4]  # Get the request ID from the file name
-                with open(os.path.join('results', f'{request_id}.txt'), 'w') as f:
-                    json.dump(results, f)
+                doc_ref = db.collection('Results').document(request_id)
+                doc_ref.set({'results': results})
+
+                # Log a message indicating the request ID
+                logging.info(f'Results for request {request_id} updated in Firestore')
 
                 # Remove the request from the queue
                 os.remove(os.path.join('queue', file))
 
         # Sleep for 1 second before checking the queue again
         time.sleep(1)
+        
+@app.route('/get_results/<path:filename>')
+def get_result_file(filename):
+    return send_from_directory('results', filename)
 
+# Modify the /execute route to return the request ID
 @app.route('/execute', methods=['POST'])
 def execute():
     try:
@@ -171,7 +199,7 @@ def execute():
 
         # Generate a unique request ID
         request_id = str(uuid.uuid4())
-
+        print("rid", request_id)
         # Write the request to a new file in the queue
         with open(os.path.join('queue', f'{request_id}.txt'), 'w') as f:
             json.dump({'language': language, 'code': code, 'test_cases': test_cases}, f)
@@ -181,6 +209,20 @@ def execute():
         # Log the error
         logging.error(f"An error occurred: {e}")
         return jsonify({'error': 'An error occurred during code submission.'}), 500
+@app.route('/get_results/<request_id>')
+def get_results(request_id):
+    try:
+        with open(os.path.join('results', f'{request_id}.jsonl'), 'r') as f:
+            results = [json.loads(line.strip()) for line in f]
+        return jsonify(results)
+    except FileNotFoundError:
+        return jsonify({'error': 'Results not found'}), 404
+
+
+
+
+
+
 
 if __name__ == '__main__':
     # Create the queue and results directories if they don't exist
