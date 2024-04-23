@@ -17,7 +17,7 @@ COPY serviceAccountKey.json /app/
 
 # Set the working directory
 WORKDIR /app
-#a
+
 # Install Python dependencies
 RUN pip install -r requirements.txt
 
