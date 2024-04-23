@@ -25,6 +25,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import socketIOClient from 'socket.io-client';
 import remarkGfm from 'remark-gfm';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
@@ -456,39 +457,76 @@ int main() {
     setLanguage(language);
   }
 
-  const submitCode = async () => {
-    console.log("sent data:", JSON.stringify({
-      language: language,
-      code: code,
-      test_cases: testCases
-    }));
-    //rESTRART
-    // Start the timer
-    const startTime = performance.now();
+  const pollResults = async (requestId) => {
+    try {
+        const response = await fetch(`https://2a42-99-208-67-206.ngrok-free.app/get_results/${requestId}`);
+        if (response.ok && response.headers.get('Content-Type') === 'application/json') {
+            const data = await response.json();
+            console.log('Received results:', data);
+            setResults(data);
+        } else if (response.ok && response.headers.get('Content-Type') === 'application/jsonl') {
+            // If response is in JSONL format, read each line and parse JSON
+            const text = await response.text();
+            const lines = text.split('\n').filter(line => line.trim() !== ''); // Split lines and remove empty lines
+            const results = lines.map(line => JSON.parse(line)); // Parse each line as JSON
+            console.log('Received results:', results);
+            setResults(results);
+        } else {
+            console.error('Error:', response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
 
+<<<<<<< HEAD
+const submitCode = async () => {
+    console.log("sent data:", JSON.stringify({
+=======
     const response = await fetch('https://e816-66-22-164-190.ngrok-free.app/execute', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+>>>>>>> parent of 0afa21d5 (Firebase storage integration with 150+ new problems)
         language: language,
         code: code,
         test_cases: testCases
-      })
-    });
+    }));
 
-    // End the timer and calculate the elapsed time
-    const endTime = performance.now();
-    const elapsedTime = endTime - startTime;
-    console.log(`Execution time: ${elapsedTime} milliseconds`);
+    try {
+        const response = await fetch('https://2a42-99-208-67-206.ngrok-free.app/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                language: language,
+                code: code,
+                test_cases: testCases
+            })
+        });
 
-    console.log("sent code");
-    const data = await response.json();
-    console.log(data);
+        if (response.ok && response.headers.get('Content-Type') === 'application/json') {
+            const data = await response.json();
+            const requestId = data.request_id;
+            console.log("DATA", data)
+            console.log("RequestID", requestId)
 
-    setResults(data);
-  };
+            // Poll for results periodically
+            const intervalId = setInterval(() => pollResults(requestId), 2000); // Poll every 2 seconds
+
+            // Stop polling after 60 seconds (optional)
+            setTimeout(() => clearInterval(intervalId), 60000);
+        } else {
+            console.error('Error:', response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
+
 
   useEffect(() => {
     // Define a function to update the user's document
