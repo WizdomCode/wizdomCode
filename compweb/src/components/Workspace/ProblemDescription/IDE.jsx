@@ -9,6 +9,7 @@ import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect, useRef } from "react";
 import { auth, app, db } from "../../../firebase.js";
 import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
+import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import "../../../Fonts.css";
 import Select from "react-select";
 import { Link } from "react-router-dom";
@@ -174,6 +175,7 @@ const IDE = (props) => {
   const [testCaseFolder, setTestCaseFolder] = useState(null);
   const xdata = [];
   const [testCases, setTestCases] = useState([]);
+  const [displayCases, setDisplayCases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -433,10 +435,79 @@ const IDE = (props) => {
   }, [questionID, dispatch]);
 
   useEffect(() => {
-    if (currentTab.data && currentTab.data.testCases) {
-      setTestCases(currentTab.data.testCases);
+    if (currentTab.data && currentTab.data.title) {
+      const testCaseObj = {};
+      const storage = getStorage();
+      const listRef = ref(storage, `/TestCaseData/${currentTab.data.folder}`);
+  
+      listAll(listRef)
+        .then((res) => {
+          let promises = res.items.map((itemRef) => {
+            return getDownloadURL(ref(storage, itemRef))
+              .then((url) => {
+                return new Promise((resolve, reject) => {
+                  const xhr = new XMLHttpRequest();
+                  xhr.responseType = '';
+                  xhr.onload = (event) => {
+                    let data = xhr.response;
+                    let numPart = parseInt(itemRef._location.path_.match(/(\d+)\.txt$/)[1]);
+                    testCaseObj[numPart] = data;
+                    resolve();
+                  };
+                  xhr.onerror = reject;
+                  xhr.open('GET', url);
+                  xhr.send();
+                });
+              });
+          });
+  
+          Promise.all(promises)
+            .then(() => {
+              let testCaseArray = [];
+              let displayCaseArray = [];
+
+              let i = 1;
+              while (testCaseObj.hasOwnProperty(String(i))) {
+                testCaseArray.push({ key: (i + 1) / 2, input: testCaseObj[i], output: testCaseObj[i + 1] });
+
+                let inputLines, outputLines;
+
+                try {
+                  inputLines = testCaseObj[i].toString().split('\n', 106);
+                  outputLines = testCaseObj[i + 1].toString().split('\n', 106);
+                } catch (error) {
+                  inputLines = String(testCaseObj[i]).split('\n', 106);
+                  outputLines = String(testCaseObj[i + 1]).split('\n', 106);
+                }  
+
+                if (inputLines.length > 105) {
+                  inputLines = inputLines.slice(0, 105);
+                  inputLines.push('...(more lines)');
+                }
+  
+                if (outputLines.length > 105) {
+                  outputLines = outputLines.slice(0, 105);
+                  outputLines.push('...(more lines)');
+                }  
+
+                displayCaseArray.push({ key: (i + 1) / 2, input: inputLines.join('\n'), output: outputLines.join('\n') });
+
+                i += 2;
+              }
+
+              setTestCases(testCaseArray);
+              console.log("displayCaseArray", displayCaseArray);
+              setDisplayCases(displayCaseArray);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
-  }, [currentTab]);
+  }, [currentTab]);  
   
   const boilerPlate = 
 `#include <iostream>
@@ -1135,7 +1206,7 @@ const submitCode = async () => {
                 <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
                 <br />
                 <div className={styles.testCases}>
-                  {currentTab.data.testCases ? currentTab.data.testCases.map((testCase, index) => {
+                  {displayCases ? displayCases.map((testCase, index) => {
                     const status = results[index]?.status?.description;
                     const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
