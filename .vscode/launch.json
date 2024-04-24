@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/lingo/OneDrive/Desktop/CP-EDU/cp-learner/judge-backend/tmp",
-      "program": "c:/Users/lingo/OneDrive/Desktop/CP-EDU/cp-learner/judge-backend/tmp/build/Debug/outDebug",
+      "cwd": "c:/Users/lingo/OneDrive/Desktop/CP-EDU/cp-learner/compweb/public/TestCaseData/tinCanTelephone/_notes",
+      "program": "c:/Users/lingo/OneDrive/Desktop/CP-EDU/cp-learner/compweb/public/TestCaseData/tinCanTelephone/_notes/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
