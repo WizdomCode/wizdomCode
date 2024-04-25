@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import AboutUs from "./pages/AboutUs";
+import NewIDE from "./pages/NewIDE";
 import Leaderboard from "./pages/Leaderboard";
 import SignUp from "./pages/SignUp";
 import LearningPath from "./pages/LearningPath";
@@ -58,7 +58,7 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/aboutus" element={<AboutUs />} />
+      <Route path="/newide" element={<NewIDE />} />
       <Route path="/leaderboard" element={<LeaderboardPage />} />
       <Route path="/learningpath" element={<LearningPath />} />
       <Route path="/computercontest" element={<ComputerContest />} />

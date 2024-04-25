@@ -1,0 +1,56 @@
+/* NewIDE.css */
+
+/* Container styles */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: black; /* Set background color to black */
+    color: white; /* Set text color to white */
+}
+
+/* Form styles */
+.form {
+    margin-bottom: 20px;
+}
+
+.input {
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff; /* Set input background color to white */
+    color: black; /* Set input text color to black */
+}
+
+.submit-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+/* File list styles */
+.file-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.file-item {
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.file-item:hover {
+    background-color: #333; /* Darken background color on hover */
+}
+
+/* Selected item styles */
+.selected-item {
+    margin-top: 20px;
+}
+
+.selected-item h2 {
+    font-size: 20px;
+}
