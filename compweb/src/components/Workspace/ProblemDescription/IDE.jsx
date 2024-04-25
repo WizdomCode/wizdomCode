@@ -917,8 +917,17 @@ const submitCode = async () => {
   }
 
   function customParser(text) {
-    // This is just an example. Replace it with your own logic.
-    const newText = text.replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
+    const newText = text
+      .split('!table')
+      .map((str, index) => {
+        if (index % 2 === 0) {
+          return `<em class="${styles.descriptionText}">${str}</em><br />`;
+        } else {
+          return str;
+        }
+      })
+      .join('')
+      .replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
     return newText;
   }
     
@@ -1114,7 +1123,7 @@ const submitCode = async () => {
                   {currentTab.data.description && (
                     <>
                       {currentTab.data.specificContest && <h3>{currentTab.data.specificContest}</h3>}
-                      <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
                       <div className={styles.divider}></div>
                       <br />
                     </>
@@ -1122,7 +1131,7 @@ const submitCode = async () => {
                   {currentTab.data.inputFormat && (
                     <>
                       <h3>Input Format</h3>
-                      <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
                       <div className={styles.divider}></div>
                       <br />
                     </>
@@ -1144,7 +1153,7 @@ const submitCode = async () => {
                   {currentTab.data.outputFormat && (
                     <>
                       <h3>Output Format</h3>
-                      <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
                       <div className={styles.divider}></div>
                       <br />
                     </>
@@ -1158,7 +1167,7 @@ const submitCode = async () => {
                       <pre className={styles.codeSnippet}>{currentTab.data.sample1.output.replace(/\\n/g, '\n')}</pre>
                       <br />
                       <h3>Explanation for Sample 1</h3>
-                      {currentTab.data.sample1.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} />}
+                      {currentTab.data.sample1.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} />}
                       <br />
                       <div className={styles.divider}></div>
                       <br />
@@ -1173,7 +1182,7 @@ const submitCode = async () => {
                       <pre className={styles.codeSnippet}>{currentTab.data.sample2.output.replace(/\\n/g, '\n')}</pre>
                       <br />
                       <h3>Explanation for Sample 2</h3>
-                      {currentTab.data.sample2.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} />}
+                      {currentTab.data.sample2.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} />}
                       <br />
                       <div className={styles.divider}></div>
                       <br />
@@ -1188,7 +1197,7 @@ const submitCode = async () => {
                       <pre className={styles.codeSnippet}>{currentTab.data.sample3.output.replace(/\\n/g, '\n')}</pre>
                       <br />
                       <h3>Explanation for Sample 3</h3>
-                      {currentTab.data.sample3.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} />}
+                      {currentTab.data.sample3.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} />}
                       <br />
                       <div className={styles.divider}></div>
                       <br />

@@ -11,6 +11,16 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Input from '@mui/material/Input';
 import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
+import Split from 'react-split'
+
+import styles from '../components/styles/ProblemDescription.module.css';
+import "../Fonts.css";
+import '../components/styles/Workspace.css';
+import "../components/styles/Paths.css";
+
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 
 const ariaLabel = { 'aria-label': 'description' };
 
@@ -27,6 +37,7 @@ const AddProblem = () => {
     const [folder, setFolder] = useState("");
     const [inputFormat, setInputFormat] = useState("");
     const [outputFormat, setOutputFormat] = useState("");
+    const [constraints, setConstraints] = useState("");
     const [points, setPoints] = useState("");
     const [sample1, setSample1] = useState({input: "", output: "", explanation: ""});
     const [sample2, setSample2] = useState({input: "", output: "", explanation: ""});
@@ -46,6 +57,7 @@ const AddProblem = () => {
                 folder,
                 inputFormat,
                 outputFormat,
+                constraints,
                 points: Number(points),
                 sample1,
                 sample2,
@@ -61,6 +73,7 @@ const AddProblem = () => {
                 folder,
                 inputFormat,
                 outputFormat,
+                constraints,
                 points: Number(points),
                 sample1,
                 sample2,
@@ -174,11 +187,164 @@ const AddProblem = () => {
 
     const currentPageData = filteredQuestions.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
 
+    function customParser(text) {
+        const newText = text
+          .split('!table')
+          .map((str, index) => {
+            if (index % 2 === 0) {
+              return `<em class="${styles.descriptionText}">${str}</em><br />`;
+            } else {
+              return str;
+            }
+          })
+          .join('')
+          .replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
+        return newText;
+      }    
+
     return (
         <>
             <Navigation></Navigation>
-            <h1>Add Problem</h1>
-            <section>
+            <Split
+                className="split"
+                style={{ display: 'flex', flexDirection: 'row' }}
+                minSize={500}
+            >
+            <div id="split-0" style={{ height: "100vh", overflow: "auto", background: "#1B1B32", backgroundColor: "#1B1B32", marginTop: "50px" }}>
+            <div className={styles.wrapper}>
+                <br />
+                {title && <h1 className={styles.title}>{title}</h1>}
+                <br />
+                <div className={styles.description}>
+                  {description && (
+                    <>
+                      {specificContest && <h3>{specificContest}</h3>}
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(description.replace(/\\n/g, '\n'))} />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {inputFormat && (
+                    <>
+                      <h3>Input Format</h3>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(inputFormat.replace(/\\n/g, '\n'))} />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {outputFormat && (
+                    <>
+                      <h3>Output Format</h3>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(outputFormat.replace(/\\n/g, '\n'))} />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {constraints && (
+                    <>
+                      <h3>Constraints</h3>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(constraints.replace(/\\n/g, '\n'))} />
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {sample1 && (
+                    <>
+                      { sample1.input && 
+                        <>
+                        <h3>Input for Sample Input 1</h3>
+                        <pre className={styles.codeSnippet}>{sample1.input.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        </>
+                      }
+                      { sample1.output && 
+                        <>
+                        <h3>Output for Sample Input 1</h3>
+                        <pre className={styles.codeSnippet}>{sample1.output.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        </>
+                      }
+                      {sample1.explanation && 
+                        <>
+                        <h3>Explanation for Sample 1</h3>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(sample1.explanation.replace(/\\n/g, '\n'))} />
+                        <br />
+                        </>
+                      }
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {sample2 && (
+                    <>
+                      { sample2.input && 
+                        <>
+                        <h3>Input for Sample Input 2</h3>
+                        <pre className={styles.codeSnippet}>{sample2.input.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        </>
+                      }
+                      { sample2.output && 
+                        <>
+                        <h3>Output for Sample Input 2</h3>
+                        <pre className={styles.codeSnippet}>{sample2.output.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        </>
+                      }
+                      {sample2.explanation && 
+                        <>
+                        <h3>Explanation for Sample 2</h3>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(sample2.explanation.replace(/\\n/g, '\n'))} />
+                        <br />
+                        </>
+                      }
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {sample3 && (
+                    <>
+                      { sample3.input && 
+                        <>
+                        <h3>Input for Sample Input 3</h3>
+                        <pre className={styles.codeSnippet}>{sample3.input.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        </>
+                      }
+                      { sample3.output && 
+                        <>
+                        <h3>Output for Sample Input 3</h3>
+                        <pre className={styles.codeSnippet}>{sample3.output.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        </>
+                      }
+                      {sample3.explanation && 
+                        <>
+                        <h3>Explanation for Sample 3</h3>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(sample3.explanation.replace(/\\n/g, '\n'))} />
+                        <br />
+                        </>
+                      }
+                      <div className={styles.divider}></div>
+                      <br />
+                    </>
+                  )}
+                  {points && (
+                    <>
+                      <h3>Points</h3>
+                      <p>{points}</p>
+                    </>
+                  )}
+                </div>
+                <br />
+                <br />
+                <button className={styles.runAll} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
+                <br />
+              </div>                
+            </div>
+            <div id="split-1">
+            <section style={{ height: "100vh", overflow: "auto" }}>
+                <h1>Add Problem</h1>
                 <div>
                     <h1 className="header">
                         Competitive Programming Website
@@ -212,11 +378,24 @@ const AddProblem = () => {
                                         <td>{q.contest}</td>
                                         <td>
                                             <button
-                                            type="button"
-                                            className='open-question'
-                                            onClick={() => {
-                                                console.log("SELECTED PROBLEM:", q);
-                                            }}
+                                                type="button"
+                                                className='open-question'
+                                                onClick={() => {
+                                                    console.log("SELECTED PROBLEM:", q);
+                                                    if (q.title) setTitle(q.title);
+                                                    if (q.contest) setContest(q.contest);
+                                                    if (q.description) setDescription(q.description);
+                                                    if (q.folder) setFolder(q.folder);
+                                                    if (q.inputFormat) setInputFormat(q.inputFormat);
+                                                    if (q.outputFormat) setOutputFormat(q.outputFormat);
+                                                    if (q.constraints) setConstraints(q.constraints);
+                                                    if (q.points) setPoints(Number(q.points));
+                                                    if (q.sample1) setSample1(q.sample1);
+                                                    if (q.sample2) setSample2(q.sample2);
+                                                    if (q.sample3) setSample3(q.sample3);
+                                                    if (q.specificContest) setSpecificContest(q.specificContest);
+                                                    if (q.topics) setTopics(q.topics);
+                                                }}
                                             >
                                             <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
                                             </button>
@@ -286,6 +465,13 @@ const AddProblem = () => {
                                 <textarea
                                     value={outputFormat}
                                     onChange={(e) => setOutputFormat(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label>constraints:</label>
+                                <textarea
+                                    value={constraints}
+                                    onChange={(e) => setConstraints(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -377,6 +563,8 @@ const AddProblem = () => {
                     </div>
                 </div>
             </section>
+            </div>
+            </Split>
         </>
     );
 }
