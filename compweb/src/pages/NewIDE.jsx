@@ -11,6 +11,7 @@ const NewIDE = () => {
     const [userData, setUserData] = useState(null);
     const [userId, setUserId] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [editedContent, setEditedContent] = useState("");
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -44,13 +45,34 @@ const NewIDE = () => {
             const ideSnapshot = await getDoc(ideRef);
             if (ideSnapshot.exists()) {
                 const itemData = ideSnapshot.data().ide[itemName];
-                console.log(itemName);
-                setSelectedItem(itemData);
+                setSelectedItem(itemName);
+                setEditedContent(itemData); // Set the edited content to the selected item data
             } else {
                 console.log("No such document!");
             }
         } catch (error) {
             console.error("Error fetching item data:", error);
+        }
+    };
+
+    const handleSave = async () => {
+        try {
+            const uid = auth.currentUser.uid;
+            const ideRef = doc(db, "IDE", uid);
+            const ideSnapshot = await getDoc(ideRef);
+            if (ideSnapshot.exists()) {
+                const existingIdeMap = ideSnapshot.data().ide || {};
+                const updatedIdeMap = {
+                    ...existingIdeMap,
+                    [selectedItem]: editedContent // Update the content of the selected item
+                };
+                await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
+                console.log("Document successfully updated!");
+            } else {
+                console.log("No such document!");
+            }
+        } catch (error) {
+            console.error("Error updating document:", error);
         }
     };
 
@@ -92,7 +114,7 @@ const NewIDE = () => {
             <h1>IDE</h1>
             <p>TEST IDE</p>
             {!showForm && (
-                <button onClick={() => setShowForm(true)}>Create Textbox</button>
+                <button onClick={() => setShowForm(true)}>Create File</button>
             )}
             {showForm && (
                 <form onSubmit={handleSubmit}>
@@ -115,8 +137,11 @@ const NewIDE = () => {
             </ul>
             {selectedItem && (
                 <div>
-                    <h2>{selectedItem}</h2>
-                    {/* Display the contents of the selected item here */}
+                    <textarea
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                    ></textarea>
+                    <button onClick={handleSave}>Save</button>
                 </div>
             )}
         </>
