@@ -200,17 +200,52 @@ const AddProblem = () => {
           .join('')
           .replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
         return newText;
-      }    
+      }
+      
+      function cleanNewLines() {
+        console.log("Cleaning lines");
+
+        const regex = /(?<=[^\n.!?:])\n/g;
+    
+        setTitle(title.replace(regex, ""));
+        setContest(contest.replace(regex, ""));
+        setDescription(description.replace(regex, ""));
+        setFolder(folder.replace(regex, ""));
+        setInputFormat(inputFormat.replace(regex, ""));
+        setOutputFormat(outputFormat.replace(regex, ""));
+        setConstraints(constraints.replace(regex, ""));
+        setPoints(points.replace(regex, ""));
+        setSample1({...sample1, explanation: sample1.explanation.replace(regex, "")});
+        setSample2({...sample2, explanation: sample2.explanation.replace(regex, "")});
+        setSample3({...sample3, explanation: sample3.explanation.replace(regex, "")});
+        setSpecificContest(specificContest.replace(regex, ""));
+        setTopics(topics.map(topic => topic.replace(regex, "")));
+    }
+
+    useEffect(() => {
+        function handleKeyDown(event) {
+            // Replace "KeyK" with the key you want to use for the shortcut
+            if (event.altKey && event.code === "KeyK") {
+                cleanNewLines();
+            }
+        }
+    
+        window.addEventListener('keydown', handleKeyDown);
+    
+        // Cleanup when component unmounts
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [title, contest, description, folder, inputFormat, outputFormat, constraints, points, sample1, sample2, sample3, specificContest, topics]);    
 
     return (
         <>
-            <Navigation></Navigation>
             <Split
                 className="split"
                 style={{ display: 'flex', flexDirection: 'row' }}
                 minSize={500}
             >
-            <div id="split-0" style={{ height: "100vh", overflow: "auto", background: "#1B1B32", backgroundColor: "#1B1B32", marginTop: "50px" }}>
+            <div id="split-0" style={{ height: "100vh", overflow: "auto", background: "#1B1B32", backgroundColor: "#1B1B32" }}>
             <div className={styles.wrapper}>
                 <br />
                 {title && <h1 className={styles.title}>{title}</h1>}

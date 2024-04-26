@@ -29,6 +29,9 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import { dark } from "@mui/material/styles/createPalette.js";
+import CheckCircle from '@mui/icons-material/CheckCircle'
+import CircleProgressBar from "../../Paths/CircleProgressBar.jsx";
+import zIndex from "@mui/material/styles/zIndex.js";
 
 const Item = styled(Paper)(({ theme }) => ({
   textAlign: 'center',
@@ -53,6 +56,8 @@ const HtmlTooltip = styled(({ className, ...props }) => (
 
 const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
     const [userData, setUserData] = useState(null);
+    const [numProblems, setNumProblems] = useState(0);
+    const [problemsCompleted, setProblemsCompleted] = useState(0);
   
     useEffect(() => {
       const fetchUserData = async () => {
@@ -70,7 +75,6 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
             if (userSnapshot.exists()) {
               // Extract required user information from the snapshot
               const userData = userSnapshot.data();
-              console.log("LESSONBACKGROUND RECT userData", userData);
               setUserData(userData); // Set the user data in the state
             } else {
               console.log("No such document!");
@@ -86,10 +90,6 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
   
       fetchUserData();
     }, [auth.currentUser]); // Empty dependency array ensures the effect runs only once when the component mounts  
-
-    useEffect(() => {
-        console.log("CHANGE IN USERDATA PATHS BGRECT", userData);
-    }, [userData]);
 
     const [open, setOpen] = React.useState(false);
     const [questions, setQuestions] = useState([]);
@@ -131,25 +131,82 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
     };
 
     useEffect(() => {
-        if (open) {
-            const fetchData = async () => {
-                const data = await addGroup(props.problemIds);
-                setQuestions(data);
-            };
+        console.log("CHANGE IN USERDATA", userData);
+
+        const updateUserSolvedCategories = async (userUid) => {
+            try {
+                // Get a reference to the user's document
+                const userDocRef = doc(db, "Users", userUid);
+                
+                // Check if the question is already solved by the user
+                const userDocSnapshot = await getDoc(userDocRef);
+                const solvedCategories = userDocSnapshot.data().solvedCategories || [];
         
-            fetchData();
+                if (!solvedCategories.includes(props.categoryId)) {
+                // Update the user's document to add the solved question and increment points
+                await updateDoc(userDocRef, {
+                    solvedCategories: arrayUnion(props.categoryId), // Add the question name to the solved array
+                    points: 10 + (userDocSnapshot.data().points || 0) // Increment points
+                });
+                console.log(`props.categoryId "${props.categoryId}" solved! Points updated.`);
+                } else {
+                console.log(`props.categoryId "${props.categoryId}" already solved.`);
+                }
+            } catch (error) {
+                console.error("Error updating user document:", error);
+            }
         }
-    }, [open]);
+
+        const fetchData = async () => {
+            let count = 0;
+            let numProblems = 0;    
+
+            const data = await addGroup(props.problemIds);
+            console.log("questions", data);
+            for (let question of data) {
+                if (userData && userData.solved && userData.solved.includes(question.title)) {
+                    count++;
+                }
+                numProblems++;
+            }
+            console.log("count", count);
+            console.log("numProblems", numProblems);
+            setProblemsCompleted(count);
+            setNumProblems(numProblems);
+            setQuestions(data);
+
+            const problemPassed = () => {
+                return count === numProblems;
+                };
+            
+                console.log("Category passed:", props.categoryId, problemPassed());
+        
+                // If the problem is solved, update the user's document
+                if (problemPassed() && auth.currentUser) {
+                const userUid = auth.currentUser.uid; // Get the current user's UID
+            
+                updateUserSolvedCategories(userUid);
+                }
+        };
+        
+        fetchData();
+    }, [userData]);
+
+    useEffect(() => {
+        // Define a function to update the user's document
+        
+      }, [problemsCompleted, numProblems, db, auth]);
 
     return (
-        <div className="universal">
+        <div className="universal" style={{ position: 'relative' }}>
+            <CircleProgressBar progress={problemsCompleted / numProblems * 100} style={{position: 'absolute', zIndex: 1}}/>
             <ClickAwayListener onClickAway={handleTooltipClose}>
-                <div>
+                <div style={{position: 'absolute', zIndex: 2, top: 25, left: 35, right: -10, bottom: 0}}>
                     <HtmlTooltip
                         title={
                             <React.Fragment>
                                 {questions.length !== 0 && (
-                                    <div className="question-list-rect">
+                                    <div className="question-list-rect" style={{ zIndex: 9999 }}>
                                         <div>
                                         <table>
                                             <thead>
@@ -351,12 +408,12 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                         return (
                             <div className='lesson-row'>
                                 {row.map((lesson, lessonIndex) => {
-                                    console.log(`Lesson ${lessonIndex} in Row ${rowIndex}:`, lesson);
+                                    console.log(`Lesson ${lessonIndex} in Row ${rowIndex}:`, unitTitle);
                                     return (
                                         <LessonBackgroundRect key={lessonIndex} {...lesson} onButtonClick={() => {
                                             console.log(`Button clicked in Lesson ${lessonIndex} in Row ${rowIndex}`);
                                             handleButtonClick(lessonIndex);
-                                        }} isFocused={lessonIndex === lastPressed && isQuestionListOpen} division={division}/>
+                                        }} isFocused={lessonIndex === lastPressed && isQuestionListOpen} division={division} categoryId={`${unitTitle}${rowIndex}${lessonIndex}`}/>
                                     );
                                 })}
                             </div>
@@ -701,6 +758,39 @@ const Paths = (props) => {
         });
     };
 
+    const [userData, setUserData] = useState(null);
+    const [userId, setUserId] = useState(null);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+        try {
+            // Get the current user
+            const currentUser = auth.currentUser;
+
+            if (currentUser) { // Check if currentUser is not null
+            setUserId(currentUser.uid); // Set the user ID
+
+            // Get the document reference for the current user from Firestore
+            const userDocRef = doc(db, "Users", currentUser.uid);
+
+            // Fetch user data from Firestore
+            const userSnapshot = await getDoc(userDocRef);
+            if (userSnapshot.exists()) {
+                // Extract required user information from the snapshot
+                const userData = userSnapshot.data();
+                setUserData(userData); // Set the user data in the state
+            } else {
+                console.log("No such document!");
+            }
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+        };
+
+        fetchUserData();
+    }, []);
+
     return (
         <div className="universal">
             <div className={styles.paths}>
@@ -792,6 +882,7 @@ const Paths = (props) => {
                                         <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
                                     </button>
                                     <h1 className={styles.title}>{lessonProblemData[tabIndex].data.title}</h1>
+                                    { userData && userData.solved && userData.solved.includes(lessonProblemData[tabIndex].data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
                                     <button onClick={scrollRight} className="scroll-button right">
                                         <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
                                     </button>

@@ -49,6 +49,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
+import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const card = (
   <React.Fragment>
@@ -1117,7 +1118,10 @@ const submitCode = async () => {
             <>
               <div className={styles.wrapper}>
                 <br />
-                <h1 className={styles.title}>{currentTab.data.title}</h1>
+                <div className={styles.problemTitleRow}>
+                  <h1 className={styles.title}>{currentTab.data.title}</h1>
+                  { userData && userData.solved && userData.solved.includes(currentTab.data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
+                </div>
                 <br />
                 <div className={styles.description}>
                   {currentTab.data.description && (

@@ -2,8 +2,8 @@ export const JUINOR_UNIT_TITLES = ["J1, J2, J3: Basic Programming", "J4: Problem
 export const JUINOR_UNIT_DESCRIPTIONS = ["", "", ""];
 export const JUNIOR_UNIT_LESSONS = [
     [
-        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Conveyor Belt Sushi"] },
-        { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Who is in the Middle?", "Squares", "Conveyor Belt Sushi", "Cupcake Party"] },
+        { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Shifty Sum", "Epidemiology"] }],
         [{ category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Tournament Selection"] },
         { category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Special Day"] }],
         [{ category: "1 Problem", lessonName: "Arrays", imgPath: "/open.png", problemIds: ["Occupy parking"] }],

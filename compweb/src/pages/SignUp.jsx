@@ -36,7 +36,8 @@ const SignUp = () => {
         city: city,
         age: parseInt(age, 10),
         points: 0,
-        solved: [] // Empty array for solved problems
+        solved: [], // Empty array for solved problems
+        solvedCategories: []
       };
   
       await setDoc(userDocRef, userData);
