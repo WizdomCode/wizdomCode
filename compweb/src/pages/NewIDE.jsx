@@ -13,6 +13,7 @@ const NewIDE = () => {
     const [inputValue, setInputValue] = useState("");
     const [userData, setUserData] = useState(null);
     const [userId, setUserId] = useState(null);
+    const [isContentSaved, setIsContentSaved] = useState(true);
     const [selectedItem, setSelectedItem] = useState(null); 
     const [editedContent, setEditedContent] = useState("");
     const [currentFolder, setCurrentFolder] = useState("ide"); // Default folder is "ide"
@@ -108,6 +109,7 @@ const NewIDE = () => {
                 };
                 await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
                 console.log("Document successfully updated!");
+                setIsContentSaved(true);
             } else {
                 console.log("No such document!");
             }
@@ -167,6 +169,26 @@ const NewIDE = () => {
             );
         }
     };
+    useEffect(() => {
+        // Compare edited content with content saved in Firebase
+        const checkContentSaved = async () => {
+            try {
+                //const uid = auth.currentUser.uid;
+                const ideRef = doc(db, "IDE", userId);
+                const ideSnapshot = await getDoc(ideRef);
+                if (ideSnapshot.exists()) {
+                    const savedContent = ideSnapshot.data().ide[selectedItem];
+                    setIsContentSaved(savedContent === editedContent);
+                } else {
+                    console.log("No such document!");
+                }
+            } catch (error) {
+                console.error("Error checking content saved:", error);
+            }
+        };
+
+        checkContentSaved(); // Call the function on component mount and whenever editedContent or selectedItem changes
+    }, [editedContent, selectedItem]);
     
     return (
         <>
@@ -219,6 +241,11 @@ const NewIDE = () => {
             </ul>
             {selectedItem && (
                 <div>
+                    {isContentSaved ? (
+                        <h3>Saved</h3>
+                    ) : (
+                        <h3>Not Saved</h3>
+                    )}
                     <textarea
                         value={editedContent}
                         onChange={(e) => setEditedContent(e.target.value)}
