@@ -8,7 +8,7 @@
 import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect, useRef } from "react";
 import { auth, app, db } from "../../../firebase.js";
-import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc, deleteDoc } from "firebase/firestore";
 import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import "../../../Fonts.css";
 import Select from "react-select";
@@ -618,6 +618,14 @@ const submitCode = async () => {
       }
     }
     // Once the condition is met, set results to the data received so far
+      const docRef = doc(db, "Results", request_id);
+      try {
+        await deleteDoc(docRef);
+        console.log("Document successfully deleted!");
+      } catch (error) {
+          console.error("Error deleting document:", error);
+      }
+
     setResults(xdata);
   };
   
