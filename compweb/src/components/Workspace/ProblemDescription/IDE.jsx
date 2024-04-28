@@ -178,6 +178,7 @@ const IDE = (props) => {
   const [testCases, setTestCases] = useState([]);
   const [displayCases, setDisplayCases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTab, setSelectedTab] = useState('question');
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOption, setFilterOption] = useState('');
@@ -187,6 +188,10 @@ const IDE = (props) => {
   const [language, setLanguage] = useState("cpp");
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [executionTime, setExecutionTime] = useState(0);
+  const [currentCode, setCurrentCode] = useState("");
+  const [solutions, setSolutions] = useState([]);
+  const [questionName, setQuestionName] = useState();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -417,6 +422,7 @@ const IDE = (props) => {
           const docRef = await getDoc(doc(db, "Questions", questionID));
           if (docRef.exists()) {
             const problemData = docRef.data();
+            setQuestionName(problemData.title)
             setCurrentProblem(problemData);
             if (!problems.includes(problemData)) {
               setProblems(prevProblems => [...prevProblems, problemData]);
@@ -557,7 +563,7 @@ const submitCode = async () => {
         code: code,
         test_cases: testCases
     }));
-  
+    setCurrentCode(code);
     // Start the timer
     const startTime = performance.now();
   
@@ -635,7 +641,7 @@ const submitCode = async () => {
 
   useEffect(() => {
     // Define a function to update the user's document
-    const updateUserSolvedQuestions = async (userUid, questionName, points) => {
+    const updateUserSolvedQuestions = async (userUid, questionName, points, code, executionTime) => {
       try {
         // Get a reference to the user's document
         const userDocRef = doc(db, "Users", userUid);
@@ -643,13 +649,36 @@ const submitCode = async () => {
         // Check if the question is already solved by the user
         const userDocSnapshot = await getDoc(userDocRef);
         const solvedQuestions = userDocSnapshot.data().solved || [];
-  
+    
         if (!solvedQuestions.includes(questionName)) {
           // Update the user's document to add the solved question and increment points
           await updateDoc(userDocRef, {
             solved: arrayUnion(questionName), // Add the question name to the solved array
             points: points + (userDocSnapshot.data().points || 0) // Increment points
           });
+    
+          // Get a reference to the question document
+          const questionDocRef = doc(db, "Questions", questionName);
+    
+          // Get the question document snapshot
+          const questionDocSnapshot = await getDoc(questionDocRef);
+          
+          // Check if solutions array exists, if not, create it
+          if (!questionDocSnapshot.exists() || !questionDocSnapshot.data().solutions) {
+            await setDoc(questionDocRef, { solutions: [] }, { merge: true });
+          }
+    
+          // Update the solutions array in the question document
+          const solutionMap = {
+            userId: userUid,
+            solution: code,
+            executionTime: executionTime,
+            score: 0
+          };
+          await updateDoc(questionDocRef, {
+            solutions: arrayUnion(solutionMap)
+          });
+    
           console.log(`Question "${questionName}" solved! Points updated.`);
         } else {
           console.log(`Question "${questionName}" already solved.`);
@@ -658,6 +687,7 @@ const submitCode = async () => {
         console.error("Error updating user document:", error);
       }
     };
+    
   
     // Example parsing
     const problemPassed = () => {
@@ -684,7 +714,7 @@ const submitCode = async () => {
       const pointsEarned = currentTab.data.points; // Assuming the points earned for solving the question are stored in the `points` field of the tab data
       const userUid = auth.currentUser.uid; // Get the current user's UID
   
-      updateUserSolvedQuestions(userUid, questionName, pointsEarned);
+      updateUserSolvedQuestions(userUid, questionName, pointsEarned, currentCode, executionTime);
     }
   }, [results, tabs, currentTab, db, auth]);
 
@@ -744,6 +774,7 @@ const submitCode = async () => {
     const endTime = performance.now();
     const elapsedTime = endTime - startTime;
     console.log(`Execution time: ${elapsedTime} milliseconds`);
+    setExecutionTime(elapsedTime);
   };
 
   const runConcurrentTests = async () => {
@@ -939,7 +970,27 @@ const submitCode = async () => {
       .replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
     return newText;
   }
-    
+  useEffect(() => {
+    const fetchSolutions = async () => {
+      try {
+        // Get a reference to the question document
+        const questionDocRef = doc(db, "Questions", questionName);
+        const questionDocSnapshot = await getDoc(questionDocRef);
+
+        if (questionDocSnapshot.exists()) {
+          const questionData = questionDocSnapshot.data();
+          const solutions = questionData.solutions || [];
+          setSolutions(solutions);
+        } else {
+          console.log(`Question "${questionName}" not found.`);
+        }
+      } catch (error) {
+        console.error("Error fetching solutions:", error);
+      }
+    };
+
+    fetchSolutions();
+  }, [questionName]);
   return (
     <Split
         className="split"
@@ -1124,150 +1175,188 @@ const submitCode = async () => {
             </>          
           ) : currentTab.type === 'problem' ? (
             <>
-              <div className={styles.wrapper}>
-                <br />
-                <div className={styles.problemTitleRow}>
-                  <h1 className={styles.title}>{currentTab.data.title}</h1>
-                  { userData && userData.solved && userData.solved.includes(currentTab.data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
-                </div>
-                <br />
-                <div className={styles.description}>
-                  {currentTab.data.description && (
-                    <>
-                      {currentTab.data.specificContest && <h3>{currentTab.data.specificContest}</h3>}
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
-                      <div className={styles.divider}></div>
-                      <br />
-                    </>
-                  )}
-                  {currentTab.data.inputFormat && (
-                    <>
-                      <h3>Input Format</h3>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
-                      <div className={styles.divider}></div>
-                      <br />
-                    </>
-                  )}
-                  {false && currentTab.data.constraints && (
-                    <>
-                      <h3>Constraints</h3>
-                      <ul>
-                        {Object.entries(currentTab.data.constraints).map(([key, value]) => (
-                          <li key={key}>
-                            <strong>{key}:</strong> {value}
-                          </li>
-                        ))}
-                      </ul>
-                      <div className={styles.divider}></div>
-                      <br />
-                    </>
-                  )}
-                  {currentTab.data.outputFormat && (
-                    <>
-                      <h3>Output Format</h3>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
-                      <div className={styles.divider}></div>
-                      <br />
-                    </>
-                  )}
-                  {currentTab.data.sample1 && currentTab.data.sample1.input && (
-                    <>
-                      <h3>Sample Input 1</h3>
-                      <pre className={styles.codeSnippet}>{currentTab.data.sample1.input.replace(/\\n/g, '\n')}</pre>
-                      <br />
-                      <h3>Output for Sample Input 1</h3>
-                      <pre className={styles.codeSnippet}>{currentTab.data.sample1.output.replace(/\\n/g, '\n')}</pre>
-                      <br />
-                      <h3>Explanation for Sample 1</h3>
-                      {currentTab.data.sample1.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} />}
-                      <br />
-                      <div className={styles.divider}></div>
-                      <br />
-                    </>
-                  )}
-                  {currentTab.data.sample2 && currentTab.data.sample2.input && (
-                    <>
-                      <h3>Sample Input 2</h3>
-                      <pre className={styles.codeSnippet}>{currentTab.data.sample2.input.replace(/\\n/g, '\n')}</pre>
-                      <br />
-                      <h3>Output for Sample Input 2</h3>
-                      <pre className={styles.codeSnippet}>{currentTab.data.sample2.output.replace(/\\n/g, '\n')}</pre>
-                      <br />
-                      <h3>Explanation for Sample 2</h3>
-                      {currentTab.data.sample2.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} />}
-                      <br />
-                      <div className={styles.divider}></div>
-                      <br />
-                    </>
-                  )}
-                  {currentTab.data.sample3 && currentTab.data.sample3.input && (
-                    <>
-                      <h3>Sample Input 3</h3>
-                      <pre className={styles.codeSnippet}>{currentTab.data.sample3.input.replace(/\\n/g, '\n')}</pre>
-                      <br />
-                      <h3>Output for Sample Input 3</h3>
-                      <pre className={styles.codeSnippet}>{currentTab.data.sample3.output.replace(/\\n/g, '\n')}</pre>
-                      <br />
-                      <h3>Explanation for Sample 3</h3>
-                      {currentTab.data.sample3.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} />}
-                      <br />
-                      <div className={styles.divider}></div>
-                      <br />
-                    </>
-                  )}
-                  {currentTab.data.points && (
-                    <>
-                      <h3>Points</h3>
-                      <p>{currentTab.data.points}</p>
-                    </>
-                  )}
-                </div>
-                <br />
-                <br />
-                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
-                <br />
-                <div className={styles.testCases}>
-                  {displayCases ? displayCases.map((testCase, index) => {
-                    const status = results[index]?.status?.description;
-                    const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
-
-                    return (
-                      <div key={testCase.key} className={className}>
+              <div className={styles.tabs}>
+                <button onClick={() => setSelectedTab('question')}>Question</button>
+                <button onClick={() => setSelectedTab('solution')}>Solution</button>
+                <button onClick={() => setSelectedTab('editorial')}>Editorial</button>
+              </div>
+              
+              {selectedTab === 'question' && (            
+                <div className={styles.wrapper}>
+                  <br />
+                  <div className={styles.problemTitleRow}>
+                    <h1 className={styles.title}>{currentTab.data.title}</h1>
+                    { userData && userData.solved && userData.solved.includes(currentTab.data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
+                  </div>
+                  <br />
+                  <div className={styles.description}>
+                    {currentTab.data.description && (
+                      <>
+                        {currentTab.data.specificContest && <h3>{currentTab.data.specificContest}</h3>}
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
+                        <div className={styles.divider}></div>
                         <br />
-                        <h3 className={className}>
-                          Case {testCase.key}
-                          {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
-                          {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
-                          {results[index] && results[index].status.description === 'Time limit exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
-                        </h3>
-                        {results[index] && (
+                      </>
+                    )}
+                    {currentTab.data.inputFormat && (
+                      <>
+                        <h3>Input Format</h3>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
+                        <div className={styles.divider}></div>
+                        <br />
+                      </>
+                    )}
+                    {false && currentTab.data.constraints && (
+                      <>
+                        <h3>Constraints</h3>
+                        <ul>
+                          {Object.entries(currentTab.data.constraints).map(([key, value]) => (
+                            <li key={key}>
+                              <strong>{key}:</strong> {value}
+                            </li>
+                          ))}
+                        </ul>
+                        <div className={styles.divider}></div>
+                        <br />
+                      </>
+                    )}
+                    {currentTab.data.outputFormat && (
+                      <>
+                        <h3>Output Format</h3>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
+                        <div className={styles.divider}></div>
+                        <br />
+                      </>
+                    )}
+                    {currentTab.data.sample1 && currentTab.data.sample1.input && (
+                      <>
+                        <h3>Sample Input 1</h3>
+                        <pre className={styles.codeSnippet}>{currentTab.data.sample1.input.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        <h3>Output for Sample Input 1</h3>
+                        <pre className={styles.codeSnippet}>{currentTab.data.sample1.output.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        <h3>Explanation for Sample 1</h3>
+                        {currentTab.data.sample1.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} />}
+                        <br />
+                        <div className={styles.divider}></div>
+                        <br />
+                      </>
+                    )}
+                    {currentTab.data.sample2 && currentTab.data.sample2.input && (
+                      <>
+                        <h3>Sample Input 2</h3>
+                        <pre className={styles.codeSnippet}>{currentTab.data.sample2.input.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        <h3>Output for Sample Input 2</h3>
+                        <pre className={styles.codeSnippet}>{currentTab.data.sample2.output.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        <h3>Explanation for Sample 2</h3>
+                        {currentTab.data.sample2.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} />}
+                        <br />
+                        <div className={styles.divider}></div>
+                        <br />
+                      </>
+                    )}
+                    {currentTab.data.sample3 && currentTab.data.sample3.input && (
+                      <>
+                        <h3>Sample Input 3</h3>
+                        <pre className={styles.codeSnippet}>{currentTab.data.sample3.input.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        <h3>Output for Sample Input 3</h3>
+                        <pre className={styles.codeSnippet}>{currentTab.data.sample3.output.replace(/\\n/g, '\n')}</pre>
+                        <br />
+                        <h3>Explanation for Sample 3</h3>
+                        {currentTab.data.sample3.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} />}
+                        <br />
+                        <div className={styles.divider}></div>
+                        <br />
+                      </>
+                    )}
+                    {currentTab.data.points && (
+                      <>
+                        <h3>Points</h3>
+                        <p>{currentTab.data.points}</p>
+                      </>
+                    )}
+                  </div>
+                  <br />
+                  <br />
+                  <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
+                  <br />
+                  <div className={styles.testCases}>
+                    {displayCases ? displayCases.map((testCase, index) => {
+                      const status = results[index]?.status?.description;
+                      const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
+
+                      return (
+                        <div key={testCase.key} className={className}>
+                          <br />
+                          <h3 className={className}>
+                            Case {testCase.key}
+                            {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
+                            {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
+                            {results[index] && results[index].status.description === 'Time limit exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
+                          </h3>
+                          {results[index] && (
+                              <>
+                                <h5 className={className}>[ {results[index].time}s ]</h5>
+                              </>
+                            )}
+                          <br />
+                          <h4 className={className}>Input:</h4>
+                          <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
+                          <br />
+                          <h4 className={className}>Expected Output:</h4>
+                          <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
+                          {results[index] && results[index].status.description === 'Wrong Answer' && (
                             <>
-                              <h5 className={className}>[ {results[index].time}s ]</h5>
+                              <br />
+                              <h4 className={className}>Actual Output:</h4>
+                              <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
                             </>
                           )}
+                        </div>
+                      );                
+                    }): (
+                      <div>
+                        <h2>Test cases for this problem are coming soon!</h2>
                         <br />
-                        <h4 className={className}>Input:</h4>
-                        <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
-                        <br />
-                        <h4 className={className}>Expected Output:</h4>
-                        <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
-                        {results[index] && results[index].status.description === 'Wrong Answer' && (
-                          <>
-                            <br />
-                            <h4 className={className}>Actual Output:</h4>
-                            <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
-                          </>
-                        )}
                       </div>
-                    );                
-                  }): (
+                    )}
+                  </div>
+                </div> 
+                )}
+
+                {selectedTab === 'solution' && (
+                  <div className={styles.wrapper}>
+                    {/* Content for the solution tab */}
+                    <h1>Solution</h1>
                     <div>
-                      <h2>Test cases for this problem are coming soon!</h2>
-                      <br />
+                      {solutions.map((solution, index) => (
+                        <div key={index}>
+                          <span>User ID: {solution.userId}</span>
+                          <span>Execution Time: {solution.executionTime}</span>
+                          <span>Score: {solution.score}</span>
+                          <button>Upvote</button>
+                          <button>Downvote</button>
+                          <pre>
+                            <code>{solution.solution}</code>
+                          </pre>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              </div> 
+                    {/* Add solution content here */}
+                  </div>
+                )}
+          
+                {selectedTab === 'editorial' && (
+                  <div className={styles.wrapper}>
+                    {/* Content for the editorial tab */}
+                    <h1>Editorial</h1>
+                    {/* Add editorial content here */}
+                  </div>
+                )}
             </>
           ) : currentTab.type === 'newTab' ? (
             <div className={styles.wrapper}>

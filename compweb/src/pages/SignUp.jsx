@@ -36,6 +36,7 @@ const SignUp = () => {
         city: city,
         age: parseInt(age, 10),
         points: 0,
+        coins: 0,
         solved: [], // Empty array for solved problems
         solvedCategories: []
       };
