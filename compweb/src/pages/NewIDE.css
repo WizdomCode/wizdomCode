@@ -19,7 +19,7 @@
     margin-right: 10px;
     border: 1px solid #ccc;
     background-color: #fff; /* Set input background color to white */
-    color: black; /* Set input text color to black */
+    color: white; /* Set input text color to black */
 }
 
 .submit-button {

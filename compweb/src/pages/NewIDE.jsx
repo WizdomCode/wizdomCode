@@ -191,7 +191,7 @@ const NewIDE = () => {
     }, [editedContent, selectedItem]);
     
     return (
-        <>
+        <div style={{ background: "black", backgroundColor: "black", color: "white" }}>
             <Navigation />
             <h1>IDE</h1>
             <p>TEST IDE</p>
@@ -209,12 +209,14 @@ const NewIDE = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         autoFocus
+                        style={{color: "white"}}
                     />
                     <input
                         type="text"
                         value={fileTypeInputValue}
                         onChange={(e) => setFileTypeInputValue(e.target.value)}
                         placeholder="File Type"
+                        style={{color: "white"}}
                     />
                     <button type="submit">Submit</button>
                 </form>
@@ -229,6 +231,7 @@ const NewIDE = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         autoFocus
+                        style={{color: "white"}}
                     />
                     <button type="submit">Submit</button>
                 </form>
@@ -249,11 +252,12 @@ const NewIDE = () => {
                     <textarea
                         value={editedContent}
                         onChange={(e) => setEditedContent(e.target.value)}
+                        style={{color: "white"}}
                     ></textarea>
                     <button onClick={handleSave}>Save</button>
                 </div>
             )}
-        </>
+        </div>
     );
 };    
 

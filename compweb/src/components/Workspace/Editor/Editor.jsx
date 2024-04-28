@@ -39,10 +39,51 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles';
 import { TEMPLATES } from '../templates.js';
 import SaveIcon from '@mui/icons-material/Save';
 import { useLocation } from "react-router-dom";
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { dark } from '@mui/material/styles/createPalette.js';
+
+const drawerWidth = 240;
+
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
+  ({ theme, open }) => ({
+    flexGrow: 1,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginRight: -drawerWidth,
+    ...(open && {
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      marginRight: 0,
+    }),
+    /**
+     * This is necessary to enable the selection of content. In the DOM, the stacking order is determined
+     * by the order of appearance. Following this rule, elements appearing later in the markup will overlay
+     * those that appear earlier. Since the Drawer comes after the Main content, this adjustment ensures
+     * proper interaction with the underlying content.
+     */
+    position: 'relative',
+  }),
+);
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-start',
+}));
 
 const darkTheme = createTheme({
   palette: {
@@ -129,6 +170,17 @@ const StyledMenu = styled((props) => (
 }));
 
 const CodeEditor = (props) => {
+  const theme = useTheme();
+  const [filesOpen, setFilesOpen] = React.useState(false);
+
+  const handleDrawerOpen = () => {
+    setFilesOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setFilesOpen(false);
+  };
+
   const [state, setState] = React.useState({
     top: false,
     left: false,
@@ -408,8 +460,19 @@ const CodeEditor = (props) => {
 
   return (
     <>
+      <Box sx={{ display: 'flex' }}>
+      <Main open={filesOpen}>
       <div className={styles.scrollableContent}>
         <div className={styles.buttonRow}>
+          <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="end"
+              onClick={handleDrawerOpen}
+              sx={{ ...(filesOpen && { display: 'none' }) }}
+            >
+            <MenuIcon />
+          </IconButton>
           <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
             <p className={styles.buttonText}>Python</p>
             {false && <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>}
@@ -547,6 +610,30 @@ const CodeEditor = (props) => {
         </Panel>
         </PanelGroup>
       </div>
+      </Main>
+      <ThemeProvider theme={darkTheme}>
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+          },
+        }}
+        variant="persistent"
+        anchor="right"
+        open={filesOpen}
+      >
+        <DrawerHeader>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </DrawerHeader>
+        <Divider />
+        
+      </Drawer>
+      </ThemeProvider>
+    </Box>
     </>
   );
 };

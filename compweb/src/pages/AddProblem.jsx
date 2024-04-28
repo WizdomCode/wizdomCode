@@ -95,8 +95,10 @@ const AddProblem = () => {
                 const testCaseFolder = folder;
         
                 if (testCaseFolder) {
-                    const fileListResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
+                    const fileListResponse = await axios.get(`/TestCaseData/${testCaseFolder}`);
                     const fileList = fileListResponse.data;
+
+                    console.log("fileList", fileList);
                     
                     fileList.sort();
         
@@ -105,8 +107,8 @@ const AddProblem = () => {
                         const outputFileName = fileList[i + 1];
         
                         try {
-                            const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                            const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+                            const inputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                            const outputResponse = await axios.get(`/TestCaseData/${testCaseFolder}/${outputFileName}`);
         
                             console.log("inputResponse", inputResponse);
                             console.log("outputResponse", outputResponse);
