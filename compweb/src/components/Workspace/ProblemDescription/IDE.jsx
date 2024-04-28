@@ -17,7 +17,7 @@ import axios from "axios";
 import Split from 'react-split'
 import CodeEditor from '../Editor/Editor.jsx';
 import '../../styles/Workspace.css';
-import Sidebar from '../../Navigation/Sidebar.js';
+import Sidebar from '../../Navigation/Sidebar.jsx';
 import "../../styles/Paths.css";
 import Paths from './Paths.jsx';
 import Tab from './Tab.jsx';
