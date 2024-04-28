@@ -8,7 +8,7 @@ import * as monaco from 'monaco-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { auth, app, db } from "../../../firebase.js";
-import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
 import { styled, alpha } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -170,6 +170,9 @@ const StyledMenu = styled((props) => (
 }));
 
 const CodeEditor = (props) => {
+  const [fileTabs, setFileTabs] = React.useState([]);
+  const [activeTabIndex, setActiveTabIndex] = React.useState(0);
+
   const theme = useTheme();
   const [filesOpen, setFilesOpen] = React.useState(false);
 
@@ -187,8 +190,7 @@ const CodeEditor = (props) => {
     bottom: false,
     right: false,
   });
-  const [userData, setUserData] = useState(null);
-  const [userId, setUserId] = useState(null);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -242,10 +244,17 @@ const CodeEditor = (props) => {
     setAnchorEl(null);
   };
 
-  const [code, setCode] = useState(props.boilerPlate);
+  const [code, setCode] = useState(null);
   const [output, setOutput] = useState([]);
   const [language, setLanguage] = useState("cpp");
   const languageRef = useRef(language); // Create a ref for the language
+
+  useEffect(() => {
+    if (fileTabs[activeTabIndex]) {
+      console.log(fileTabs[activeTabIndex]);
+      setCode(fileTabs[activeTabIndex].code);
+    }
+  }, [activeTabIndex]);
 
   // Update the ref whenever the language changes
   useEffect(() => {
@@ -312,6 +321,15 @@ const CodeEditor = (props) => {
   }, [editorRef.current]);  
 
   useEffect(() => {
+    if (fileTabs.length > 0) {
+      const newFileTabs = [...fileTabs];
+      newFileTabs[activeTabIndex] = {
+        ...newFileTabs[activeTabIndex],
+        code: code,
+      };
+      setFileTabs(newFileTabs);  
+    }
+
     props.getCode(code, language);
     dispatch({
       type: 'SET_CODE_STATE',
@@ -457,35 +475,264 @@ const CodeEditor = (props) => {
     }
   }
   
+    const [showFileForm, setShowFileForm] = useState(false);
+    const [fileTypeInputValue, setFileTypeInputValue] = useState("");
+    const [showFolderForm, setShowFolderForm] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+    const [inputValue, setInputValue] = useState("");
+    const [userData, setUserData] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [isContentSaved, setIsContentSaved] = useState(true);
+    const [selectedItem, setSelectedItem] = useState(null); 
+    const [editedContent, setEditedContent] = useState("");
+    const [currentFolder, setCurrentFolder] = useState("ide"); // Default folder is "ide"
+
+    const handleFileSubmit = async (event) => {
+        event.preventDefault();
+        const uid = auth.currentUser.uid;
+        const ideRef = doc(db, "IDE", uid);
+        try {
+            const ideSnapshot = await getDoc(ideRef);
+            if (ideSnapshot.exists()) {
+                const existingIdeMap = ideSnapshot.data().ide || {};
+                const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : "";
+                const updatedIdeMap = {
+                    ...existingIdeMap,
+                    [`${folderPath}${inputValue}`]: "blank"
+                };
+                const updatedFileTypes = {
+                    ...ideSnapshot.data().fileTypes, // Existing file types map
+                    [`${folderPath}${inputValue}`]: fileTypeInputValue // Add file type to fileTypes map
+                };
+                await setDoc(ideRef, { ide: updatedIdeMap, fileTypes: updatedFileTypes }, { merge: true });
+                console.log("Document successfully written!");
+
+                setFileTabs([...fileTabs, { name: `${folderPath}${inputValue}`, language: fileTypeInputValue, code: '' }]);
+                setActiveTabIndex(fileTabs.length);
+            } else {
+                console.log("No such document!");
+            }
+            setInputValue("");
+            setFileTypeInputValue(""); // Clear file type input value
+            setShowFileForm(false);
+            fetchUserData();
+        } catch (error) {
+            console.error("Error writing document: ", error);
+        }
+    };
+    
+    const handleFolderSubmit = async (event) => {
+        event.preventDefault();
+        const uid = auth.currentUser.uid;
+        const ideRef = doc(db, "IDE", uid);
+        try {
+            const ideSnapshot = await getDoc(ideRef);
+            if (ideSnapshot.exists()) {
+                const existingIdeMap = ideSnapshot.data().ide || {};
+                const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : ""; // Add folder path if it's not the root folder
+                if (inputValue.trim() !== "") { // Check if inputValue is not empty
+                    const updatedIdeMap = {
+                        ...existingIdeMap,
+                        [`${folderPath}${inputValue}`]: {} // Create an empty object for the folder
+                    };
+                    await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
+                    console.log("Document successfully written!");
+                }
+            } else {
+                console.log("No such document!");
+            }
+            setInputValue("");
+            setShowFolderForm(false);
+            fetchUserData(); // Call fetchUserData to update the file list
+        } catch (error) {
+            console.error("Error writing document: ", error);
+        }
+    };
+
+    const handleTabClose = (index) => {
+      console.log("removing index", index);
+      console.log("Current filetabs len", fileTabs.length);
+
+      const newFileTabs = fileTabs.filter((_, i) => i !== index);
+
+      setFileTabs(newFileTabs);    
+    
+      if (fileTabs.length > 1) {
+        setActiveTabIndex(prevIndex => {
+          console.log("New filetabs len", fileTabs.length);
+          console.log("prevIndex", prevIndex);
+
+          if (index === prevIndex && prevIndex === fileTabs.length - 1) {
+            setCode(fileTabs[prevIndex - 1].code);
+            return prevIndex - 1;
+          } else if (index < prevIndex) {
+            setCode(fileTabs[prevIndex - 1].code);
+            return prevIndex - 1;
+          }
+          console.log("b");
+          console.log("prevIndex", prevIndex);
+          setCode(fileTabs[prevIndex].code);
+          return prevIndex;
+        });
+      } else {
+        setCode(null);
+        setActiveTabIndex(0);
+      }
+    };
+
+    useEffect(() => {
+      console.log("Change in activeTabIndex", activeTabIndex);
+    }, [activeTabIndex]);
+    
+    useEffect(() => {
+      console.log("Change in fileTabs", fileTabs);
+    }, [fileTabs]);
+    
+     const handleItemClick = async (itemName) => {
+        try {
+            const uid = auth.currentUser.uid;
+            const ideRef = doc(db, "IDE", uid);
+            const ideSnapshot = await getDoc(ideRef);
+            if (ideSnapshot.exists()) {
+                const itemData = ideSnapshot.data().ide[itemName];
+                const itemType = ideSnapshot.data().fileTypes[itemName];
+                setSelectedItem(itemName);
+                setEditedContent(itemData); // Set the edited content to the selected item data
+                setCode(itemData);
+
+                // Check if file with same name already exists
+                const existingTabIndex = fileTabs.findIndex(tab => tab.name === itemName);
+                if (existingTabIndex !== -1) {
+                    // If file exists, set the active tab index to that file
+                    setActiveTabIndex(existingTabIndex);
+                } else {
+                    // If file doesn't exist, create a new file and set it as the active tab
+                    setFileTabs([...fileTabs, { language: itemType, name: itemName, code: itemData }]);
+                    setActiveTabIndex(fileTabs.length); // Set the new tab as the active tab
+                    console.log("New tab:", { language: itemType, name: itemName, code: itemData });
+                }
+            } else {
+                console.log("No such document!");
+            }
+        } catch (error) {
+            console.error("Error fetching item data:", error);
+        }
+    };
+
+
+    const handleSave = async () => {
+        try {
+            const uid = auth.currentUser.uid;
+            const ideRef = doc(db, "IDE", uid);
+            const ideSnapshot = await getDoc(ideRef);
+            if (ideSnapshot.exists()) {
+                const existingIdeMap = ideSnapshot.data().ide || {};
+                const updatedIdeMap = {
+                    ...existingIdeMap,
+                    [fileTabs[activeTabIndex].name]: code // Update the content of the selected item
+                };
+                await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
+                console.log("Document successfully updated!");
+                setIsContentSaved(true);
+            } else {
+                console.log("No such document!");
+            }
+        } catch (error) {
+            console.error("Error updating document:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData(); // Call fetchUserData on component mount
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                fetchUserData(); // Call fetchUserData when auth state changes
+            }
+        });
+        return unsubscribe;
+    }, []);
+
+    const fetchUserData = async () => {
+        try {
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                setUserId(currentUser.uid);
+                const userDocRef = doc(db, "IDE", currentUser.uid);
+                const userSnapshot = await getDoc(userDocRef);
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.data();
+                    setUserData(userData);
+                } else {
+                    console.log("No such document!");
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    };
+    const renderFileOrFolder = (itemName, isFolder) => {
+        if (isFolder) {
+            return (
+                <li key={itemName} onClick={() => handleItemClick(itemName)}>
+                    <strong>Folder:</strong> {itemName}
+                    <ul>
+                        {userData && userData.ide && Object.keys(userData.ide).map((itemName, index) => (
+                            renderFileOrFolder(itemName, userData.ide[itemName].__isFolder)
+                        ))}
+                    </ul>
+                </li>
+            );
+        } else {
+            return (
+                <li key={itemName} onClick={() => handleItemClick(itemName)}>
+                    {itemName}
+                </li>
+            );
+        }
+    };
+    useEffect(() => {
+        // Compare edited content with content saved in Firebase
+        const checkContentSaved = async () => {
+            try {
+                //const uid = auth.currentUser.uid;
+                const ideRef = doc(db, "IDE", userId);
+                const ideSnapshot = await getDoc(ideRef);
+                if (ideSnapshot.exists()) {
+                    const savedContent = ideSnapshot.data().ide[selectedItem];
+                    setIsContentSaved(savedContent === code);
+                } else {
+                    console.log("No such document!");
+                }
+            } catch (error) {
+                console.error("Error checking content saved:", error);
+            }
+        };
+
+        checkContentSaved(); // Call the function on component mount and whenever editedContent or selectedItem changes
+    }, [code, selectedItem]);
 
   return (
     <>
       <Box sx={{ display: 'flex' }}>
       <Main open={filesOpen}>
       <div className={styles.scrollableContent}>
+        <div className={styles.tabWrapper}>
         <div className={styles.buttonRow}>
-          <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="end"
-              onClick={handleDrawerOpen}
-              sx={{ ...(filesOpen && { display: 'none' }) }}
-            >
-            <MenuIcon />
-          </IconButton>
-          <button className={styles.button} style={{background: language === "python" ? BGDARK : UNSELECTED, color: language === "python" ? "white" : "white"}} onClick={() => { setLanguage("python")}}>
-            <p className={styles.buttonText}>Python</p>
-            {false && <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>}
-          </button>
-          <button className={styles.button} style={{background: language === "java" ? BGDARK : UNSELECTED, color: language === "java" ? "white" : "white"}} onClick={() => { setLanguage("java")}}>
-            <p className={styles.buttonText}>Java</p>
-            {false && <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>}  
-          </button>
-          <button className={styles.button} style={{background: language === "cpp" ? BGDARK : UNSELECTED, color: language === "cpp" ? "white" : "white"}} onClick={() => { setLanguage("cpp")}}>
-            <p className={styles.buttonText}>C++</p>
-            {false && <img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}}/>}  
-          </button>
-          {false && <button className={styles.newTab}><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>}
+          {fileTabs.map((tab, index) => (
+            <button className={styles.button} style={{background: index === activeTabIndex ? BGDARK : UNSELECTED, color: index === activeTabIndex ? "white" : "white"}} onClick={() => { setActiveTabIndex(index)}}>
+              <p className={styles.buttonText}>{tab.name}</p>
+              {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
+            </button>          
+          ))
+          }
+          {<button 
+            className={styles.newTab}
+            onClick={handleDrawerOpen}
+            style={{ ...(filesOpen && { display: 'none' }) }}            
+          ><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>}
           <div className={styles.rightAlign}>
             <ThemeProvider theme={darkTheme}>
               <div>
@@ -531,31 +778,46 @@ const CodeEditor = (props) => {
                   <SaveIcon style={{color: 'white'}} onClick={() => { saveCode() }}/>
                 </IconButton>
               </div>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="end"
+                onClick={handleDrawerOpen}
+                sx={{ ...(filesOpen && { display: 'none' }) }}
+              >
+                <MenuIcon style={{color: "white"}}/>
+              </IconButton>
             </ThemeProvider>
           </div>
+        </div>
         </div>
         <br />
         <PanelGroup direction="vertical">
         <Panel>
-        <div className={styles.codeEditor}>
-          <Editor
-            theme="night-owl"
-            height="100%"
-            defaultLanguage="cpp"
-            value={code}
-            onChange={(value) => setCode(value)}
-            onMount={(editor, monaco) => {
-              editorRef.current = editor;
-              fetch('/themes/Night Owl.json')
-                .then(data => data.json())
-                .then(data => {
-                  console.log("theme data:", data);
-                  monaco.editor.defineTheme('night-owl', data);
-                  editor.updateOptions({ theme: 'night-owl' });
-                })
-            }}
-          />
-        </div>
+        {code ?
+          <div className={styles.codeEditor}>
+            <Editor
+              theme="night-owl"
+              height="100%"
+              defaultLanguage="cpp"
+              value={code}
+              onChange={(value) => setCode(value)}
+              onMount={(editor, monaco) => {
+                editorRef.current = editor;
+                fetch('/themes/Night Owl.json')
+                  .then(data => data.json())
+                  .then(data => {
+                    console.log("theme data:", data);
+                    monaco.editor.defineTheme('night-owl', data);
+                    editor.updateOptions({ theme: 'night-owl' });
+                  })
+              }}
+            />
+          </div> :
+          <div>
+            Open a file to start coding!
+          </div>
+        }
         </Panel>
         <PanelResizeHandle style={{ position: 'relative', cursor: 'row-resize', background: '#ccc', height: '10px', zIndex: 1 }}/>
         <Panel>
@@ -630,7 +892,59 @@ const CodeEditor = (props) => {
           </IconButton>
         </DrawerHeader>
         <Divider />
-        
+          {!showFileForm && (
+                <button onClick={() => setShowFileForm(true)}>Create File</button>
+            )}
+            {showFileForm && (
+                <form onSubmit={handleFileSubmit}>
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        autoFocus
+                        style={{color: "white"}}
+                    />
+                    <input
+                        type="text"
+                        value={fileTypeInputValue}
+                        onChange={(e) => setFileTypeInputValue(e.target.value)}
+                        placeholder="File Type"
+                        style={{color: "white"}}
+                    />
+                    <button type="submit">Submit</button>
+                </form>
+            )}
+            {!showFolderForm && (
+                <button onClick={() => setShowFolderForm(true)}>Create Folder</button>
+            )}
+            {showFolderForm && (
+                <form onSubmit={handleFolderSubmit}>
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        autoFocus
+                        style={{color: "white"}}
+                    />
+                    <button type="submit">Submit</button>
+                </form>
+            )}
+            <p>Files and Folders:</p>
+            <ul>
+                {userData && userData.ide && Object.keys(userData.ide).map((itemName, index) => (
+                    renderFileOrFolder(itemName, userData.ide[itemName].__isFolder)
+                ))}
+            </ul>
+            {selectedItem && (
+                <div>
+                    {isContentSaved ? (
+                        <h3>Saved</h3>
+                    ) : (
+                        <h3>Not Saved</h3>
+                    )}
+                    <button onClick={handleSave}>Save</button>
+                </div>
+            )}
       </Drawer>
       </ThemeProvider>
     </Box>
