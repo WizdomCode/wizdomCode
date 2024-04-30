@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useReducer } from 'react';
 import Split from 'react-split';
 import styles from '../../styles/Editor.module.css';
 import '../../styles/Editor.css';
@@ -48,6 +48,75 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { dark } from '@mui/material/styles/createPalette.js';
+import { NativeSelect } from '@mantine/core';
+import {
+  Tree,
+  getBackendOptions,
+  MultiBackend,
+} from "@minoru/react-dnd-treeview";
+import { DndProvider } from "react-dnd";
+
+const initialData = [
+  {
+    "id": 1,
+    "parent": 0,
+    "droppable": true,
+    "text": "Folder 1"
+  },
+  {
+    "id": 2,
+    "parent": 1,
+    "text": "File 1-1",
+    "data": {
+      "language": "python"
+    }
+  },
+  {
+    "id": 3,
+    "parent": 1,
+    "text": "File 1-2",
+    "data": {
+      "language": "cpp"
+    }
+  },
+  {
+    "id": 4,
+    "parent": 0,
+    "droppable": true,
+    "text": "Folder 2"
+  },
+  {
+    "id": 5,
+    "parent": 4,
+    "droppable": true,
+    "text": "Folder 2-1"
+  },
+  {
+    "id": 6,
+    "parent": 5,
+    "text": "File 2-1-1",
+    "data": {
+      "language": "python"
+    }
+  }
+];
+
+const initialCode = {
+  2: "print('File 1-1')",
+  3: `#include <iostream>
+
+int main() {
+    std::cout << "Hello World!";
+    return 0;
+}`,
+  6: "print('File 2-1-1')",
+};
+
+const FILE_EXTENSION = {
+  python: ".py",
+  java: ".java",
+  cpp: ".cpp"
+};
 
 const drawerWidth = 240;
 
@@ -338,6 +407,9 @@ const CodeEditor = (props) => {
         code: code
       }
     })
+
+    console.log("CODE TO SUBMIT", code);
+    if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language) console.log("Language", fileTabs[activeTabIndex].language);
   }, [code]);
 
   const submitCode = async () => {
@@ -476,7 +548,7 @@ const CodeEditor = (props) => {
   }
   
     const [showFileForm, setShowFileForm] = useState(false);
-    const [fileTypeInputValue, setFileTypeInputValue] = useState("");
+    const [fileTypeInputValue, setFileTypeInputValue] = useState("cpp");
     const [showFolderForm, setShowFolderForm] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [inputValue, setInputValue] = useState("");
@@ -489,63 +561,99 @@ const CodeEditor = (props) => {
 
     const handleFileSubmit = async (event) => {
         event.preventDefault();
-        const uid = auth.currentUser.uid;
-        const ideRef = doc(db, "IDE", uid);
-        try {
-            const ideSnapshot = await getDoc(ideRef);
-            if (ideSnapshot.exists()) {
-                const existingIdeMap = ideSnapshot.data().ide || {};
-                const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : "";
-                const updatedIdeMap = {
-                    ...existingIdeMap,
-                    [`${folderPath}${inputValue}`]: "blank"
-                };
-                const updatedFileTypes = {
-                    ...ideSnapshot.data().fileTypes, // Existing file types map
-                    [`${folderPath}${inputValue}`]: fileTypeInputValue // Add file type to fileTypes map
-                };
-                await setDoc(ideRef, { ide: updatedIdeMap, fileTypes: updatedFileTypes }, { merge: true });
-                console.log("Document successfully written!");
 
-                setFileTabs([...fileTabs, { name: `${folderPath}${inputValue}`, language: fileTypeInputValue, code: '' }]);
-                setActiveTabIndex(fileTabs.length);
-            } else {
-                console.log("No such document!");
-            }
-            setInputValue("");
-            setFileTypeInputValue(""); // Clear file type input value
-            setShowFileForm(false);
-            fetchUserData();
-        } catch (error) {
-            console.error("Error writing document: ", error);
+        console.log(openFile);
+        const parentId = openFile ? (openFile.droppable ? openFile.id : openFile.parent) : 0;
+        const newFile = { 
+            id: treeData[treeData.length - 1].id + 1, 
+            parent: parentId, 
+            text: inputValue, 
+            data: { language: fileTypeInputValue } 
+        };
+        console.log("New file created", newFile);
+    
+        setFileTabs([...fileTabs, { id: treeData[treeData.length - 1].id + 1, language: fileTypeInputValue, name: inputValue, code: "" }]);
+
+        setFileCode({ type: 'update', key: treeData[treeData.length - 1].id + 1, value: "" });
+
+        const newTreeData = [...treeData, newFile];
+        setTreeData(newTreeData);    
+        
+        if (false) {
+          const uid = auth.currentUser.uid;
+          const ideRef = doc(db, "IDE", uid);
+          try {
+              const ideSnapshot = await getDoc(ideRef);
+              if (ideSnapshot.exists()) {
+                  const existingIdeMap = ideSnapshot.data().ide || {};
+                  const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : "";
+                  const updatedIdeMap = {
+                      ...existingIdeMap,
+                      [`${folderPath}${inputValue}`]: "blank"
+                  };
+                  const updatedFileTypes = {
+                      ...ideSnapshot.data().fileTypes, // Existing file types map
+                      [`${folderPath}${inputValue}`]: fileTypeInputValue // Add file type to fileTypes map
+                  };
+                  await setDoc(ideRef, { ide: updatedIdeMap, fileTypes: updatedFileTypes }, { merge: true });
+                  console.log("Document successfully written!");
+
+                  setFileTabs([...fileTabs, { name: `${folderPath}${inputValue}`, language: fileTypeInputValue, code: '' }]);
+                  setActiveTabIndex(fileTabs.length);
+              } else {
+                  console.log("No such document!");
+              }
+              setInputValue("");
+              setFileTypeInputValue(""); // Clear file type input value
+              setShowFileForm(false);
+              fetchUserData();
+          } catch (error) {
+              console.error("Error writing document: ", error);
+          }
         }
     };
     
     const handleFolderSubmit = async (event) => {
         event.preventDefault();
-        const uid = auth.currentUser.uid;
-        const ideRef = doc(db, "IDE", uid);
-        try {
-            const ideSnapshot = await getDoc(ideRef);
-            if (ideSnapshot.exists()) {
-                const existingIdeMap = ideSnapshot.data().ide || {};
-                const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : ""; // Add folder path if it's not the root folder
-                if (inputValue.trim() !== "") { // Check if inputValue is not empty
-                    const updatedIdeMap = {
-                        ...existingIdeMap,
-                        [`${folderPath}${inputValue}`]: {} // Create an empty object for the folder
-                    };
-                    await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-                    console.log("Document successfully written!");
-                }
-            } else {
-                console.log("No such document!");
-            }
-            setInputValue("");
-            setShowFolderForm(false);
-            fetchUserData(); // Call fetchUserData to update the file list
-        } catch (error) {
-            console.error("Error writing document: ", error);
+
+        console.log(openFile);
+        const parentId = openFile ? (openFile.droppable ? openFile.id : openFile.parent) : 0;
+        const newFile = { 
+            id: treeData[treeData.length - 1].id + 1, 
+            parent: parentId, 
+            text: inputValue, 
+            droppable: true
+        };
+        console.log("New file created", newFile);
+    
+        const newTreeData = [...treeData, newFile];
+        setTreeData(newTreeData);    
+
+        if (false) {
+          const uid = auth.currentUser.uid;
+          const ideRef = doc(db, "IDE", uid);
+          try {
+              const ideSnapshot = await getDoc(ideRef);
+              if (ideSnapshot.exists()) {
+                  const existingIdeMap = ideSnapshot.data().ide || {};
+                  const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : ""; // Add folder path if it's not the root folder
+                  if (inputValue.trim() !== "") { // Check if inputValue is not empty
+                      const updatedIdeMap = {
+                          ...existingIdeMap,
+                          [`${folderPath}${inputValue}`]: {} // Create an empty object for the folder
+                      };
+                      await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
+                      console.log("Document successfully written!");
+                  }
+              } else {
+                  console.log("No such document!");
+              }
+              setInputValue("");
+              setShowFolderForm(false);
+              fetchUserData(); // Call fetchUserData to update the file list
+          } catch (error) {
+              console.error("Error writing document: ", error);
+          }
         }
     };
 
@@ -714,6 +822,127 @@ const CodeEditor = (props) => {
         checkContentSaved(); // Call the function on component mount and whenever editedContent or selectedItem changes
     }, [code, selectedItem]);
 
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'update':
+        return { ...state, [action.key]: action.value };
+      case 'delete':
+        const newState = { ...state };
+        delete newState[action.key];
+        return newState;
+      default:
+        throw new Error();
+    }
+  }    
+
+  const [treeData, setTreeData] = useState(initialData);
+  const [fileCode, setFileCode] = useReducer(reducer, initialCode);
+
+  useEffect(() => {
+    console.log("CHANGE IN FILECODE", fileCode);
+  }, [fileCode]);
+
+  const handleDrop = async (newTreeData) => {
+    console.log("newTreeData", newTreeData);
+    setTreeData(newTreeData);
+  }; 
+
+  useEffect(() => {
+    const updateTree = async (newTreeData) => {
+      const uid = auth.currentUser.uid;
+      const docRef = doc(db, "IDE", uid);
+  
+      console.log("updating firestore tree");
+      console.log(newTreeData);
+    
+      try {
+        await setDoc(docRef, { files: newTreeData }, { merge: true });
+        console.log("Document written successfully");
+      } catch (error) {
+        console.error("Error writing document: ", error);
+      }
+    }; 
+
+    updateTree(treeData);
+  }, [treeData]);
+  
+  useEffect(() => {
+    const fetchData = async (userId) => {
+      const docRef = doc(db, "IDE", userId);
+      const docSnap = await getDoc(docRef);
+  
+      if (docSnap.exists()) {
+        console.log("STORED TREE DATA", docSnap.data().files);
+        setTreeData(docSnap.data().files || initialData);
+      } else {
+        console.log("No such document!");
+        setTreeData(initialData);
+      }
+    };  
+
+    if (userId) {
+      console.log("Change in userId", userId);
+      fetchData(userId);
+    }
+  }, [userId]);
+
+  const [openFile, setOpenFile] = useState(null);
+
+  useEffect(() => {
+    const handleFileClick = async () => {
+      setSelectedItem(openFile.text);
+      setEditedContent(fileCode[openFile.id]);
+      setCode(fileCode[openFile.id]);
+
+      // Check if file with same name already exists
+      const existingTabIndex = fileTabs.findIndex(tab => tab.id === openFile.id);
+      if (existingTabIndex !== -1) {
+          // If file exists, set the active tab index to that file
+          setActiveTabIndex(existingTabIndex);
+      } else {
+          // If file doesn't exist, create a new file and set it as the active tab
+          setFileTabs([...fileTabs, { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] }]);
+          setActiveTabIndex(fileTabs.length); // Set the new tab as the active tab
+          console.log("New tab:", { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] });
+      }
+    };
+
+    if (openFile && !openFile.droppable) {
+      handleFileClick();
+    }
+  }, [openFile]);
+
+  const handleFileDelete = () => {
+    if (openFile && openFile.id) {
+      const id = openFile.id;
+      setFileTabs(prevArray => prevArray.filter(object => object.id !== id));
+      setTreeData(prevArray => prevArray.filter(object => object.id !== id));
+      setFileCode({ type: 'delete', key: id });
+
+      if (fileTabs.length > 1) {
+        setActiveTabIndex(prevIndex => {
+          console.log("New filetabs len", fileTabs.length);
+          console.log("prevIndex", prevIndex);
+
+          if (activeTabIndex === prevIndex && prevIndex === fileTabs.length - 1) {
+            setCode(fileTabs[prevIndex - 1].code);
+            return prevIndex - 1;
+          } else if (activeTabIndex < prevIndex) {
+            setCode(fileTabs[prevIndex - 1].code);
+            return prevIndex - 1;
+          }
+          console.log("b");
+          console.log("prevIndex", prevIndex);
+          setCode(fileTabs[prevIndex].code);
+          return prevIndex;
+        });
+      } else {
+        setCode(null);
+        setActiveTabIndex(0);
+      }
+    }
+  }
+
   return (
     <>
       <Box sx={{ display: 'flex' }}>
@@ -723,7 +952,7 @@ const CodeEditor = (props) => {
         <div className={styles.buttonRow}>
           {fileTabs.map((tab, index) => (
             <button className={styles.button} style={{background: index === activeTabIndex ? BGDARK : UNSELECTED, color: index === activeTabIndex ? "white" : "white"}} onClick={() => { setActiveTabIndex(index)}}>
-              <p className={styles.buttonText}>{tab.name}</p>
+              <p className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
               {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
             </button>          
           ))
@@ -794,25 +1023,31 @@ const CodeEditor = (props) => {
         <br />
         <PanelGroup direction="vertical">
         <Panel>
-        {code ?
+        {fileTabs.length > 0 ?
           <div className={styles.codeEditor}>
-            <Editor
-              theme="night-owl"
-              height="100%"
-              defaultLanguage="cpp"
-              value={code}
-              onChange={(value) => setCode(value)}
-              onMount={(editor, monaco) => {
-                editorRef.current = editor;
-                fetch('/themes/Night Owl.json')
-                  .then(data => data.json())
-                  .then(data => {
-                    console.log("theme data:", data);
-                    monaco.editor.defineTheme('night-owl', data);
-                    editor.updateOptions({ theme: 'night-owl' });
-                  })
-              }}
-            />
+            { fileTabs.map((tab, index) => (
+              index === activeTabIndex &&
+              <Editor
+                theme="night-owl"
+                height="100%"
+                defaultLanguage="cpp"
+                value={fileCode[tab.id]}
+                onChange={(value) => {
+                  setFileCode({ type: 'update', key: tab.id, value: value })
+                  setCode(value);
+                }}
+                onMount={(editor, monaco) => {
+                  editorRef.current = editor;
+                  fetch('/themes/Night Owl.json')
+                    .then(data => data.json())
+                    .then(data => {
+                      console.log("theme data:", data);
+                      monaco.editor.defineTheme('night-owl', data);
+                      editor.updateOptions({ theme: 'night-owl' });
+                    })
+                }}
+              />
+            ))}
           </div> :
           <div>
             Open a file to start coding!
@@ -896,23 +1131,24 @@ const CodeEditor = (props) => {
                 <button onClick={() => setShowFileForm(true)}>Create File</button>
             )}
             {showFileForm && (
-                <form onSubmit={handleFileSubmit}>
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        autoFocus
-                        style={{color: "white"}}
-                    />
-                    <input
-                        type="text"
-                        value={fileTypeInputValue}
+                <div>
+                  <form onSubmit={handleFileSubmit}>
+                      <input
+                          type="text"
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          autoFocus
+                          style={{color: "white"}}
+                          placeholder="File Name"
+                      />
+                      <NativeSelect 
+                        label="Language" 
+                        data={['cpp', 'python', 'java']} 
                         onChange={(e) => setFileTypeInputValue(e.target.value)}
-                        placeholder="File Type"
-                        style={{color: "white"}}
-                    />
-                    <button type="submit">Submit</button>
-                </form>
+                      />
+                      <button type="submit">Submit</button>
+                  </form>
+                </div>
             )}
             {!showFolderForm && (
                 <button onClick={() => setShowFolderForm(true)}>Create Folder</button>
@@ -929,6 +1165,7 @@ const CodeEditor = (props) => {
                     <button type="submit">Submit</button>
                 </form>
             )}
+            <button onClick={() => handleFileDelete()}>Delete</button>
             <p>Files and Folders:</p>
             <ul>
                 {userData && userData.ide && Object.keys(userData.ide).map((itemName, index) => (
@@ -945,6 +1182,28 @@ const CodeEditor = (props) => {
                     <button onClick={handleSave}>Save</button>
                 </div>
             )}
+        <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
+          <Tree
+            tree={treeData}
+            rootId={0}
+            onDrop={handleDrop}
+            render={(node, { depth, isOpen, onToggle }) => (
+              <div 
+                style={{ marginLeft: depth * 10, backgroundColor: openFile && openFile.text === node.text ? 'darkblue' : 'transparent' }}
+                onClick={() => {console.log(node, "clicked"); setOpenFile(node);}}
+              >
+                {node.droppable && (
+                  <span onClick={onToggle}>{isOpen ? "[-]" : "[+]"}</span>
+                )}
+                {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
+              </div>
+            )}
+            dragPreviewRender={(monitorProps) => (
+              <div>{monitorProps.item.text}</div>
+            )}
+            style={{ height: "100%" }}
+          />
+        </DndProvider>
       </Drawer>
       </ThemeProvider>
     </Box>
