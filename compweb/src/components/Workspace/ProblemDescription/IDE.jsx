@@ -182,7 +182,11 @@ const IDE = (props) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOption, setFilterOption] = useState('');
+  const [selectedSolution, setSelectedSolution] = useState(null);
 
+  const toggleCodeVisibility = (index) => {
+    setSelectedSolution(selectedSolution === index ? null : index);
+  };
   const [results, setResults] = useState([]);
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState("cpp");
@@ -655,7 +659,7 @@ const submitCode = async () => {
           await updateDoc(userDocRef, {
             solved: arrayUnion(questionName), // Add the question name to the solved array
             points: points + (userDocSnapshot.data().points || 0), // Increment points
-            coins: (points*10) + (userDocSnapshot.data().points || 0) // Increment points
+            coins: (points*10) + (userDocSnapshot.data().points || 0) // Increment coins
           });
     
           // Get a reference to the question document
@@ -1339,9 +1343,10 @@ const submitCode = async () => {
                           <span>User ID: {solution.userId}</span>
                           <span>Execution Time: {solution.executionTime}</span>
                           <span>Score: {solution.score}</span>
-                          <button>Upvote</button>
-                          <button>Downvote</button>
-                          <pre>
+                          <button onClick={() => toggleCodeVisibility(index)}>
+                            {selectedSolution === index ? 'Hide Code' : 'Show Code'}
+                          </button>
+                          <pre style={{ display: selectedSolution === index ? 'block' : 'none' }}>
                             <code>{solution.solution}</code>
                           </pre>
                         </div>
