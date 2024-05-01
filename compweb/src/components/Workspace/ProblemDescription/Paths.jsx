@@ -146,7 +146,8 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                 // Update the user's document to add the solved question and increment points
                 await updateDoc(userDocRef, {
                     solvedCategories: arrayUnion(props.categoryId), // Add the question name to the solved array
-                    points: 10 + (userDocSnapshot.data().points || 0) // Increment points
+                    points: 10 + (userDocSnapshot.data().points || 0), // Increment points
+                    coins: 100 + (userDocSnapshot.data().points || 0),
                 });
                 console.log(`props.categoryId "${props.categoryId}" solved! Points updated.`);
                 } else {

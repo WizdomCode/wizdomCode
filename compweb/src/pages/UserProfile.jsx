@@ -3,13 +3,22 @@ import { auth, db } from "../firebase";
 import Navigation from "../components/Navigation/Navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from 'react-redux';
+import SpiderChart from "./SpiderChart";
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
 
   const authenticatedUser = useSelector(state => state.authenticatedUser);
-
+  const skills = {
+    JavaScript: 0.9,
+    HTML: 0.85,
+    CSS: 0.95,
+    React: 0.8,
+    Nodejs: 0.7,
+    Git: 0.9,
+    Communication: 0.95,
+  };
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -61,6 +70,7 @@ const UserProfile = () => {
               <li key={index}>{item}</li>
             ))}
           </ul>
+          <SpiderChart skills={userData.skills} />
         </div>
       )}
     </>
