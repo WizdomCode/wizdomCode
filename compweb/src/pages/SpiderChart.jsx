@@ -11,33 +11,62 @@ class SpiderChart extends React.Component {
 
     this.state = {
       series: [{
-        name: 'Skills',
+        name: 'Points',
         data: values,
       }],
       options: {
         chart: {
           type: 'radar',
+          toolbar: {
+            show: false
+          },
+          background: '#f8f8f8',
           dropShadow: {
             enabled: true,
-            blur: 5,
-            left: 2,
-            top: 2,
+            blur: 1,
+            left: 1,
+            top: 1,
             opacity: 0.1
           }
         },
+        colors: ['#0084ff'],
         stroke: {
-          width: 2
+          width: 3,
+          curve: 'smooth'
         },
         fill: {
           opacity: 0.1
         },
         markers: {
-          size: 0
+          size: 5,
+          colors: ['#0084ff'],
+          strokeWidth: 0,
+          hover: {
+            size: 7
+          }
         },
         xaxis: {
-          categories: labels
+          categories: labels,
+          labels: {
+            style: {
+              colors: '#333',
+              fontSize: '14px',
+              fontWeight: 500,
+              fontFamily: 'Arial, sans-serif'
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#333',
+              fontSize: '14px',
+              fontWeight: 500,
+              fontFamily: 'Arial, sans-serif'
+            }
+          }
         }
-      },
+      }
     };
   }
 
