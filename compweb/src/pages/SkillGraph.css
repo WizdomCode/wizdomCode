@@ -1,0 +1,25 @@
+.skill-graph-container {
+    margin-top: 20px;
+  }
+  
+  .skill-graph {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .skill-polygon-outline {
+    fill: none;
+    stroke: #007bff;
+    stroke-width: 1;
+  }
+  
+  .skill-point {
+    fill: #007bff;
+    stroke: #fff;
+  }
+  
+  .skill-category {
+    width: calc(100% / 7);
+    text-align: center;
+  }
+  

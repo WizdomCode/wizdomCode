@@ -28,6 +28,17 @@ const SignUp = () => {
       const userDocRef = doc(db, "Users", user.uid);
   
       // Create an empty array called "solved" for each new user
+      const skills = {
+        "Ad Hoc": 0,
+        "Data Structures": 0,
+        "Dynamic Programming": 0,
+        "Graph Theory": 0,
+        "Greedy Algorithms": 0,
+        "Math": 0,
+        "String Algorithms": 0
+        // Add more skills here if needed
+      };
+  
       const userData = {
         username: username,
         firstName: firstName,
@@ -38,7 +49,8 @@ const SignUp = () => {
         points: 0,
         coins: 0,
         solved: [], // Empty array for solved problems
-        solvedCategories: []
+        solvedCategories: [],
+        skills: skills // Assign the skills map to userData
       };
   
       await setDoc(userDocRef, userData);

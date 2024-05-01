@@ -537,7 +537,7 @@ int main() {
 
   const pollResults = async (requestId) => {
     try {
-        const response = await fetch(`https://2a42-99-208-67-206.ngrok-free.app/get_results/${requestId}`);
+        const response = await fetch(`https://7516-147-124-72-82.ngrok-free.app/get_results/${requestId}`);
         if (response.ok && response.headers.get('Content-Type') === 'application/json') {
             const data = await response.json();
             console.log('Received results:', data);
@@ -567,7 +567,7 @@ const submitCode = async () => {
     // Start the timer
     const startTime = performance.now();
   
-    const response = await fetch('https://f140-99-208-67-206.ngrok-free.app/execute', {
+    const response = await fetch('https://7516-147-124-72-82.ngrok-free.app/execute', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -616,7 +616,7 @@ const submitCode = async () => {
       
         if (!stopFetching) {
           // Delay before next fetch to avoid overwhelming the server
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
       } else {
         console.log("Document not found!");
@@ -654,7 +654,8 @@ const submitCode = async () => {
           // Update the user's document to add the solved question and increment points
           await updateDoc(userDocRef, {
             solved: arrayUnion(questionName), // Add the question name to the solved array
-            points: points + (userDocSnapshot.data().points || 0) // Increment points
+            points: points + (userDocSnapshot.data().points || 0), // Increment points
+            coins: (points*10) + (userDocSnapshot.data().points || 0) // Increment points
           });
     
           // Get a reference to the question document
