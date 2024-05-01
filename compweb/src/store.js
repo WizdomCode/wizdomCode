@@ -31,7 +31,19 @@ const initialState = {
   inputOutputTab: 'input',
   inputData: '',
   outputData: '',
-  authenticatedUser: null
+  authenticatedUser: null,
+  fileTabs: [],
+  activeFileTab: 0,
+  fileCode: {
+  2: "print('File 1-1')",
+  3: `#include <iostream>
+
+int main() {
+    std::cout << "Hello World!";
+    return 0;
+}`,
+  6: "print('File 2-1-1')",
+}
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -173,6 +185,52 @@ function reducer(state = initialState, action) {
         ...state,
         authenticatedUser: action.payload,  // Update tabIndex with the new value
       };
+    case 'ADD_FILE_TAB':
+      return {
+        ...state,
+        fileTabs: [...state.fileTabs, action.payload],
+      };
+    case 'REMOVE_FILE_TAB_BY_ID':
+      const removedById = state.fileTabs.filter(tab => tab.id !== action.payload);
+      return {
+        ...state,
+        fileTabs: removedById,
+      };
+    case 'REMOVE_FILE_TAB_BY_INDEX':
+      const removedByIndex = state.fileTabs.filter((_, i) => i !== action.payload);
+      return {
+        ...state,
+        fileTabs: removedByIndex,
+      };
+    case 'SET_ACTIVE_FILE_TAB':
+      return {
+        ...state,
+        activeFileTab: action.payload,
+      }
+    case 'UPDATE_FILE_CODE':
+      console.log('UPDATE_FILE_CODE', {
+        ...state.fileCode,
+        [action.key]: action.value,
+      });
+      return {
+        ...state, 
+        fileCode: {
+          ...state.fileCode,
+          [action.key]: action.value,
+        }
+      }
+    case 'DELETE_FILE_CODE':
+      const newFileCodeState = { ...state.fileCode };
+      delete newFileCodeState[action.key];
+      return {
+        ...state,
+        fileCode: newFileCodeState
+      };
+    case 'REPLACE_FILE_CODE':
+      return {
+        ...state,
+        fileCode: action.newState
+      }
     default:
       return state;
   }

@@ -239,8 +239,8 @@ const StyledMenu = styled((props) => (
 }));
 
 const CodeEditor = (props) => {
-  const [fileTabs, setFileTabs] = React.useState([]);
-  const [activeTabIndex, setActiveTabIndex] = React.useState(0);
+  const fileTabs = useSelector(state => state.fileTabs);
+  const activeTabIndex = useSelector(state => state.activeFileTab);
 
   const theme = useTheme();
   const [filesOpen, setFilesOpen] = React.useState(false);
@@ -390,15 +390,6 @@ const CodeEditor = (props) => {
   }, [editorRef.current]);  
 
   useEffect(() => {
-    if (fileTabs.length > 0) {
-      const newFileTabs = [...fileTabs];
-      newFileTabs[activeTabIndex] = {
-        ...newFileTabs[activeTabIndex],
-        code: code,
-      };
-      setFileTabs(newFileTabs);  
-    }
-
     props.getCode(code, language);
     dispatch({
       type: 'SET_CODE_STATE',
@@ -418,7 +409,7 @@ const CodeEditor = (props) => {
     // Start the timer
     const startTime = performance.now();
 
-    const response = await fetch('https://e816-66-22-164-190.ngrok-free.app/execute', {
+    const response = await fetch(`${import.meta.env.VITE_APP_JUDGE_URL}execute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -572,45 +563,12 @@ const CodeEditor = (props) => {
         };
         console.log("New file created", newFile);
     
-        setFileTabs([...fileTabs, { id: treeData[treeData.length - 1].id + 1, language: fileTypeInputValue, name: inputValue, code: "" }]);
+        dispatch({ type: 'ADD_FILE_TAB', payload: { id: treeData[treeData.length - 1].id + 1, language: fileTypeInputValue, name: inputValue, code: "" } });
 
-        setFileCode({ type: 'update', key: treeData[treeData.length - 1].id + 1, value: "" });
+        dispatch({ type: 'UPDATE_FILE_CODE', key: treeData[treeData.length - 1].id + 1, value: "" });
 
         const newTreeData = [...treeData, newFile];
-        setTreeData(newTreeData);    
-        
-        if (false) {
-          const uid = auth.currentUser.uid;
-          const ideRef = doc(db, "IDE", uid);
-          try {
-              const ideSnapshot = await getDoc(ideRef);
-              if (ideSnapshot.exists()) {
-                  const existingIdeMap = ideSnapshot.data().ide || {};
-                  const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : "";
-                  const updatedIdeMap = {
-                      ...existingIdeMap,
-                      [`${folderPath}${inputValue}`]: "blank"
-                  };
-                  const updatedFileTypes = {
-                      ...ideSnapshot.data().fileTypes, // Existing file types map
-                      [`${folderPath}${inputValue}`]: fileTypeInputValue // Add file type to fileTypes map
-                  };
-                  await setDoc(ideRef, { ide: updatedIdeMap, fileTypes: updatedFileTypes }, { merge: true });
-                  console.log("Document successfully written!");
-
-                  setFileTabs([...fileTabs, { name: `${folderPath}${inputValue}`, language: fileTypeInputValue, code: '' }]);
-                  setActiveTabIndex(fileTabs.length);
-              } else {
-                  console.log("No such document!");
-              }
-              setInputValue("");
-              setFileTypeInputValue(""); // Clear file type input value
-              setShowFileForm(false);
-              fetchUserData();
-          } catch (error) {
-              console.error("Error writing document: ", error);
-          }
-        }
+        setTreeData(newTreeData);
     };
     
     const handleFolderSubmit = async (event) => {
@@ -661,30 +619,31 @@ const CodeEditor = (props) => {
       console.log("removing index", index);
       console.log("Current filetabs len", fileTabs.length);
 
-      const newFileTabs = fileTabs.filter((_, i) => i !== index);
-
-      setFileTabs(newFileTabs);    
+      dispatch({ type: 'REMOVE_FILE_TAB_BY_INDEX', payload: index });
     
       if (fileTabs.length > 1) {
-        setActiveTabIndex(prevIndex => {
-          console.log("New filetabs len", fileTabs.length);
-          console.log("prevIndex", prevIndex);
+        console.log("New filetabs len", fileTabs.length);
+        console.log("prevIndex", activeTabIndex);
 
-          if (index === prevIndex && prevIndex === fileTabs.length - 1) {
-            setCode(fileTabs[prevIndex - 1].code);
-            return prevIndex - 1;
-          } else if (index < prevIndex) {
-            setCode(fileTabs[prevIndex - 1].code);
-            return prevIndex - 1;
-          }
-          console.log("b");
-          console.log("prevIndex", prevIndex);
-          setCode(fileTabs[prevIndex].code);
-          return prevIndex;
-        });
+        if (activeTabIndex === fileTabs.length - 1) {
+          console.log("New filetabs len", fileTabs.length);
+          setCode(fileTabs[activeTabIndex - 1].code);
+          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
+          return;
+        } else if (index < activeTabIndex) {
+          setCode(fileTabs[activeTabIndex - 1].code);
+          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
+          return;
+        }
+        console.log("b");
+        console.log("prevIndex", activeTabIndex);
+        setCode(fileTabs[activeTabIndex].code);
+        dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex });
+        return;
       } else {
         setCode(null);
-        setActiveTabIndex(0);
+        dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: 0 });
+        return;
       }
     };
 
@@ -712,11 +671,11 @@ const CodeEditor = (props) => {
                 const existingTabIndex = fileTabs.findIndex(tab => tab.name === itemName);
                 if (existingTabIndex !== -1) {
                     // If file exists, set the active tab index to that file
-                    setActiveTabIndex(existingTabIndex);
+                    dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: existingTabIndex });
                 } else {
                     // If file doesn't exist, create a new file and set it as the active tab
-                    setFileTabs([...fileTabs, { language: itemType, name: itemName, code: itemData }]);
-                    setActiveTabIndex(fileTabs.length); // Set the new tab as the active tab
+                    dispatch({ type: 'ADD_FILE_TAB', payload: { language: itemType, name: itemName, code: itemData } });
+                    dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
                     console.log("New tab:", { language: itemType, name: itemName, code: itemData });
                 }
             } else {
@@ -742,6 +701,20 @@ const CodeEditor = (props) => {
                 await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
                 console.log("Document successfully updated!");
                 setIsContentSaved(true);
+
+                const updateFileCode = async (newFileCode) => {
+                  console.log("updating firestore code");
+                  console.log(newFileCode);
+                
+                  try {
+                    await setDoc(ideRef, { code: newFileCode }, { merge: true });
+                    console.log("Document written successfully");
+                  } catch (error) {
+                    console.error("Error writing document: ", error);
+                  }
+                }; 
+            
+                updateFileCode(fileCode);
             } else {
                 console.log("No such document!");
             }
@@ -830,13 +803,15 @@ const CodeEditor = (props) => {
         const newState = { ...state };
         delete newState[action.key];
         return newState;
+      case 'replace':
+        return action.newState;
       default:
         throw new Error();
     }
   }    
 
   const [treeData, setTreeData] = useState(initialData);
-  const [fileCode, setFileCode] = useReducer(reducer, initialCode);
+  const fileCode = useSelector(state => state.fileCode);
 
   useEffect(() => {
     console.log("CHANGE IN FILECODE", fileCode);
@@ -874,9 +849,13 @@ const CodeEditor = (props) => {
       if (docSnap.exists()) {
         console.log("STORED TREE DATA", docSnap.data().files);
         setTreeData(docSnap.data().files || initialData);
+
+        console.log("STORED CODE DATA", docSnap.data().code);
+        dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
       } else {
         console.log("No such document!");
         setTreeData(initialData);
+        dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
       }
     };  
 
@@ -898,11 +877,11 @@ const CodeEditor = (props) => {
       const existingTabIndex = fileTabs.findIndex(tab => tab.id === openFile.id);
       if (existingTabIndex !== -1) {
           // If file exists, set the active tab index to that file
-          setActiveTabIndex(existingTabIndex);
+          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: existingTabIndex });
       } else {
           // If file doesn't exist, create a new file and set it as the active tab
-          setFileTabs([...fileTabs, { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] }]);
-          setActiveTabIndex(fileTabs.length); // Set the new tab as the active tab
+          dispatch({ type: 'ADD_FILE_TAB', payload: { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] } });
+          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
           console.log("New tab:", { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] });
       }
     };
@@ -915,30 +894,33 @@ const CodeEditor = (props) => {
   const handleFileDelete = () => {
     if (openFile && openFile.id) {
       const id = openFile.id;
-      setFileTabs(prevArray => prevArray.filter(object => object.id !== id));
+      const removeIndex = fileTabs.findIndex(object => object.id === id);
+      dispatch({ type: 'REMOVE_FILE_TAB_BY_ID', payload: id });
       setTreeData(prevArray => prevArray.filter(object => object.id !== id));
-      setFileCode({ type: 'delete', key: id });
+      dispatch({ type: 'DELETE_FILE_CODE', key: id });
 
       if (fileTabs.length > 1) {
-        setActiveTabIndex(prevIndex => {
-          console.log("New filetabs len", fileTabs.length);
-          console.log("prevIndex", prevIndex);
+        console.log("New filetabs len", fileTabs.length);
+        console.log("prevIndex", activeTabIndex);
 
-          if (activeTabIndex === prevIndex && prevIndex === fileTabs.length - 1) {
-            setCode(fileTabs[prevIndex - 1].code);
-            return prevIndex - 1;
-          } else if (activeTabIndex < prevIndex) {
-            setCode(fileTabs[prevIndex - 1].code);
-            return prevIndex - 1;
-          }
-          console.log("b");
-          console.log("prevIndex", prevIndex);
-          setCode(fileTabs[prevIndex].code);
-          return prevIndex;
-        });
+        if (activeTabIndex === fileTabs.length - 1) {
+          setCode(fileTabs[activeTabIndex - 1].code);
+          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
+          return;
+        } else if (removeIndex < activeTabIndex) {
+          setCode(fileTabs[activeTabIndex - 1].code);
+          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
+          return;
+        }
+        console.log("b");
+        console.log("prevIndex", activeTabIndex);
+        setCode(fileTabs[activeTabIndex].code);
+        dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex });
+        return;
       } else {
         setCode(null);
-        setActiveTabIndex(0);
+        dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: 0 });
+        return;
       }
     }
   }
@@ -951,7 +933,7 @@ const CodeEditor = (props) => {
         <div className={styles.tabWrapper}>
         <div className={styles.buttonRow}>
           {fileTabs.map((tab, index) => (
-            <button className={styles.button} style={{background: index === activeTabIndex ? BGDARK : UNSELECTED, color: index === activeTabIndex ? "white" : "white"}} onClick={() => { setActiveTabIndex(index)}}>
+            <button className={styles.button} style={{background: index === activeTabIndex ? BGDARK : UNSELECTED, color: index === activeTabIndex ? "white" : "white"}} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
               <p className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
               {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
             </button>          
@@ -1030,10 +1012,10 @@ const CodeEditor = (props) => {
               <Editor
                 theme="night-owl"
                 height="100%"
-                defaultLanguage="cpp"
+                defaultLanguage={tab.language}
                 value={fileCode[tab.id]}
                 onChange={(value) => {
-                  setFileCode({ type: 'update', key: tab.id, value: value })
+                  dispatch({ type: 'UPDATE_FILE_CODE', key: tab.id, value: value })
                   setCode(value);
                 }}
                 onMount={(editor, monaco) => {

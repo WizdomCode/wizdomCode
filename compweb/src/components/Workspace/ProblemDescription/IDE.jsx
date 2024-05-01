@@ -558,7 +558,7 @@ int main() {
 };
 
 const submitCode = async () => {
-    console.log("sent data:", JSON.stringify({
+    console.log("submitting from here:", JSON.stringify({
         language: language,
         code: code,
         test_cases: testCases
@@ -567,7 +567,7 @@ const submitCode = async () => {
     // Start the timer
     const startTime = performance.now();
   
-    const response = await fetch('https://f140-99-208-67-206.ngrok-free.app/execute', {
+    const response = await fetch(`${import.meta.env.VITE_APP_JUDGE_URL}execute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -598,6 +598,7 @@ const submitCode = async () => {
       const rdata = await getDoc(docRef);
       if (rdata.exists) {
         const ndata = rdata.data();
+        console.log("DATA RECEIVED FROM SERVER", ndata);
       
         // Check if results array exists in ndata
         if (ndata && ndata.results && Array.isArray(ndata.results)) {
