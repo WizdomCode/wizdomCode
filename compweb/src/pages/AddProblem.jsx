@@ -22,6 +22,10 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css'; 
+
 const ariaLabel = { 'aria-label': 'description' };
 
 const lightTheme = createTheme({
@@ -256,7 +260,11 @@ const AddProblem = () => {
                   {description && (
                     <>
                       {specificContest && <h3>{specificContest}</h3>}
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(description.replace(/\\n/g, '\n'))} />
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeRaw, rehypeKatex]}
+                        children={customParser(description.replace(/\\n/g, '\n'))}
+                      />
                       <div className={styles.divider}></div>
                       <br />
                     </>

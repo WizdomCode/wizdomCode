@@ -391,13 +391,15 @@ const CodeEditor = (props) => {
 
   useEffect(() => {
     props.getCode(code, language);
-    dispatch({
-      type: 'SET_CODE_STATE',
-      payload: {
-        language: language,
-        code: code
-      }
-    })
+    if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language) {
+      dispatch({
+        type: 'SET_CODE_STATE',
+        payload: {
+          language: fileTabs[activeTabIndex].language,
+          code: code
+        }
+      })
+    }
 
     console.log("CODE TO SUBMIT", code);
     if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language) console.log("Language", fileTabs[activeTabIndex].language);

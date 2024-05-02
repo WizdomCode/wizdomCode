@@ -22,12 +22,7 @@ import "../../styles/Paths.css";
 import Paths from './Paths.jsx';
 import Tab from './Tab.jsx';
 import { useDispatch, useSelector } from 'react-redux';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
 import socketIOClient from 'socket.io-client';
-import remarkGfm from 'remark-gfm';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import TablePagination from '@mui/material/TablePagination';
@@ -49,7 +44,8 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
-import CheckCircle from '@mui/icons-material/CheckCircle';
+import ProblemDescription from './ProblemDescription.jsx';
+import Navigation from '../../Navigation/Navigation.jsx';
 
 const card = (
   <React.Fragment>
@@ -182,14 +178,9 @@ const IDE = (props) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOption, setFilterOption] = useState('');
-  const [selectedSolution, setSelectedSolution] = useState(null);
 
-  const toggleCodeVisibility = (index) => {
-    setSelectedSolution(selectedSolution === index ? null : index);
-  };
   const [results, setResults] = useState([]);
-  const [code, setCode] = useState('');
-  const [language, setLanguage] = useState("cpp");
+  const codeState = useSelector(state => state.codeState); 
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
   const [executionTime, setExecutionTime] = useState(0);
@@ -535,8 +526,6 @@ int main() {
 
   const getCode = (code, language) => {
     console.log("Received code output in parent component:", code);
-    setCode(code);
-    setLanguage(language);
   }
 
   const pollResults = async (requestId) => {
@@ -563,11 +552,11 @@ int main() {
 
 const submitCode = async () => {
     console.log("submitting from here:", JSON.stringify({
-        language: language,
-        code: code,
+        language: codeState.language,
+        code: codeState.code,
         test_cases: testCases
     }));
-    setCurrentCode(code);
+    setCurrentCode(codeState.code);
     // Start the timer
     const startTime = performance.now();
   
@@ -577,8 +566,8 @@ const submitCode = async () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        language: language,
-        code: code,
+        language: codeState.language,
+        code: codeState.code,
         test_cases: testCases
       })
     });
@@ -724,173 +713,6 @@ const submitCode = async () => {
     }
   }, [results, tabs, currentTab, db, auth]);
 
-  const languages = {
-    "cpp": 54, // C++ (GCC 9.2.0)
-    "python": 71, // Python (3.8.1)
-    "java": 62, // Java (OpenJDK 13.0.1)
-  };  
-
-  const runAllTests = async () => {
-
-    // Start the timer
-    const startTime = performance.now();
-
-    let results = [];
-    for (let testCase of testCases) {
-      // Prepare the data for the Judge0 API
-      const data = {
-        source_code: code,
-        language_id: languages[language],
-        stdin: testCase.input, // Convert input to an array
-        expected_output: testCase.output,
-        cpu_time_limit: 2, // CPU time limit in seconds
-        cpu_extra_time: 0.5, // Extra time in seconds
-        memory_limit: 128000, // Memory limit in kilobytes
-        stack_limit: 64000, // Stack limit in kilobytes
-        max_processes_and_or_threads: 30, // Maximum number of processes and/or threads
-        enable_per_process_and_thread_time_limit: false,
-        enable_per_process_and_thread_memory_limit: false,
-        max_file_size: 1024 // Maximum file size in kilobytes
-      };
-
-      console.log(JSON.stringify(data));
-
-      // Make a POST request to the Judge0 API
-      const response = await fetch('http://localhost:2358/submissions/?base64_encoded=false&wait=true', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-
-      // Parse the response
-      const result = await response.json();
-
-      console.log(result);
-      console.log('Standard Output:', result['stdout']);
-      console.log('Error Messages:', result.stderr || result.message);
-
-      results.push(result);
-    }
-    console.log(results);
-    setResults(results);
-
-    // End the timer and calculate the elapsed time
-    const endTime = performance.now();
-    const elapsedTime = endTime - startTime;
-    console.log(`Execution time: ${elapsedTime} milliseconds`);
-    setExecutionTime(elapsedTime);
-  };
-
-  const runConcurrentTests = async () => {
-    // Start the timer
-    const startTime = performance.now();
-  
-    // Prepare the data for the Judge0 API
-    const dataTemplate = {
-      source_code: code,
-      language_id: languages[language],
-      cpu_time_limit: 2, // CPU time limit in seconds
-      cpu_extra_time: 0.5, // Extra time in seconds
-      memory_limit: 128000, // Memory limit in kilobytes
-      stack_limit: 64000, // Stack limit in kilobytes
-      max_processes_and_or_threads: 30, // Maximum number of processes and/or threads
-      enable_per_process_and_thread_time_limit: false,
-      enable_per_process_and_thread_memory_limit: false,
-      max_file_size: 1024 // Maximum file size in kilobytes
-    };
-  
-    // Make a POST request to the Judge0 API
-    const fetchOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-  
-    const results = await Promise.all(testCases.map(async testCase => {
-      const data = { ...dataTemplate, stdin: testCase.input, expected_output: testCase.output };
-      fetchOptions.body = JSON.stringify(data);
-  
-      const response = await fetch('http://localhost:2358/submissions/?base64_encoded=false&wait=true', fetchOptions);
-      return response.json();
-    }));
-  
-    setResults(results);
-  
-    // End the timer and calculate the elapsed time
-    const endTime = performance.now();
-    const elapsedTime = endTime - startTime;
-    console.log(`Execution time: ${elapsedTime} milliseconds`);
-  };  
-  
-  const runBatchCases = async () => {
-    // Start the timer
-    const startTime = performance.now();
-  
-    let submissions = [];
-  
-    for (let testCase of testCases) {
-      // Prepare the data for the Judge0 API
-      const data = {
-        source_code: code,
-        language_id: languages[language],
-        stdin: testCase.input, // Convert input to an array
-        expected_output: testCase.output,
-        cpu_time_limit: 2, // CPU time limit in seconds
-        cpu_extra_time: 0.5, // Extra time in seconds
-        memory_limit: 128000, // Memory limit in kilobytes
-        stack_limit: 64000, // Stack limit in kilobytes
-        max_processes_and_or_threads: 30, // Maximum number of processes and/or threads
-        enable_per_process_and_thread_time_limit: false,
-        enable_per_process_and_thread_memory_limit: false,
-        max_file_size: 1024 // Maximum file size in kilobytes
-      };
-  
-      submissions.push(data);
-    }
-  
-    console.log(submissions);
-  
-    // Make a POST request to the Judge0 API
-    const response = await fetch('http://localhost:2358/submissions/batch?base64_encoded=false&wait=true', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ submissions: submissions })
-    });
-  
-    // Parse the response
-    const results = await response.json();
-  
-    // Extract tokens from the response
-    const tokens = results.map(result => result.token).join(',');
-  
-    let getResults;
-    do {
-      // Make a GET request to the Judge0 API with the tokens
-      const getResponse = await fetch(`http://localhost:2358/submissions/batch?tokens=${tokens}&base64_encoded=false&fields=token,stdout,stderr,status,language_id`);
-  
-      // Parse the GET response
-      getResults = await getResponse.json();
-  
-      // If the last submission is still in queue or processing, wait for a second before the next request
-      if (getResults.submissions[getResults.submissions.length - 1].status.description === 'In Queue' || getResults.submissions[getResults.submissions.length - 1].status.description === 'Processing') {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    } while (getResults.submissions[getResults.submissions.length - 1].status.description === 'In Queue' || getResults.submissions[getResults.submissions.length - 1].status.description === 'Processing');
-  
-    setResults(getResults.submissions);
-    console.log("Server response:", getResults.submissions);
-  
-    // End the timer and calculate the elapsed time
-    const endTime = performance.now();
-    const elapsedTime = endTime - startTime;
-    console.log(`Execution time: ${elapsedTime} milliseconds`);
-  };  
-
   const state = useSelector(state => state); // Access the state
 
   const [draggedTab, setDraggedTab] = useState(null); // New state for the dragged tab
@@ -962,20 +784,6 @@ const submitCode = async () => {
     setLinePosition({ index: null, position: null });
   }
 
-  function customParser(text) {
-    const newText = text
-      .split('!table')
-      .map((str, index) => {
-        if (index % 2 === 0) {
-          return `<em class="${styles.descriptionText}">${str}</em><br />`;
-        } else {
-          return str;
-        }
-      })
-      .join('')
-      .replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
-    return newText;
-  }
   useEffect(() => {
     const fetchSolutions = async () => {
       try {
@@ -998,537 +806,356 @@ const submitCode = async () => {
     fetchSolutions();
   }, [questionName]);
   return (
-    <Split
-        className="split"
-        style={{ display: 'flex', flexDirection: 'row' }}
-        minSize={500}
-    >
-    <div id="split-0">
-    <div className={styles.row}>
-      <Sidebar />
-      <div className={styles.problemStatement}>
-        <div className={styles.scrollableContent}>
-          { props.currentPage === 'problems' && ( 
-            <div className={styles.tabWrapper}>
-              <div 
-                className={styles.buttonRow}
-                onDragOver={(e) => e.preventDefault()} // Add this line
-              >
-                {tabs.map((tab, index) => (
-                  <>
-                    {linePosition.index === index.toString() && linePosition.position === 'left' && <div className={styles.line} />}
-                    <Tab
-                      key={index}
-                      index={index}
-                      tab={tab}
-                      isActive={currentTab === tab}
-                      setDraggedTab={setDraggedTab}
-                    />
-                    {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
-                  </>
-                ))}
-                <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
-                  <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
-                </button>
-                <div className={styles.rightAlign}>
-                </div>
-              </div>
-            </div>
-            )}
-          { props.currentPage === 'ccc' || props.currentPage === 'usaco' ? (
-            <>
-              <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
-            </>
-          ) : props.currentPage === 'leaderboard' ? (
-            <>
-              <Leaderboard />
-            </>
-          ) : props.currentPage === 'home' ? (
-            <div className='universal'>
-              <div className={styles.wrapper}>
-                <div className='hero'>
-                  <div>
-                    <br />
-                    <h1>Learn competitive programming.</h1>
-                    <h1>Master any contest.</h1>
-                    <br />
-                    <p className={styles.customLatex}>Notice: This is a conceptual version. This project is very early in development and we welcome any and all feedback or suggestions. Contact us: competitive.programming2197@gmail.com</p>
-                    <br />
-                    <Link to="/signup" className={styles.img}>
-                      <button className={styles.runAll} style={{color: 'white'}}>Get started</button>
-                    </Link>
-                    <br /> 
+    <>
+      <Navigation />
+      <Split
+          className="split"
+          style={{ display: 'flex', flexDirection: 'row' }}
+          minSize={500}
+      >
+      <div id="split-0">
+      <div className={styles.row}>
+        <Sidebar />
+        <div className={styles.problemStatement}>
+          <div className={styles.scrollableContent}>
+            { props.currentPage === 'problems' && ( 
+              <div className={styles.tabWrapper}>
+                <div 
+                  className={styles.buttonRow}
+                  onDragOver={(e) => e.preventDefault()} // Add this line
+                >
+                  {tabs.map((tab, index) => (
+                    <>
+                      {linePosition.index === index.toString() && linePosition.position === 'left' && <div className={styles.line} />}
+                      <Tab
+                        key={index}
+                        index={index}
+                        tab={tab}
+                        isActive={currentTab === tab}
+                        setDraggedTab={setDraggedTab}
+                      />
+                      {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
+                    </>
+                  ))}
+                  <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
+                    <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
+                  </button>
+                  <div className={styles.rightAlign}>
                   </div>
                 </div>
-                <br /> 
-                <ThemeProvider theme={darkTheme}>
-                  <Box sx={{ width: '100%' }}>
-                    <Card variant="outlined">
-                      <CardMedia
-                        sx={{ height: 140 }}
-                        image="/problems.png"
-                        title="green iguana"
-                      />
-                      <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                          Problem database
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Study from 10+ hand-picked problems on the ultimate platform for preparing for competitive programming contests.
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Link to="/problems" className={styles.img}>
-                          <Button size="small">Get Started</Button>
-                        </Link>
-                      </CardActions>
-                    </Card>
-                  </Box>
-                  <br />
-                  <Box sx={{ width: '100%' }}>
-                    <Card variant="outlined">
-                    <CardMedia
-                        sx={{ height: 140 }}
-                        image="/duopaths.png"
-                        title="green iguana"
-                      />
-                      <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                          Learning paths
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Waste no time learning topics in a logical progression.
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Link to="/ccc" className={styles.img}>
-                          <Button size="small">CCC Topics</Button>
-                        </Link>
-                        <Link to="/usaco" className={styles.img}>
-                          <Button size="small">USACO Topics</Button>
-                        </Link>
-                      </CardActions>
-                    </Card>
-                  </Box>
-                  <br />
-                  <Box sx={{ width: '100%' }}>
-                    <Card variant="outlined">
-                    <CardMedia
-                        sx={{ height: 140 }}
-                        image="/workspace.png"
-                        title="green iguana"
-                      />
-                      <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                          Feature-rich workspace
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Instantly test code against official problem data or custom inputs.
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Button size="small">Learn More</Button>
-                      </CardActions>
-                    </Card>
-                  </Box>
-                  <br />
-                  <Box sx={{ width: '100%' }}>
-                    <Card variant="outlined">
-                    <CardMedia
-                        sx={{ height: 140 }}
-                        image="/templates.png"
-                        title="green iguana"
-                      />
-                      <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                          Code Templates
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Waste no time crafting solutions with our extensive collection of code templates.
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Button size="small">Learn More</Button>
-                      </CardActions>
-                    </Card>
-                  </Box>
-                </ThemeProvider>
-                <br />
-                <br />
-                <h1>Start from a contest</h1>
-                <br />
-                <Link to="/ccc" className={styles.img}>
-                  <button className={styles.runAll} style={{color: 'white'}}>CCC</button>
-                </Link>
-                <br />
-                <Link to="/usaco" className={styles.img}>
-                  <button className={styles.runAll} style={{color: 'white'}}>USACO</button>
-                </Link>
-                <br />
               </div>
-            </div>
-          ) : props.currentPage === 'profile' ? (
-            <>
-              <UserProfile />
-            </>          
-          ) : props.currentPage === 'login' ? (
-            <>
-              <Login />
-            </>          
-          ) : props.currentPage === 'signup' ? (
-            <>
-              <SignUp />
-            </>          
-          ) : currentTab.type === 'problem' ? (
-            <>
-              <div className={styles.tabs}>
-                <button onClick={() => setSelectedTab('question')}>Question</button>
-                <button onClick={() => setSelectedTab('solution')}>Solution</button>
-                <button onClick={() => setSelectedTab('editorial')}>Editorial</button>
-              </div>
-              
-              {selectedTab === 'question' && (            
+              )}
+            { props.currentPage === 'ccc' || props.currentPage === 'usaco' ? (
+              <>
+                <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
+              </>
+            ) : props.currentPage === 'leaderboard' ? (
+              <>
+                <Leaderboard />
+              </>
+            ) : props.currentPage === 'home' ? (
+              <div className='universal'>
                 <div className={styles.wrapper}>
-                  <br />
-                  <div className={styles.problemTitleRow}>
-                    <h1 className={styles.title}>{currentTab.data.title}</h1>
-                    { userData && userData.solved && userData.solved.includes(currentTab.data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
+                  <div className='hero'>
+                    <div>
+                      <br />
+                      <h1>Learn competitive programming.</h1>
+                      <h1>Master any contest.</h1>
+                      <br />
+                      <p className={styles.customLatex}>Notice: This is a conceptual version. This project is very early in development and we welcome any and all feedback or suggestions. Contact us: competitive.programming2197@gmail.com</p>
+                      <br />
+                      <Link to="/signup" className={styles.img}>
+                        <button className={styles.runAll} style={{color: 'white'}}>Get started</button>
+                      </Link>
+                      <br /> 
+                    </div>
                   </div>
+                  <br /> 
+                  <ThemeProvider theme={darkTheme}>
+                    <Box sx={{ width: '100%' }}>
+                      <Card variant="outlined">
+                        <CardMedia
+                          sx={{ height: 140 }}
+                          image="/problems.png"
+                          title="green iguana"
+                        />
+                        <CardContent>
+                          <Typography gutterBottom variant="h5" component="div">
+                            Problem database
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Study from 10+ hand-picked problems on the ultimate platform for preparing for competitive programming contests.
+                          </Typography>
+                        </CardContent>
+                        <CardActions>
+                          <Link to="/problems" className={styles.img}>
+                            <Button size="small">Get Started</Button>
+                          </Link>
+                        </CardActions>
+                      </Card>
+                    </Box>
+                    <br />
+                    <Box sx={{ width: '100%' }}>
+                      <Card variant="outlined">
+                      <CardMedia
+                          sx={{ height: 140 }}
+                          image="/duopaths.png"
+                          title="green iguana"
+                        />
+                        <CardContent>
+                          <Typography gutterBottom variant="h5" component="div">
+                            Learning paths
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Waste no time learning topics in a logical progression.
+                          </Typography>
+                        </CardContent>
+                        <CardActions>
+                          <Link to="/ccc" className={styles.img}>
+                            <Button size="small">CCC Topics</Button>
+                          </Link>
+                          <Link to="/usaco" className={styles.img}>
+                            <Button size="small">USACO Topics</Button>
+                          </Link>
+                        </CardActions>
+                      </Card>
+                    </Box>
+                    <br />
+                    <Box sx={{ width: '100%' }}>
+                      <Card variant="outlined">
+                      <CardMedia
+                          sx={{ height: 140 }}
+                          image="/workspace.png"
+                          title="green iguana"
+                        />
+                        <CardContent>
+                          <Typography gutterBottom variant="h5" component="div">
+                            Feature-rich workspace
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Instantly test code against official problem data or custom inputs.
+                          </Typography>
+                        </CardContent>
+                        <CardActions>
+                          <Button size="small">Learn More</Button>
+                        </CardActions>
+                      </Card>
+                    </Box>
+                    <br />
+                    <Box sx={{ width: '100%' }}>
+                      <Card variant="outlined">
+                      <CardMedia
+                          sx={{ height: 140 }}
+                          image="/templates.png"
+                          title="green iguana"
+                        />
+                        <CardContent>
+                          <Typography gutterBottom variant="h5" component="div">
+                            Code Templates
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Waste no time crafting solutions with our extensive collection of code templates.
+                          </Typography>
+                        </CardContent>
+                        <CardActions>
+                          <Button size="small">Learn More</Button>
+                        </CardActions>
+                      </Card>
+                    </Box>
+                  </ThemeProvider>
                   <br />
+                  <br />
+                  <h1>Start from a contest</h1>
+                  <br />
+                  <Link to="/ccc" className={styles.img}>
+                    <button className={styles.runAll} style={{color: 'white'}}>CCC</button>
+                  </Link>
+                  <br />
+                  <Link to="/usaco" className={styles.img}>
+                    <button className={styles.runAll} style={{color: 'white'}}>USACO</button>
+                  </Link>
+                  <br />
+                </div>
+              </div>
+            ) : props.currentPage === 'profile' ? (
+              <>
+                <UserProfile />
+              </>          
+            ) : props.currentPage === 'login' ? (
+              <>
+                <Login />
+              </>          
+            ) : props.currentPage === 'signup' ? (
+              <>
+                <SignUp />
+              </>          
+            ) : currentTab.type === 'problem' ? (
+              <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} displayCases={displayCases} results={results} solutions={solutions} />
+            ) : currentTab.type === 'newTab' ? (
+              <div className={styles.wrapper}>
+                <div className='hero'> 
                   <div className={styles.description}>
-                    {currentTab.data.description && (
-                      <>
-                        {currentTab.data.specificContest && <h3>{currentTab.data.specificContest}</h3>}
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))} />
-                        <div className={styles.divider}></div>
-                        <br />
-                      </>
-                    )}
-                    {currentTab.data.inputFormat && (
-                      <>
-                        <h3>Input Format</h3>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
-                        <div className={styles.divider}></div>
-                        <br />
-                      </>
-                    )}
-                    {false && currentTab.data.constraints && (
-                      <>
-                        <h3>Constraints</h3>
-                        <ul>
-                          {Object.entries(currentTab.data.constraints).map(([key, value]) => (
-                            <li key={key}>
-                              <strong>{key}:</strong> {value}
-                            </li>
-                          ))}
-                        </ul>
-                        <div className={styles.divider}></div>
-                        <br />
-                      </>
-                    )}
-                    {currentTab.data.outputFormat && (
-                      <>
-                        <h3>Output Format</h3>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
-                        <div className={styles.divider}></div>
-                        <br />
-                      </>
-                    )}
-                    {currentTab.data.sample1 && currentTab.data.sample1.input && (
-                      <>
-                        <h3>Sample Input 1</h3>
-                        <pre className={styles.codeSnippet}>{currentTab.data.sample1.input.replace(/\\n/g, '\n')}</pre>
-                        <br />
-                        <h3>Output for Sample Input 1</h3>
-                        <pre className={styles.codeSnippet}>{currentTab.data.sample1.output.replace(/\\n/g, '\n')}</pre>
-                        <br />
-                        <h3>Explanation for Sample 1</h3>
-                        {currentTab.data.sample1.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} />}
-                        <br />
-                        <div className={styles.divider}></div>
-                        <br />
-                      </>
-                    )}
-                    {currentTab.data.sample2 && currentTab.data.sample2.input && (
-                      <>
-                        <h3>Sample Input 2</h3>
-                        <pre className={styles.codeSnippet}>{currentTab.data.sample2.input.replace(/\\n/g, '\n')}</pre>
-                        <br />
-                        <h3>Output for Sample Input 2</h3>
-                        <pre className={styles.codeSnippet}>{currentTab.data.sample2.output.replace(/\\n/g, '\n')}</pre>
-                        <br />
-                        <h3>Explanation for Sample 2</h3>
-                        {currentTab.data.sample2.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} />}
-                        <br />
-                        <div className={styles.divider}></div>
-                        <br />
-                      </>
-                    )}
-                    {currentTab.data.sample3 && currentTab.data.sample3.input && (
-                      <>
-                        <h3>Sample Input 3</h3>
-                        <pre className={styles.codeSnippet}>{currentTab.data.sample3.input.replace(/\\n/g, '\n')}</pre>
-                        <br />
-                        <h3>Output for Sample Input 3</h3>
-                        <pre className={styles.codeSnippet}>{currentTab.data.sample3.output.replace(/\\n/g, '\n')}</pre>
-                        <br />
-                        <h3>Explanation for Sample 3</h3>
-                        {currentTab.data.sample3.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} />}
-                        <br />
-                        <div className={styles.divider}></div>
-                        <br />
-                      </>
-                    )}
-                    {currentTab.data.points && (
-                      <>
-                        <h3>Points</h3>
-                        <p>{currentTab.data.points}</p>
-                      </>
-                    )}
-                  </div>
-                  <br />
-                  <br />
-                  <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
-                  <br />
-                  <div className={styles.testCases}>
-                    {displayCases ? displayCases.map((testCase, index) => {
-                      const status = results[index]?.status?.description;
-                      const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
-
-                      return (
-                        <div key={testCase.key} className={className}>
-                          <br />
-                          <h3 className={className}>
-                            Case {testCase.key}
-                            {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
-                            {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
-                            {results[index] && results[index].status.description === 'Time limit exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
-                          </h3>
-                          {results[index] && (
-                              <>
-                                <h5 className={className}>[ {results[index].time}s ]</h5>
-                              </>
-                            )}
-                          <br />
-                          <h4 className={className}>Input:</h4>
-                          <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
-                          <br />
-                          <h4 className={className}>Expected Output:</h4>
-                          <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
-                          {results[index] && results[index].status.description === 'Wrong Answer' && (
-                            <>
-                              <br />
-                              <h4 className={className}>Actual Output:</h4>
-                              <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
-                            </>
-                          )}
+                    <h2 className="title">Problems</h2>
+                    <div className="search-rect">
+                        <Box sx={{ display: 'flex', alignItems: 'flex-end', width: '100%', m: 1 }}>
+                          <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }}/>
+                          <Input fullWidth placeholder="Search problems..." inputProps={ariaLabel} sx={{ color: 'black', width: '100%' }} style={{ color: 'black' }} theme={lightTheme} value={search} onChange={(e) => setSearch(e.target.value)}/>
+                        </Box>
+                    </div>
+                    <div className="subsearch-row">
+                      <div className="search-container">
+                        <div className="column1">
+                          <div style={{position: 'relative'}}>
+                            <Select 
+                              placeholder="Topics..."
+                              styles={SELECT_STYLES}
+                              options={TOPICS.map(opt => ({ label: opt, value: opt }))}
+                              isMulti
+                              onChange={(selected) => setTopics(selected.map((s) => s.value))}
+                              onFocus={() => handleFocus('topics')}
+                              onBlur={() => handleBlur('topics')}
+                            />
+                            {!topics.length && !isFocused.topics && <div className="dropdown-placeholder">Topic</div>}
+                          </div>
+                          <div style={{position: 'relative'}}>
+                            <Select 
+                              styles={SELECT_STYLES}
+                              options={CONTESTS.map(opt => ({ label: opt, value: opt }))}
+                              isMulti
+                              onChange={(selected) => setContests(selected.map((s) => s.value))}
+                              placeholder="Contests..."
+                              onFocus={() => handleFocus('contests')}
+                              onBlur={() => handleBlur('contests')}
+                            />
+                            {!contests.length && !isFocused.contests && <div className="dropdown-placeholder">Contest</div>}
+                          </div>
                         </div>
-                      );                
-                    }): (
+                        <div className="column2">
+                          <ThemeProvider theme={darkTheme}>
+                            <Box sx={{ width: 350, ml: 2 }}>
+                              <Typography id="input-slider" gutterBottom>
+                                Points Range
+                              </Typography>
+                              <Grid container spacing={2} alignItems="center">
+                                <Grid item xs>
+                                  <Slider
+                                    value={value}
+                                    onChange={handleSliderChange}
+                                    aria-labelledby="input-slider"
+                                    min={1}
+                                    max={50}
+                                    marks={marks}
+                                  />
+                                </Grid>
+                                <Grid item style={{ marginTop: '-25px' }}>
+                                  <Input
+                                    value={value[0]}
+                                    size="small"
+                                    onChange={handleInputChangeMin}
+                                    onBlur={handleBlurring}
+                                    inputProps={{
+                                      step: 1,
+                                      min: 1,
+                                      max: 50,
+                                      type: 'number',
+                                      'aria-labelledby': 'input-slider',
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item style={{ marginTop: '-25px' }}>
+                                  <Input
+                                    value={value[1]}
+                                    size="small"
+                                    onChange={handleInputChangeMax}
+                                    onBlur={handleBlurring}
+                                    inputProps={{
+                                      step: 1,
+                                      min: 1,
+                                      max: 50,
+                                      type: 'number',
+                                      'aria-labelledby': 'input-slider',
+                                    }}
+                                  />
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          </ThemeProvider>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="question-list">
+                  <div className="wrapper">
+                    <div className="question-list-rect">
                       <div>
-                        <h2>Test cases for this problem are coming soon!</h2>
-                        <br />
-                      </div>
-                    )}
-                  </div>
-                </div> 
-                )}
-
-                {selectedTab === 'solution' && (
-                  <div className={styles.wrapper}>
-                    {/* Content for the solution tab */}
-                    <h1>Solution</h1>
-                    <div>
-                      {solutions.map((solution, index) => (
-                        <div key={index}>
-                          <span>User ID: {solution.userId}</span>
-                          <span>Execution Time: {solution.executionTime}</span>
-                          <span>Score: {solution.score}</span>
-                          <button onClick={() => toggleCodeVisibility(index)}>
-                            {selectedSolution === index ? 'Hide Code' : 'Show Code'}
-                          </button>
-                          <pre style={{ display: selectedSolution === index ? 'block' : 'none' }}>
-                            <code>{solution.solution}</code>
-                          </pre>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Add solution content here */}
-                  </div>
-                )}
-          
-                {selectedTab === 'editorial' && (
-                  <div className={styles.wrapper}>
-                    {/* Content for the editorial tab */}
-                    <h1>Editorial</h1>
-                    {/* Add editorial content here */}
-                  </div>
-                )}
-            </>
-          ) : currentTab.type === 'newTab' ? (
-            <div className={styles.wrapper}>
-              <div className='hero'> 
-                <div className={styles.description}>
-                  <h2 className="title">Problems</h2>
-                  <div className="search-rect">
-                      <Box sx={{ display: 'flex', alignItems: 'flex-end', width: '100%', m: 1 }}>
-                        <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }}/>
-                        <Input fullWidth placeholder="Search problems..." inputProps={ariaLabel} sx={{ color: 'black', width: '100%' }} style={{ color: 'black' }} theme={lightTheme} value={search} onChange={(e) => setSearch(e.target.value)}/>
-                      </Box>
-                  </div>
-                  <div className="subsearch-row">
-                    <div className="search-container">
-                      <div className="column1">
-                        <div style={{position: 'relative'}}>
-                          <Select 
-                            placeholder="Topics..."
-                            styles={SELECT_STYLES}
-                            options={TOPICS.map(opt => ({ label: opt, value: opt }))}
-                            isMulti
-                            onChange={(selected) => setTopics(selected.map((s) => s.value))}
-                            onFocus={() => handleFocus('topics')}
-                            onBlur={() => handleBlur('topics')}
-                          />
-                          {!topics.length && !isFocused.topics && <div className="dropdown-placeholder">Topic</div>}
-                        </div>
-                        <div style={{position: 'relative'}}>
-                          <Select 
-                            styles={SELECT_STYLES}
-                            options={CONTESTS.map(opt => ({ label: opt, value: opt }))}
-                            isMulti
-                            onChange={(selected) => setContests(selected.map((s) => s.value))}
-                            placeholder="Contests..."
-                            onFocus={() => handleFocus('contests')}
-                            onBlur={() => handleBlur('contests')}
-                          />
-                          {!contests.length && !isFocused.contests && <div className="dropdown-placeholder">Contest</div>}
-                        </div>
-                      </div>
-                      <div className="column2">
-                        <ThemeProvider theme={darkTheme}>
-                          <Box sx={{ width: 350, ml: 2 }}>
-                            <Typography id="input-slider" gutterBottom>
-                              Points Range
-                            </Typography>
-                            <Grid container spacing={2} alignItems="center">
-                              <Grid item xs>
-                                <Slider
-                                  value={value}
-                                  onChange={handleSliderChange}
-                                  aria-labelledby="input-slider"
-                                  min={1}
-                                  max={50}
-                                  marks={marks}
-                                />
-                              </Grid>
-                              <Grid item style={{ marginTop: '-25px' }}>
-                                <Input
-                                  value={value[0]}
-                                  size="small"
-                                  onChange={handleInputChangeMin}
-                                  onBlur={handleBlurring}
-                                  inputProps={{
-                                    step: 1,
-                                    min: 1,
-                                    max: 50,
-                                    type: 'number',
-                                    'aria-labelledby': 'input-slider',
-                                  }}
-                                />
-                              </Grid>
-                              <Grid item style={{ marginTop: '-25px' }}>
-                                <Input
-                                  value={value[1]}
-                                  size="small"
-                                  onChange={handleInputChangeMax}
-                                  onBlur={handleBlurring}
-                                  inputProps={{
-                                    step: 1,
-                                    min: 1,
-                                    max: 50,
-                                    type: 'number',
-                                    'aria-labelledby': 'input-slider',
-                                  }}
-                                />
-                              </Grid>
-                            </Grid>
-                          </Box>
-                        </ThemeProvider>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="question-list">
-                <div className="wrapper">
-                  <div className="question-list-rect">
-                    <div>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Points</th>
-                            <th>Topics</th>
-                            <th>Contest</th>
-                            <th>Solved</th>
-                            <th>Problems</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {currentPageData.map((q) => (
-                            <tr key={q.id}>
-                              <td>{q.title}</td>
-                              <td>{q.points}</td>
-                              <td>{q.topics.join(", ")}</td>
-                              <td>{q.contest}</td>
-                                { userData && userData.solved ? <td>{userData.solved.includes(q.id) ? "yes" : "no"}</td> : <td>no</td> }
-                              <td>
-                                <button
-                                  type="button"
-                                  className='open-question'
-                                  onClick={() => {
-                                    setQuestionID(q.title);
-                                    setTestCaseFolder(q.folder);
-                                    window.scrollTo(0, 0); // This will scroll the page to the top
-                                  }}
-                                >
-                                  <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
-                                </button>
-                              </td>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Points</th>
+                              <th>Topics</th>
+                              <th>Contest</th>
+                              <th>Solved</th>
+                              <th>Problems</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {currentPageData.map((q) => (
+                              <tr key={q.id}>
+                                <td>{q.title}</td>
+                                <td>{q.points}</td>
+                                <td>{q.topics.join(", ")}</td>
+                                <td>{q.contest}</td>
+                                  { userData && userData.solved ? <td>{userData.solved.includes(q.id) ? "yes" : "no"}</td> : <td>no</td> }
+                                <td>
+                                  <button
+                                    type="button"
+                                    className='open-question'
+                                    onClick={() => {
+                                      setQuestionID(q.title);
+                                      setTestCaseFolder(q.folder);
+                                      window.scrollTo(0, 0); // This will scroll the page to the top
+                                    }}
+                                  >
+                                    <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
+                <div className='pagination'>
+                  <ThemeProvider theme={darkTheme}>
+                    <TablePagination
+                      component="div"
+                      count={filteredQuestions.length} // Update the total count
+                      page={page}
+                      onPageChange={handleChangePage}
+                      rowsPerPage={rowsPerPage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                  </ThemeProvider>
+                </div>
+                <br />
               </div>
-              <div className='pagination'>
-                <ThemeProvider theme={darkTheme}>
-                  <TablePagination
-                    component="div"
-                    count={filteredQuestions.length} // Update the total count
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                  />
-                </ThemeProvider>
+            ) : (
+              <div className={styles.wrapper}>
               </div>
-              <br />
-            </div>
-          ) : (
-            <div className={styles.wrapper}>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div>
-    </div>
-    <div id="split-1">
-        <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
-    </div>
-    </Split>
+      </div>
+      <div id="split-1">
+          <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
+      </div>
+      </Split>
+    </>
   );
 };
 
