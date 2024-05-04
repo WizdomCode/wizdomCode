@@ -530,7 +530,7 @@ int main() {
 
   const pollResults = async (requestId) => {
     try {
-        const response = await fetch(`https://7516-147-124-72-82.ngrok-free.app/get_results/${requestId}`);
+        const response = await fetch(`https://3702-147-124-72-82.ngrok-free.app/get_results/${requestId}`);
         if (response.ok && response.headers.get('Content-Type') === 'application/json') {
             const data = await response.json();
             console.log('Received results:', data);
@@ -610,7 +610,7 @@ const submitCode = async () => {
       
         if (!stopFetching) {
           // Delay before next fetch to avoid overwhelming the server
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       } else {
         console.log("Document not found!");
