@@ -1,4 +1,4 @@
-export const TEMPLATES = {
+export const TEMPLATE_CODE = {
     'Depth-First Search (DFS)': {
       cpp:
 `void dfs(vector<vector<int>>& graph, vector<bool>& visited, int node) {

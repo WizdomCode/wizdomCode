@@ -20,11 +20,19 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css'; // don't forget to import katex styles
-
+import { Button, Overlay, AspectRatio } from '@mantine/core';
+import { getCategory, getDifficultyLevel } from '../../../../public/CATEGORY_NAMES.js';
 
 const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, results, solutions }) => {
+  // Example usage of getCategory
+  console.log('getCategory("String Hashing")', getCategory("String Hashing")); // prints "String Algorithms"
+  
+  // Example usage of getDifficultyLevel
+  console.log("getDifficultyLevel(5)", getDifficultyLevel(5)); // prints { level: 'Intermediate', number: 1 }
+
   const [selectedTab, setSelectedTab] = useState('question');
   const [selectedSolution, setSelectedSolution] = useState(null);
+  const [testCasesVisible, setTestCasesVisible] = useState(false);
 
   const toggleCodeVisibility = (index) => {
     setSelectedSolution(selectedSolution === index ? null : index);
@@ -160,6 +168,8 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
           <br />
           <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
           <br />
+          { console.log("testCasesVisible", testCasesVisible), 
+          testCasesVisible ?
           <div className={styles.testCases}>
             {displayCases ? displayCases.map((testCase, index) => {
               const status = results[index]?.status?.description;
@@ -200,7 +210,11 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
                 <br />
               </div>
             )}
+          </div> :
+          <div>
+            <Button onClick={() => setTestCasesVisible(true)}>Show test cases</Button>
           </div>
+          }
         </div> 
         )}
 

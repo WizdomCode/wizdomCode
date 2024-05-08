@@ -1,17 +1,18 @@
 :root {
   --dark-bg:#1B1B32;
   --light-bg: #3B3B4F;
-  --code-bg: #0A0A23;
+  --code-bg: #181A1D;
   --navbar: #0A0A23;
 }
 
 .scrollableContent {
   height: 100vh;
   width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: var(--dark-bg);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .split {
@@ -71,7 +72,6 @@
 }
 
 .codeEditor {
-  background-color: var(--code-bg);
   resize: vertical;
   overflow: hidden;
   height: 100%;
@@ -111,7 +111,6 @@
 
 .buttonRow {
   display: flex;
-  background: var(--navbar);
   align-items: center;
 }
 
@@ -119,7 +118,6 @@
   position: absolute;
   right: 0;
   display: flex;
-  background-color: var(--dark-bg);
   padding: 8px 16px;
   align-items: center;
 }
@@ -130,7 +128,6 @@
   align-items: center;
   justify-content: flex-start;
   border: none;
-  background: #2E3139;
   width: 156px;
   height: 48.848px;
   flex-shrink: 0;
@@ -144,11 +141,9 @@
 
 .closeIcon {
   flex: 1;
-  background-color: var(--dark-bg);
 }
 
 .buttonIcon {
-  background-color: var(--dark-bg);
   border: none;
   font-size: large;
   padding: 8px 16px;
@@ -241,7 +236,6 @@
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden; /* Disable vertical scrollbar */
-  background: var(--navbar);
   align-items: center;
   width: 100%;
   margin: 0 0;
@@ -254,7 +248,6 @@
 }
 
 .buttonRow::-webkit-scrollbar-thumb {
-  background-color: rgba(155, 155, 155, 0.7);
   border-radius: 20px;
 }
 
@@ -271,7 +264,6 @@
   align-items: center;
   justify-content: flex-start;
   border: none;
-  background: #2E3139;
   width: 156px;
   height: 48.848px;
   flex-shrink: 0;

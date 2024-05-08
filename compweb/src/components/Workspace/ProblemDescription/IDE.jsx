@@ -46,6 +46,11 @@ import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
 import ProblemDescription from './ProblemDescription.jsx';
 import Navigation from '../../Navigation/Navigation.jsx';
+import { 
+  useMantineTheme
+} from '@mantine/core';
+import FileList from './FileList.jsx';
+import { SideNav } from '../../Navigation/SideNav.jsx';
 
 const card = (
   <React.Fragment>
@@ -788,7 +793,7 @@ const submitCode = async () => {
     const fetchSolutions = async () => {
       try {
         // Get a reference to the question document
-        const questionDocRef = doc(db, "Questions", questionName);
+        const questionDocRef = doc(db, "Questions", currentTab.data.title);
         const questionDocSnapshot = await getDoc(questionDocRef);
 
         if (questionDocSnapshot.exists()) {
@@ -796,7 +801,7 @@ const submitCode = async () => {
           const solutions = questionData.solutions || [];
           setSolutions(solutions);
         } else {
-          console.log(`Question "${questionName}" not found.`);
+          console.log(`Question "${currentTab.data.title}" not found.`);
         }
       } catch (error) {
         console.error("Error fetching solutions:", error);
@@ -804,18 +809,26 @@ const submitCode = async () => {
     };
 
     fetchSolutions();
-  }, [questionName]);
+  }, [currentTab]);
+
+  const theme = useMantineTheme();
+
+  const isFileListOpen = useSelector(state => state.isFileListOpen);
+
   return (
     <>
       <Navigation />
+      <div style={{ display: 'flex', direction: 'row' }}>
+      <SideNav />
       <Split
           className="split"
-          style={{ display: 'flex', flexDirection: 'row' }}
-          minSize={500}
+          style={{ display: 'flex', flexDirection: 'row', backgroundColor: theme.colors.siteBackground[0], width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+          minSize={0}
+          sizes={isFileListOpen ? [40, 40, 20] : [50, 50, 0]}
+          snapOffset={180}
       >
       <div id="split-0">
       <div className={styles.row}>
-        <Sidebar />
         <div className={styles.problemStatement}>
           <div className={styles.scrollableContent}>
             { props.currentPage === 'problems' && ( 
@@ -823,6 +836,7 @@ const submitCode = async () => {
                 <div 
                   className={styles.buttonRow}
                   onDragOver={(e) => e.preventDefault()} // Add this line
+                  style={{ backgroundColor: theme.colors.editorBackground[0] }}
                 >
                   {tabs.map((tab, index) => (
                     <>
@@ -1151,10 +1165,14 @@ const submitCode = async () => {
         </div>
       </div>
       </div>
-      <div id="split-1">
+      <div id="split-1" style={{ backgroundColor: theme.colors.siteBackground[0], width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
           <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
       </div>
+      <div>
+        <FileList />
+      </div>
       </Split>
+      </div>
     </>
   );
 };

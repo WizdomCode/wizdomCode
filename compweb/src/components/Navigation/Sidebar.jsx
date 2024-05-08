@@ -10,6 +10,13 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from "../../firebase"
 import { onAuthStateChanged, signOut} from "firebase/auth";
+import { 
+  useMantineTheme,
+  Center,
+  UnstyledButton, 
+  Stack, 
+  rem
+} from '@mantine/core';
 
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -50,8 +57,10 @@ const Sidebar = ({ onUsacoClick, onCccClick }) => {
     console.log("sidebar authenticatedUser percep:", authenticatedUser);
   }, [authenticatedUser]);
 
+  const theme = useMantineTheme();
+
   return (
-    <div className={styles.sidebar}>
+    <div className={styles.sidebar} style={{ backgroundColor: theme.colors.navbar[0] }}>
         <Link to="/problems" className={styles.img}>
           <button className={`${styles.button} ${location.pathname === '/problems' ? styles.activeTab : ''}`}>
             <BootstrapTooltip title="Problems" placement="right">

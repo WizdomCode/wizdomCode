@@ -15,7 +15,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background-color: var(--dark-bg);
   color: white;
 }
 
@@ -137,7 +136,6 @@ input:focus {
 }
 
 thead {
-  background-color: var(--navbar);
   margin-top: 12px;
   font-family: "Poppins", sans-serif;
   font-weight: 500;

@@ -1,10 +1,13 @@
 import React from 'react'
 import IDE from '../components/Workspace/ProblemDescription/IDE';
+import Leaderboard from './Leaderboard';
+import Navigation from '../components/Navigation/Navigation';
 
 const LeaderboardPage = () => {
     return (
       <div>
-          <IDE currentPage="leaderboard"/>
+          <Navigation />
+          <Leaderboard />
       </div>
     )
 };  

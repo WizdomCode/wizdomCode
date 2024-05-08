@@ -43,7 +43,14 @@ int main() {
     return 0;
 }`,
   6: "print('File 2-1-1')",
-}
+},
+  treeData: null,
+  openFile: null,
+  openTemplate: null,
+  templateIsClicked: false,
+  isFileListOpen: true,
+  activeCategoryId: null,
+  lessonQuestionList: null
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -231,6 +238,42 @@ function reducer(state = initialState, action) {
         ...state,
         fileCode: action.newState
       }
+    case 'SET_TREE_DATA':
+      return {
+        ...state,
+        treeData: action.payload
+      }
+    case 'SET_OPEN_FILE':
+      return {
+        ...state,
+        openFile: action.payload
+      }
+    case 'SET_OPEN_TEMPLATE':
+      return {
+        ...state,
+        openTemplate: action.payload
+      }
+    case 'SET_TEMPLATE_IS_CLICKED':
+      return {
+        ...state,
+        templateIsClicked: action.payload
+      }
+    case 'SET_IS_FILE_LIST_OPEN':
+      return {
+        ...state, 
+        isFileListOpen: action.payload
+      }
+    case 'SET_ACTIVE_CATEGORY_ID':
+      return {
+        ...state,
+        activeCategoryId: action.payload
+      }
+    case 'SET_LESSON_QUESTION_LIST': {
+      return {
+        ...state,
+        lessonQuestionList: action.payload
+      }
+    }
     default:
       return state;
   }

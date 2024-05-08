@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import { Link } from "react-router-dom";
 import Authentication from './Authentication';
 import { auth, db } from "../../firebase"
 import { onAuthStateChanged, signOut} from "firebase/auth";
@@ -67,13 +67,13 @@ import Share from '@mui/icons-material/Share';
 const mockdata = [
   {
     icon: IconCode,
-    title: 'Open source',
-    description: 'This Pokémon’s cry is very loud and distracting',
+    title: 'Problems',
+    description: '250+ problems from the most popular competitive programming contests',
   },
   {
     icon: IconCoin,
-    title: 'Free for everyone',
-    description: 'The fluid of Smeargle’s tail secretions changes',
+    title: 'Canadian Computing Competition',
+    description: 'Canada\'s largest competitive programming competition',
   },
   {
     icon: IconBook,
@@ -84,16 +84,6 @@ const mockdata = [
     icon: IconFingerprint,
     title: 'Security',
     description: 'The shell’s rounded shape and the grooves on its.',
-  },
-  {
-    icon: IconChartPie3,
-    title: 'Analytics',
-    description: 'This Pokémon uses its flying ability to quickly chase',
-  },
-  {
-    icon: IconNotification,
-    title: 'Notifications',
-    description: 'Combusken battles with the intensely hot flames it spews',
   },
 ];
 
@@ -206,12 +196,75 @@ const Navigation = () => {
     console.log("sidebar authenticatedUser percep:", authenticatedUser);
   }, [authenticatedUser]);
 
+  const location = useLocation();
+
   return (
     <>
-      <Box>
+      <Box style={{ backgroundColor: theme.colors.navbar[0]}}>
         <header className={classes.header}>
           <Group justify="space-between" h="100%">
-            <IconNotification size={30}/>
+            <Link to="/">
+              <IconNotification size={30} style={{ marginLeft: '10px' }}/>
+            </Link>
+
+            <Group h="100%" gap={0} visibleFrom="sm">
+              <a href="#" className={classes.link}>
+                <Link to="/leaderboard">
+                  Leaderboard
+                </Link>
+              </a>
+              <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
+                <HoverCard.Target>
+                  <a href="#" className={classes.link}>
+                    <Center inline>
+                      <Box component="span" mr={5}>
+                        <Link to='/problems'>
+                          Workspace
+                        </Link>
+                      </Box>
+                      <IconChevronDown
+                        style={{ width: rem(16), height: rem(16) }}
+                        color={theme.colors.blue[6]}
+                      />
+                    </Center>
+                  </a>
+                </HoverCard.Target>
+
+                <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
+                  <Group justify="space-between" px="md">
+                    <Text fw={500}>Workspace</Text>
+                    <Anchor href="#" fz="xs">
+                      View all
+                    </Anchor>
+                  </Group>
+
+                  <Divider my="sm" />
+
+                  <SimpleGrid cols={2} spacing={0}>
+                    {links}
+                  </SimpleGrid>
+
+                  <div className={classes.dropdownFooter}>
+                    <Group justify="space-between">
+                      <div>
+                        <Text fw={500} fz="sm">
+                          Get started
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          Their food sources have decreased, and their numbers
+                        </Text>
+                      </div>
+                      <Button variant="default">Get started</Button>
+                    </Group>
+                  </div>
+                </HoverCard.Dropdown>
+              </HoverCard>
+              <a href="#" className={classes.link}>
+                <Link to="/userprofile">
+                  Profile
+                </Link>
+              </a>
+            </Group>
 
             <Group visibleFrom="sm">
 
@@ -377,7 +430,7 @@ const Navigation = () => {
             <UnstyledButton className={classes.link} onClick={toggleLinks}>
               <Center inline>
                 <Box component="span" mr={5}>
-                  Features
+                  Workspace
                 </Box>
                 <IconChevronDown
                   style={{ width: rem(16), height: rem(16) }}

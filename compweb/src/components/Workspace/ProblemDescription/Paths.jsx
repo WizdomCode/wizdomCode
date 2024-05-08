@@ -32,6 +32,9 @@ import { dark } from "@mui/material/styles/createPalette.js";
 import CheckCircle from '@mui/icons-material/CheckCircle'
 import CircleProgressBar from "../../Paths/CircleProgressBar.jsx";
 import zIndex from "@mui/material/styles/zIndex.js";
+import { useClickOutside } from '@mantine/hooks';
+import ArrowDropUpRoundedIcon from '@mui/icons-material/ArrowDropUpRounded';
+import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 
 const Item = styled(Paper)(({ theme }) => ({
   textAlign: 'center',
@@ -141,17 +144,19 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                 // Check if the question is already solved by the user
                 const userDocSnapshot = await getDoc(userDocRef);
                 const solvedCategories = userDocSnapshot.data().solvedCategories || [];
+
+                const stringId = `${props.categoryId.unitTitle}${props.categoryId.rowIndex}${props.categoryId.lessonIndex}`;
         
-                if (!solvedCategories.includes(props.categoryId)) {
+                if (!solvedCategories.includes(stringId)) {
                 // Update the user's document to add the solved question and increment points
                 await updateDoc(userDocRef, {
-                    solvedCategories: arrayUnion(props.categoryId), // Add the question name to the solved array
+                    solvedCategories: arrayUnion(stringId), // Add the question name to the solved array
                     points: 10 + (userDocSnapshot.data().points || 0), // Increment points
                     coins: 100 + (userDocSnapshot.data().points || 0),
                 });
-                console.log(`props.categoryId "${props.categoryId}" solved! Points updated.`);
+                console.log(`props.categoryId "${stringId}" solved! Points updated.`);
                 } else {
-                console.log(`props.categoryId "${props.categoryId}" already solved.`);
+                console.log(`props.categoryId "${stringId}" already solved.`);
                 }
             } catch (error) {
                 console.error("Error updating user document:", error);
@@ -180,7 +185,7 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                 return count === numProblems;
                 };
             
-                console.log("Category passed:", props.categoryId, problemPassed());
+                console.log("Category passed:", `${props.categoryId.unitTitle}${props.categoryId.rowIndex}${props.categoryId.lessonIndex}`, problemPassed());
         
                 // If the problem is solved, update the user's document
                 if (problemPassed() && auth.currentUser) {
@@ -197,6 +202,15 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
         // Define a function to update the user's document
         
       }, [problemsCompleted, numProblems, db, auth]);
+
+    const activeCategoryId = useSelector(state => state.activeCategoryId);
+
+    useEffect(() => {
+        if (questions && activeCategoryId) {
+            const categoryIsActive = activeCategoryId.unitTitle === props.categoryId.unitTitle && activeCategoryId.lessonIndex === props.categoryId.lessonIndex && activeCategoryId.rowIndex === props.categoryId.rowIndex;
+            if (categoryIsActive) dispatch({ type: 'SET_LESSON_QUESTION_LIST', payload: questions });
+        }
+    }, [activeCategoryId]);
 
     return (
         <div className="universal" style={{ position: 'relative' }}>
@@ -269,15 +283,19 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                     >
                         <div 
                             className={`lesson-background-rect ${ open ? 'hovered' : ''}`}
-                            onClick={handleTooltipOpen}
+                            // onClick={handleTooltipOpen}
+                            onClick={onButtonClick}
                             tabIndex="0" // Add this to make the div focusable
                         >
                             <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
                             <div>
-                                <Item className={`bottom-rectangle ${props.lessonName.length > 12 ? 'long-lesson-name' : 'lesson-name'}`} onClick={onButtonClick}>{ props.lessonName }</Item>
+                                <Item className={`bottom-rectangle ${props.lessonName.length > 12 ? 'long-lesson-name' : 'lesson-name'}`}>{ props.lessonName }</Item>
                             </div>
                         </div>
                     </HtmlTooltip>
+                    {activeCategoryId && activeCategoryId.unitTitle === props.categoryId.unitTitle && activeCategoryId.lessonIndex === props.categoryId.lessonIndex && activeCategoryId.rowIndex === props.categoryId.rowIndex &&
+                        <ArrowDropUpRoundedIcon style={{ height: '100px', width: '100px', marginTop: '-30px', marginLeft: '35px' }}/>
+                    }
                 </div>
             </ClickAwayListener>
         </div>
@@ -294,6 +312,8 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     const [questions, setQuestions] = useState([]);
     const [lastPressed, setLastPressed] = useState(null);
     const [isQuestionListOpen, setIsQuestionListOpen] = useState(false); // Add this line
+
+    const [userData, setUserData] = useState(null);
 
     const tabIndex = useSelector(state => state.lessonTabIndex);
     
@@ -382,6 +402,47 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     
         fetchData();
     }, [lastPressed]);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+          try {
+            // Get the current user
+            const currentUser = auth.currentUser;
+    
+            if (currentUser) { // Check if currentUser is not null
+    
+              // Get the document reference for the current user from Firestore
+              const userDocRef = doc(db, "Users", currentUser.uid);
+    
+              // Fetch user data from Firestore
+              const userSnapshot = await getDoc(userDocRef);
+              if (userSnapshot.exists()) {
+                // Extract required user information from the snapshot
+                const userData = userSnapshot.data();
+                setUserData(userData); // Set the user data in the state
+              } else {
+                console.log("No such document!");
+              }
+            }
+            else {
+              console.log("NO CURRENT USER UH OH", currentUser)
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+          }
+        };
+    
+        fetchUserData();
+      }, [auth.currentUser]); // Empty dependency array ensures the effect runs only once when the component mounts 
+      
+    const [isProblemListOpen, setIsProblemListOpen] = useState(false);
+    const ref = useClickOutside(() => {
+        dispatch({ type: 'SET_ACTIVE_CATEGORY_ID', payload: null });
+        setIsProblemListOpen(false);
+    });   
+
+    const lessonQuestionList = useSelector(state => state.lessonQuestionList);
+    const activeCategoryId = useSelector(state => state.activeCategoryId);
     
     return (
         <div className="universal">
@@ -407,17 +468,75 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                     {lessons.map((row, rowIndex) => {
                         console.log(`Row ${rowIndex}:`, row);
                         return (
-                            <div className='lesson-row'>
-                                {row.map((lesson, lessonIndex) => {
-                                    console.log(`Lesson ${lessonIndex} in Row ${rowIndex}:`, unitTitle);
-                                    return (
-                                        <LessonBackgroundRect key={lessonIndex} {...lesson} onButtonClick={() => {
-                                            console.log(`Button clicked in Lesson ${lessonIndex} in Row ${rowIndex}`);
-                                            handleButtonClick(lessonIndex);
-                                        }} isFocused={lessonIndex === lastPressed && isQuestionListOpen} division={division} categoryId={`${unitTitle}${rowIndex}${lessonIndex}`}/>
-                                    );
-                                })}
-                            </div>
+                            <>
+                                <div className='lesson-row'>
+                                    {row.map((lesson, lessonIndex) => {
+                                        console.log(`Lesson ${lessonIndex} in Row ${rowIndex}:`, unitTitle);
+                                        return (
+                                            <LessonBackgroundRect key={lessonIndex} {...lesson} onButtonClick={() => {
+                                                console.log(`Button clicked in Lesson ${lessonIndex} in Row ${rowIndex}`);
+                                                handleButtonClick(lessonIndex);
+                                                dispatch({ type: 'SET_ACTIVE_CATEGORY_ID', payload: { unitTitle: unitTitle, rowIndex: rowIndex, lessonIndex: lessonIndex }});
+                                            }} isFocused={lessonIndex === lastPressed && isQuestionListOpen} division={division} categoryId={{ unitTitle: unitTitle, rowIndex: rowIndex, lessonIndex: lessonIndex }}/>
+                                        );
+                                    })}
+                                </div>
+                                <React.Fragment>
+                                    {
+                                    console.log("activeCategoryId", activeCategoryId),
+                                    console.log("unitTitle", unitTitle),
+                                    console.log("rowIndex", rowIndex),
+                                    activeCategoryId && activeCategoryId.unitTitle === unitTitle && activeCategoryId.rowIndex === rowIndex && lessonQuestionList && (
+                                        <div className="question-list-rect" style={{ zIndex: 9999 }} ref={ref}>
+                                            <div>
+                                            <table>
+                                                <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Points</th>
+                                                    <th>Topics</th>
+                                                    <th>Contest</th>
+                                                    <th>Solved</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {lessonQuestionList.map((q) => (
+                                                    <tr key={q.id}>
+                                                    <td>{q.title}</td>
+                                                    <td>{q.points}</td>
+                                                    <td>{q.topics.join(", ")}</td>
+                                                    <td>{q.contest}</td>
+                                                    { userData && userData.solved ? <td>{userData.solved.includes(q.title) ? "yes" : "no"}</td> : <td>no</td> }
+                                                    <td>
+                                                        <button
+                                                        type="button"
+                                                        className='open-question'
+                                                        onClick={() => {
+                                                            window.scrollTo(0, 0); // This will scroll the page to the top
+                                                            dispatch({
+                                                                type: 'SET_LESSON_META_DATA',
+                                                                index: tabIndex,
+                                                                payload: {
+                                                                    division: division,
+                                                                    lesson: lastPressed,
+                                                                    problem_id: q.title // TODO: This becomes problem if question id in firebase differs from question title
+                                                                },
+                                                            })
+                                                        }}
+                                                        >
+                                                        <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
+                                                        </button>
+                                                    </td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
+                                            </div>
+                                        </div>
+                                    )}
+                                </React.Fragment>
+                            </>
                         );
                     })}
                 </div>

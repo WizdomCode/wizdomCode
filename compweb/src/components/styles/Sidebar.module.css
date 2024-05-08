@@ -15,7 +15,6 @@
   flex-direction: column;
   align-items: center; /* Align items to the left */
   justify-content: flex-start; /* Align items to the top */
-  background: var(--light-bg);
   color: #fff;
   padding: 2rem;
   box-sizing: border-box;

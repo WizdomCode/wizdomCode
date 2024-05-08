@@ -1,0 +1,31 @@
+.marginSpacing {
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+.selectedBackground {
+    background-color: var(--light-bg);
+}
+
+ul {
+    list-style-type: none;
+}
+
+.vertCenterIcons {
+    display: flex;
+    align-items: center;
+}
+
+.languageIcon {
+    height: 20px;
+    margin-right: 6px;
+}
+
+.fileNameButtonRow {
+    display: flex;
+    direction: row;
+}
+
+.rightAlign {
+    margin-left: auto;
+}

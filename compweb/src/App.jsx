@@ -62,6 +62,8 @@ import '@mantine/core/styles.css';
 // import '@mantine/code-highlight/styles.css';
 // ...
 
+import '@mantine/code-highlight/styles.css';
+
 function App() {
   return (
     <Routes>

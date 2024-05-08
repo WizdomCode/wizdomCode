@@ -51,7 +51,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
       onDragEnter={dragEnter}
       onDragOver={dragOver}
       className={styles.buttonTab} 
-      style={{background: isActive ? "#1B1B32" : "#0A0A23", color: "white", width: `${text.length * 1.3}ch`, minWidth: '156px'}} 
+      style={{background: isActive ? "#202327" : "#15181E", color: "white", width: `${text.length * 1.3}ch`, minWidth: '156px'}} 
       onMouseOver={() => setIsHovered(true)}
       onMouseOut={() => setIsHovered(false)}  
       onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
