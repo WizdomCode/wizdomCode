@@ -173,7 +173,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
           <div className={styles.testCases}>
             {displayCases ? displayCases.map((testCase, index) => {
               const status = results[index]?.status?.description;
-              const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
+                const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
               return (
                 <div key={testCase.key} className={className}>
@@ -182,7 +182,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
                     Case {testCase.key}
                     {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
                     {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
-                    {results[index] && results[index].status.description === 'Time limit exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
+                    {results[index] && results[index].status.description === 'Time Limit Exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
                   </h3>
                   {results[index] && (
                       <>
