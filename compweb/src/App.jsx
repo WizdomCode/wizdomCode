@@ -5,6 +5,7 @@ import NewIDE from "./pages/NewIDE";
 import Leaderboard from "./pages/Leaderboard";
 import SignUp from "./pages/SignUp";
 import LearningPath from "./pages/LearningPath";
+import Challenges from "./pages/Challenges";
 import ComputerContest from "./pages/ComputerContests/ComputerContest";
 import USACO from "./pages/ComputerContests/USACO/USACO";
 import Bronze from "./pages/ComputerContests/USACO/Bronze/Bronze";
@@ -74,6 +75,7 @@ function App() {
       <Route path="/leaderboard" element={<LeaderboardPage />} />
       <Route path="/learningpath" element={<LearningPath />} />
       <Route path="/computercontest" element={<ComputerContest />} />
+      <Route path="/challenges" element={<Challenges />} />
       <Route path="/usaco" element={<USACO />} />
       <Route path="/ccc" element={<CCC />} />
 
