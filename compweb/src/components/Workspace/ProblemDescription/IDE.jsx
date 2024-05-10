@@ -51,6 +51,7 @@ import {
 } from '@mantine/core';
 import FileList from './FileList.jsx';
 import { SideNav } from '../../Navigation/SideNav.jsx';
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 const card = (
   <React.Fragment>
@@ -818,16 +819,10 @@ const submitCode = async () => {
   return (
     <>
       <Navigation />
-      <div style={{ display: 'flex', direction: 'row' }}>
+      <div style={{ display: 'flex', direction: 'row', height: 'calc(100vh - 50px)' }}>
       <SideNav />
-      <Split
-          className="split"
-          style={{ display: 'flex', flexDirection: 'row', backgroundColor: theme.colors.siteBackground[0], width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
-          minSize={0}
-          sizes={isFileListOpen ? [40, 40, 20] : [50, 50, 0]}
-          snapOffset={180}
-      >
-      <div id="split-0">
+      <PanelGroup direction="horizontal">
+      <Panel defaultSize={43} minSize={14} collapsible={true} collapsedSize={0}>
       <div className={styles.row}>
         <div className={styles.problemStatement}>
           <div className={styles.scrollableContent}>
@@ -1164,14 +1159,16 @@ const submitCode = async () => {
           </div>
         </div>
       </div>
-      </div>
-      <div id="split-1" style={{ backgroundColor: theme.colors.siteBackground[0], width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+      </Panel>
+      <PanelResizeHandle className={styles.panelResizeHandle} />
+      <Panel defaultSize={43} minSize={14} collapsible={true} collapsedSize={0}>
           <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
-      </div>
-      <div>
+      </Panel>
+      <PanelResizeHandle className={styles.panelResizeHandle} />
+      <Panel defaultSize={14} minSize={14} collapsible={true} collapsedSize={0}>
         <FileList />
-      </div>
-      </Split>
+      </Panel>
+      </PanelGroup>
       </div>
     </>
   );

@@ -1,16 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-:root {
-  --dark-bg:#1B1B32;
-  --light-bg: #3B3B4F;
-  --code-bg: #181A1D;
-  --navbar: #0A0A23;
-}
-
 .row {
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 50px);
   width: 100%;
 }
 
@@ -119,7 +112,6 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  height: 100vh;
   overflow: auto;
   width: 100%;
   padding-left: 10px;
@@ -300,4 +292,9 @@ ul {
   width: 2px;
   padding: 2px;
   background-color: white;
+}
+
+.panelResizeHandle {
+  width: 4px;
+  background-color: transparent;
 }

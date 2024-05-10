@@ -6,7 +6,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Authentication from './Authentication';
 import { auth, db } from "../../firebase"
-import { onAuthStateChanged, signOut} from "firebase/auth";
+import { ActionCodeOperation, onAuthStateChanged, signOut} from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 import styles from '../styles/Navigation.module.css';
@@ -64,32 +64,49 @@ import ShareIcon from '@mui/icons-material/Share';
 import classes from '../styles/Navigation.module.css';
 import Share from '@mui/icons-material/Share';
 
+import { useDispatch, useSelector } from 'react-redux';
+
 const mockdata = [
   {
     icon: IconCode,
     title: 'Problems',
     description: '250+ problems from the most popular competitive programming contests',
+    link: '/problems'
   },
   {
     icon: IconCoin,
     title: 'Canadian Computing Competition',
     description: 'Canada\'s largest competitive programming competition',
+    link: '/ccc'
   },
   {
     icon: IconBook,
-    title: 'Documentation',
+    title: 'Usaco',
     description: 'Yanma is capable of seeing 360 degrees without',
+    link: '/usaco'
+  },
+];
+
+const communityData = [
+  {
+    icon: IconCode,
+    title: 'Profile',
+    description: '250+ problems from the most popular competitive programming contests',
+    link: '/userprofile'
   },
   {
-    icon: IconFingerprint,
-    title: 'Security',
-    description: 'The shell’s rounded shape and the grooves on its.',
+    icon: IconCoin,
+    title: 'Leaderboard',
+    description: 'Canada\'s largest competitive programming competition',
+    link: '/leaderboard'
   },
 ];
 
 const Navigation = () => {
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -108,6 +125,7 @@ const Navigation = () => {
           if (userSnapshot.exists()) {
             // Extract required user information from the snapshot
             const userData = userSnapshot.data();
+            dispatch({ type: 'SET_USER_INFO', payload: userData });
             console.log("NAVBAR USER DATA", userData);
             setUserData(userData); // Set the user data in the state
           } else {
@@ -127,21 +145,43 @@ const Navigation = () => {
   const theme = useMantineTheme();
 
   const links = mockdata.map((item) => (
-    <UnstyledButton className={classes.subLink} key={item.title}>
-      <Group wrap="nowrap" align="flex-start">
-        <ThemeIcon size={34} variant="default" radius="md">
-          <item.icon style={{ width: rem(22), height: rem(22) }} color={theme.colors.blue[6]} />
-        </ThemeIcon>
-        <div>
-          <Text size="sm" fw={500}>
-            {item.title}
-          </Text>
-          <Text size="xs" c="dimmed">
-            {item.description}
-          </Text>
-        </div>
-      </Group>
-    </UnstyledButton>
+    <Link to={item.link} key={item.title}>
+      <UnstyledButton className={classes.subLink} p={10}>
+        <Group wrap="nowrap" align="flex-start">
+          <ThemeIcon size={34} variant="default" radius="md">
+            <item.icon style={{ width: rem(22), height: rem(22) }} color={theme.colors.blue[6]} />
+          </ThemeIcon>
+          <div>
+            <Text size="sm" fw={500}>
+              {item.title}
+            </Text>
+            <Text size="xs" c="dimmed">
+              {item.description}
+            </Text>
+          </div>
+        </Group>
+      </UnstyledButton>
+    </Link>
+  ));
+  
+  const communityLinks = communityData.map((item) => (
+    <Link to={item.link} key={item.title}>
+      <UnstyledButton className={classes.subLink} p={10}>
+        <Group wrap="nowrap" align="flex-start">
+          <ThemeIcon size={34} variant="default" radius="md">
+            <item.icon style={{ width: rem(22), height: rem(22) }} color={theme.colors.blue[6]} />
+          </ThemeIcon>
+          <div>
+            <Text size="sm" fw={500}>
+              {item.title}
+            </Text>
+            <Text size="xs" c="dimmed">
+              {item.description}
+            </Text>
+          </div>
+        </Group>
+      </UnstyledButton>
+    </Link>
   ));
 
   const [scrolled, setScrolled] = useState(false);
@@ -207,12 +247,7 @@ const Navigation = () => {
               <IconNotification size={30} style={{ marginLeft: '10px' }}/>
             </Link>
 
-            <Group h="100%" gap={0} visibleFrom="sm">
-              <a href="#" className={classes.link}>
-                <Link to="/leaderboard">
-                  Leaderboard
-                </Link>
-              </a>
+            <Group h="100%" gap={0} visibleFrom="sm" ml="200">
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
                   <a href="#" className={classes.link}>
@@ -233,9 +268,6 @@ const Navigation = () => {
                 <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
                   <Group justify="space-between" px="md">
                     <Text fw={500}>Workspace</Text>
-                    <Anchor href="#" fz="xs">
-                      View all
-                    </Anchor>
                   </Group>
 
                   <Divider my="sm" />
@@ -243,27 +275,38 @@ const Navigation = () => {
                   <SimpleGrid cols={2} spacing={0}>
                     {links}
                   </SimpleGrid>
-
-                  <div className={classes.dropdownFooter}>
-                    <Group justify="space-between">
-                      <div>
-                        <Text fw={500} fz="sm">
-                          Get started
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          Their food sources have decreased, and their numbers
-                        </Text>
-                      </div>
-                      <Button variant="default">Get started</Button>
-                    </Group>
-                  </div>
                 </HoverCard.Dropdown>
               </HoverCard>
-              <a href="#" className={classes.link}>
-                <Link to="/userprofile">
-                  Profile
-                </Link>
-              </a>
+
+              <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
+                <HoverCard.Target>
+                  <a href="#" className={classes.link}>
+                    <Center inline>
+                      <Box component="span" mr={5}>
+                        <Link to='/problems'>
+                          Community
+                        </Link>
+                      </Box>
+                      <IconChevronDown
+                        style={{ width: rem(16), height: rem(16) }}
+                        color={theme.colors.blue[6]}
+                      />
+                    </Center>
+                  </a>
+                </HoverCard.Target>
+
+                <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
+                  <Group justify="space-between" px="md">
+                    <Text fw={500}>Community</Text>
+                  </Group>
+
+                  <Divider my="sm" />
+
+                  <SimpleGrid cols={2} spacing={0}>
+                    {communityLinks}
+                  </SimpleGrid>
+                </HoverCard.Dropdown>
+              </HoverCard>
             </Group>
 
             <Group visibleFrom="sm">

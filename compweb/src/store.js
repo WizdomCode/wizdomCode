@@ -50,7 +50,8 @@ int main() {
   templateIsClicked: false,
   isFileListOpen: true,
   activeCategoryId: null,
-  lessonQuestionList: null
+  lessonQuestionList: null,
+  userInfo: null
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -272,6 +273,12 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         lessonQuestionList: action.payload
+      }
+    }
+    case 'SET_USER_INFO': {
+      return {
+        ...state,
+        userInfo: action.payload
       }
     }
     default:

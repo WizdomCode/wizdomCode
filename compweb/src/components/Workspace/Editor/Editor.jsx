@@ -615,7 +615,7 @@ const CodeEditor = (props) => {
         </div>
         <br />
         <PanelGroup direction="vertical" style={{ width: '100%' }}>
-        <Panel style={{ width: '100%' }}>
+        <Panel style={{ width: '100%' }} defaultSize={70}>
         {openTemplate ? 
         (
           <div>

@@ -1,12 +1,5 @@
-:root {
-  --dark-bg:#1B1B32;
-  --light-bg: #3B3B4F;
-  --code-bg: #181A1D;
-  --navbar: #0A0A23;
-}
-
 .scrollableContent {
-  height: 100vh;
+  height: calc(100vh - 50px);
   width: 100%;
   max-width: 100%;
   display: flex;
