@@ -5,26 +5,40 @@ import { doc, setDoc, deleteField, updateDoc, arrayUnion } from "firebase/firest
 const Challenges = () => {
   const [dailyReset, setDailyReset] = useState(false);
   const [monthlyReset, setMonthlyReset] = useState(false);
-  const [dailyReset, setDailyReset] = useState(false);
+  const [weeklyReset, setWeeklyReset] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const dailyChallengeArray = ["challenge 1sui dsiuasdfiju", "challenge 2 askdiasd", "challenge 3  jdas", "challenge 4 aujsds"];
+
+  const keyChallengeMap = {
+    solve: "Solve a problem",
+    vote: "Upvote 3 solutions",
+    sets: "",
+    amongus: "challenge 4 aujsds"
+  };
+
   const [dailyChallenges, setDailyChallenges] = useState([]);
 
-  const newDailyChallenges = async () => {
-    const randomChallenges = dailyChallengeArray.sort(() => 0.5 - Math.random()).slice(0, 3).map(challenge => ({
-      challenge,
-      points: 10,
-      users: []
-    }));
-    // Upload to Firestore
-    const challengesRef = doc(db, "Challenges", "Daily");
-    // Delete existing array if exists
-    await deleteField(challengesRef, "dailyChallenges");
-    // Set new challenges
-    await setDoc(challengesRef, { dailyChallenges: randomChallenges });
-    setDailyChallenges(randomChallenges);
-    console.log("Daily challenges updated:", randomChallenges);
-  };
+const newDailyChallenges = async () => {
+  const keys = Object.keys(keyChallengeMap);
+  const randomKeys = keys.sort(() => 0.5 - Math.random()).slice(0, 3);
+  
+  const randomChallenges = randomKeys.map(key => ({
+    challenge: keyChallengeMap[key],
+    category: key,
+    points: 10,
+    total: 3,
+    users: []
+  }));
+  
+  // Upload to Firestore
+  const challengesRef = doc(db, "Challenges", "Daily");
+  // Delete existing array if exists
+  await deleteField(challengesRef, "dailyChallenges");
+  // Set new challenges
+  await setDoc(challengesRef, { dailyChallenges: randomChallenges });
+  setDailyChallenges(randomChallenges);
+  console.log("Daily challenges updated:", randomChallenges);
+};
+
 
   const solveChallenge = async (index, userName) => {
     // Update Firestore document to add the user's name to the users array of the challenge

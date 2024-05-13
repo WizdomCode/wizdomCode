@@ -50,6 +50,7 @@ const SignUp = () => {
         coins: 0,
         solved: [], // Empty array for solved problems
         solvedCategories: [],
+        streak: 0,
         skills: skills // Assign the skills map to userData
       };
   

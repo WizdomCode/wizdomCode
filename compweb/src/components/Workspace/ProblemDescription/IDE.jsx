@@ -681,6 +681,27 @@ const submitCode = async () => {
           });
     
           console.log(`Question "${questionName}" solved! Points updated.`);
+    
+          // Check and update daily challenge progress
+          const challengeDocRef = doc(db, "Challenges", "Daily");
+          const challengeDocSnapshot = await getDoc(challengeDocRef);
+          const dailyChallenges = challengeDocSnapshot.data().dailyChallenges || [];
+    
+          dailyChallenges.forEach(async (challenge, index) => {
+            if (challenge.users.includes(userUid)) {
+              // User already solved this challenge, increment the score
+              await updateDoc(challengeDocRef, {
+                [`dailyChallenges.${index}.score`]: challenge.score + 1
+              });
+            } else {
+              // User solved this challenge for the first time, add user and set score to 1
+              await updateDoc(challengeDocRef, {
+                [`dailyChallenges.${index}.users`]: arrayUnion(userUid),
+                [`dailyChallenges.${index}.score`]: 1
+              });
+            }
+          });
+    
         } else {
           console.log(`Question "${questionName}" already solved.`);
         }
@@ -688,7 +709,6 @@ const submitCode = async () => {
         console.error("Error updating user document:", error);
       }
     };
-    
   
     // Example parsing
     const problemPassed = () => {
