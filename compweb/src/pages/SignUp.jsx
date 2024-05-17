@@ -15,7 +15,45 @@ const SignUp = () => {
   const [age, setAge] = useState("");
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
+  const addUserIdToPointsArray = async (userId) => {
+    const documentIds = ["General", "Challenges", "ComputingContest", "Community", "Miscellaneous"];
 
+    for (const documentId of documentIds) {
+        try {
+            const docRef = doc(db, "Achievements", documentId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                let updated = false;
+
+                // Iterate over each key in the document data
+                for (const key in data) {
+                    if (data.hasOwnProperty(key) && typeof data[key] === 'object' && data[key] !== null) {
+                        // Check if the object has a points property and it's an array
+                        if (Array.isArray(data[key].points)) {
+                            // Add the userId: 0 to the points array
+                            data[key].points.push({ [userId]: 0 });
+                            updated = true;
+                        }
+                    }
+                }
+
+                // If any updates were made, update the document
+                if (updated) {
+                    await updateDoc(docRef, data);
+                    console.log(`Updated ${documentId} document.`);
+                } else {
+                    console.log(`No updates needed for ${documentId} document.`);
+                }
+            } else {
+                console.log(`Document ${documentId} does not exist.`);
+            }
+        } catch (error) {
+            console.error(`Error updating document ${documentId}:`, error);
+        }
+    }
+};
   const signUp = async (e) => {
     e.preventDefault();
   
@@ -55,7 +93,7 @@ const SignUp = () => {
       };
   
       await setDoc(userDocRef, userData);
-  
+      addUserIdToPointsArray(user.uid);
       console.log("User information added to Firestore successfully!");
       
       // Redirect to the home page after successful sign-up
