@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { db } from "../firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import SpiderChart from "./SpiderChart";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
+import "./Achievements.css"; // Make sure to create this CSS file for styling
 
 const Achievements = () => {
     const [achievements, setAchievements] = useState({});
     const [selectedCategory, setSelectedCategory] = useState("General");
+
     useEffect(() => {
         const fetchAchievements = async (documentId) => {
             try {
@@ -37,11 +38,32 @@ const Achievements = () => {
 
             setAchievements(allData);
         };
+
         fetchAllAchievements();
     }, []);
 
     const handleCategoryChange = (category) => {
         setSelectedCategory(category);
+    };
+
+    const calculateStars = (userPoints, totalPoints) => {
+        let stars = 0;
+        let relevantTotal = totalPoints[0];
+
+        for (let i = 0; i < totalPoints.length; i++) {
+            if (userPoints >= totalPoints[i]) {
+                stars++;
+                if (i < totalPoints.length - 1) {
+                    relevantTotal = totalPoints[i + 1];
+                } else {
+                    relevantTotal = totalPoints[i];
+                }
+            }
+        }
+
+        const progress = Math.min(userPoints, relevantTotal);
+
+        return { stars, starCount: totalPoints.length, progress, relevantTotal };
     };
 
     return (
@@ -54,9 +76,33 @@ const Achievements = () => {
                     </button>
                 ))}
             </div>
-            <div>
+            <div className="achievement-cards">
                 {achievements[selectedCategory] ? (
-                    <pre>{JSON.stringify(achievements[selectedCategory], null, 2)}</pre>
+                    Object.keys(achievements[selectedCategory]).map((achievementName) => {
+                        const achievement = achievements[selectedCategory][achievementName];
+                        const currentUser = auth.currentUser.uid;
+
+                        const userPoints = achievement.points[currentUser]; // Replace <USER_ID> with actual user ID
+                        const totalPoints = achievement.total; // Assuming total points is an array
+
+                        const { stars, starCount, progress, relevantTotal } = calculateStars(userPoints, totalPoints);
+
+                        return (
+                            <div key={achievementName} className="achievement-card">
+                                <h2>{achievementName}</h2>
+                                <p>
+                                    {stars}/{starCount} stars
+                                </p>
+                                <p>
+                                    {progress}/{relevantTotal}
+                                </p>
+                                <p>
+                                    {achievement.p1}
+                                    {achievement.p2 && ` ${relevantTotal} ${achievement.p2}`}
+                                </p>
+                            </div>
+                        );
+                    })
                 ) : (
                     <p>Loading...</p>
                 )}
