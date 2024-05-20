@@ -11,7 +11,6 @@ const Gutter = () => {
 
   const handleMouseUp = () => {
     draggingRef.current = false;
-    console.log("done dragging", position);
   };
 
   const handleMouseMove = (event) => {

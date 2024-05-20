@@ -54,7 +54,6 @@ const Sidebar = ({ onUsacoClick, onCccClick }) => {
   }
 
   useEffect(() => {
-    console.log("sidebar authenticatedUser percep:", authenticatedUser);
   }, [authenticatedUser]);
 
   const theme = useMantineTheme();

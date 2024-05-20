@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import "./Achievements.css"; // Make sure to create this CSS file for styling
 
 const Achievements = () => {
@@ -16,11 +16,9 @@ const Achievements = () => {
                 if (achievementsDoc.exists()) {
                     return achievementsDoc.data();
                 } else {
-                    console.log(`Document ${documentId} does not exist.`);
                     return null;
                 }
             } catch (error) {
-                console.error("Error fetching achievements:", error);
                 return null;
             }
         };
@@ -64,6 +62,45 @@ const Achievements = () => {
         const progress = Math.min(userPoints, relevantTotal);
 
         return { stars, starCount: totalPoints.length, progress, relevantTotal };
+    };
+
+    const addPointsToCategory = async (category, points) => {
+        try {
+            const currentUser = auth.currentUser.uid;
+            let achievementFound = false;
+
+            for (const docId of Object.keys(achievements)) {
+                const achievement = achievements[docId];
+                
+                if (achievement.category === category) {
+                    const achievementRef = doc(db, "Achievements", docId);
+                    const currentPoints = achievement.points[currentUser] || 0;
+                    const newPoints = currentPoints + points;
+
+                    await updateDoc(achievementRef, {
+                        [`points.${currentUser}`]: newPoints
+                    });
+
+                    setAchievements((prevAchievements) => ({
+                        ...prevAchievements,
+                        [docId]: {
+                            ...prevAchievements[docId],
+                            points: {
+                                ...prevAchievements[docId].points,
+                                [currentUser]: newPoints
+                            }
+                        }
+                    }));
+
+                    achievementFound = true;
+                    break;
+                }
+            }
+
+            if (!achievementFound) {
+            }
+        } catch (error) {
+        }
     };
 
     return (

@@ -39,6 +39,7 @@ import Leaderboard from '../../../pages/Leaderboard.jsx';
 import UserProfile from '../../../pages/UserProfile.jsx';
 import Login from '../../../pages/Login.jsx';
 import SignUp from '../../../pages/SignUp.jsx';
+import Achievements from '../../../pages/Achievements.jsx';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -154,7 +155,6 @@ const IDE = (props) => {
   const currentTab = useSelector(state => state.currentTab);
 
   useEffect(() => {
-    console.log("Current tab:", currentTab);
   }, [currentTab]);
 
   const TOPICS = ["sorting", "searching", "syntax"];
@@ -213,17 +213,14 @@ const IDE = (props) => {
             const userData = userSnapshot.data();
             setUserData(userData); // Set the user data in the state
           } else {
-            console.log("No such document!");
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
       }
     };
 
     fetchUserData();
   }, []); // Empty dependency array ensures the effect runs only once when the component mounts
-  console.log("Current page:", props.currentPage);
 
   const handleFocus = (name) => {
     setIsFocused({...isFocused, [name]: true});
@@ -384,12 +381,9 @@ const IDE = (props) => {
 
     filtered = filtered.filter((q) => q.points >= value[0] && q.points <= value[1]);
 
-    console.log("search", search);
-
     if (search) {
       filtered = filtered.filter((q) => {
         if (q.title) {
-          console.log("q", q);
           return q.title.toLowerCase().includes(search.toLowerCase());
         }
         return false; // return false if there's no title, so it doesn't get included in the filtered array
@@ -431,10 +425,8 @@ const IDE = (props) => {
             // Add the problem to the tabs
             dispatch({ type: 'ADD_TAB', payload: { type: 'problem', data: problemData } });
           } else {
-            console.log("No such document!");
           }
         } catch (error) {
-          console.error("Error fetching document: ", error);
         }
       }
     };
@@ -504,15 +496,12 @@ const IDE = (props) => {
               }
 
               setTestCases(testCaseArray);
-              console.log("displayCaseArray", displayCaseArray);
               setDisplayCases(displayCaseArray);
             })
             .catch((error) => {
-              console.log(error);
             });
         })
         .catch((error) => {
-          console.log(error);
         });
     }
   }, [currentTab]);  
@@ -526,12 +515,10 @@ int main() {
 }`;
 
   const getResults = (data) => {
-    console.log("Received code output in parent component:", data);
     setResults(data);
   };
 
   const getCode = (code, language) => {
-    console.log("Received code output in parent component:", code);
   }
 
   const pollResults = async (requestId) => {
@@ -539,29 +526,20 @@ int main() {
         const response = await fetch(`https://3702-147-124-72-82.ngrok-free.app/get_results/${requestId}`);
         if (response.ok && response.headers.get('Content-Type') === 'application/json') {
             const data = await response.json();
-            console.log('Received results:', data);
             setResults(data);
         } else if (response.ok && response.headers.get('Content-Type') === 'application/jsonl') {
             // If response is in JSONL format, read each line and parse JSON
             const text = await response.text();
             const lines = text.split('\n').filter(line => line.trim() !== ''); // Split lines and remove empty lines
             const results = lines.map(line => JSON.parse(line)); // Parse each line as JSON
-            console.log('Received results:', results);
             setResults(results);
         } else {
-            console.error('Error:', response.status, response.statusText);
         }
     } catch (error) {
-        console.error('Error:', error);
     }
 };
 
 const submitCode = async () => {
-    console.log("submitting from here:", JSON.stringify({
-        language: codeState.language,
-        code: codeState.code,
-        test_cases: testCases
-    }));
     setCurrentCode(codeState.code);
     // Start the timer
     const startTime = performance.now();
@@ -580,14 +558,10 @@ const submitCode = async () => {
   
     // End the timer and calculate the elapsed time
     const endTime = performance.now();
-    const elapsedTime = endTime - startTime;
-    console.log(`Execution time: ${elapsedTime} milliseconds`);
-  
-    console.log("sent code");
+    const elapsedTime = endTime - startTime
   
     // Extract request_id from response
     const { request_id } = await response.json();
-    console.log(request_id);
   
     // Continuously fetch data from Firestore until the condition is met
     let stopFetching = false;
@@ -597,13 +571,11 @@ const submitCode = async () => {
       const rdata = await getDoc(docRef);
       if (rdata.exists) {
         const ndata = rdata.data();
-        console.log("DATA RECEIVED FROM SERVER", ndata);
       
         // Check if results array exists in ndata
         if (ndata && ndata.results && Array.isArray(ndata.results)) {
           // Iterate over results
           for (let result of ndata.results) {
-            console.log("result: ", result);
             if (result.key === "stop") {
               stopFetching = true;
               break; // Exit loop if condition is met
@@ -611,7 +583,6 @@ const submitCode = async () => {
             xdata.push(result);
           }
         } else {
-          console.log("Results not found or not in expected format in ndata.");
         }
       
         if (!stopFetching) {
@@ -619,7 +590,6 @@ const submitCode = async () => {
           await new Promise(resolve => setTimeout(resolve, 500));
         }
       } else {
-        console.log("Document not found!");
         break;
       }
     }
@@ -627,9 +597,7 @@ const submitCode = async () => {
       const docRef = doc(db, "Results", request_id);
       try {
         await deleteDoc(docRef);
-        console.log("Document successfully deleted!");
       } catch (error) {
-          console.error("Error deleting document:", error);
       }
 
     setResults(xdata);
@@ -680,7 +648,6 @@ const submitCode = async () => {
             solutions: arrayUnion(solutionMap)
           });
     
-          console.log(`Question "${questionName}" solved! Points updated.`);
     
           // Check and update daily challenge progress
           const challengeDocRef = doc(db, "Challenges", "Daily");
@@ -703,10 +670,8 @@ const submitCode = async () => {
           });
     
         } else {
-          console.log(`Question "${questionName}" already solved.`);
         }
       } catch (error) {
-        console.error("Error updating user document:", error);
       }
     };
   
@@ -725,9 +690,6 @@ const submitCode = async () => {
       }
     };
 
-    console.log("Problem passed:", problemPassed());
-
-    console.log("currentTabData", currentTab);
   
     // If the problem is solved, update the user's document
     if (problemPassed() && currentTab.data) {
@@ -746,20 +708,16 @@ const submitCode = async () => {
   const linePositionRef = useRef(linePosition); // New ref for the line position
 
   useEffect(() => {
-    console.log("State after dispatch:", state); // Log the state after dispatch
     }, [state]); // Add state as a dependency to useEffect 
 
   useEffect(() => {
-    console.log("draggedTab: ", draggedTab); // Log the state after dispatch
   }, [draggedTab]); // Add state as a dependency to useEffect
   
   useEffect(() => {
-    console.log("JUST WHAT IS CHANGING THIS? ", linePosition); // Log the state after dispatch
     linePositionRef.current = linePosition;
   }, [linePosition]); // Add state as a dependency to useEffect
 
     useEffect(() => {
-      console.log("dragged tab:", draggedTab);
 
       const handleDragOver = (e) => {
         e.preventDefault();
@@ -767,15 +725,10 @@ const submitCode = async () => {
         if (target && target.id && draggedTab !== null) {
           const draggedTabIndex = draggedTab;
           const targetTabIndex = target.id;
-          console.log("draggedTabIndex", draggedTabIndex);
-          console.log("target", target);
-          console.log("target.id", target.id);
-          console.log("targetTabIndex", targetTabIndex);
 
           const middlePoint = e.target.getBoundingClientRect().x + e.target.getBoundingClientRect().width / 2;
           const linePos = e.clientX < middlePoint ? 'left' : 'right';
-      
-          console.log({ index: targetTabIndex, position: linePos});
+    
 
           setLinePosition({ index: targetTabIndex, position: linePos});
         }
@@ -791,13 +744,7 @@ const submitCode = async () => {
 
   const dragEnd = (e) => {
     e.preventDefault();
-    console.log("DIPATCHEIOHFJIIO");
     const linePos = linePositionRef.current;
-    console.log({
-      fromIndex: draggedTab,
-      toIndex: linePos.index, 
-      direction: linePos.position
-    });
     dispatch({
       type: 'MOVE_TAB',
       payload: {
@@ -822,10 +769,8 @@ const submitCode = async () => {
           const solutions = questionData.solutions || [];
           setSolutions(solutions);
         } else {
-          console.log(`Question "${currentTab.data.title}" not found.`);
         }
       } catch (error) {
-        console.error("Error fetching solutions:", error);
       }
     };
 

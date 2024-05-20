@@ -55,8 +55,6 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
       onMouseOver={() => setIsHovered(true)}
       onMouseOut={() => setIsHovered(false)}  
       onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
-        console.log("type:", type === 'lesson');
-        console.log("payload", tab);
         if (type === 'lesson') {
           dispatch({
             type: 'SET_LESSON_TAB_INDEX',

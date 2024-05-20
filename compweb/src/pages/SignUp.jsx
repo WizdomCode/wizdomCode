@@ -43,15 +43,11 @@ const SignUp = () => {
           // If any updates were made, update the document
           if (updated) {
             await updateDoc(docRef, data);
-            console.log(`Updated ${documentId} document.`);
           } else {
-            console.log(`No updates needed for ${documentId} document.`);
           }
         } else {
-          console.log(`Document ${documentId} does not exist.`);
         }
       } catch (error) {
-        console.error(`Error updating document ${documentId}:`, error);
       }
     }
   };
@@ -62,7 +58,6 @@ const SignUp = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log("User UID:", user.uid);
 
       // Set user information with the same ID as the user's authentication UID
       const userDocRef = doc(db, "Users", user.uid);
@@ -96,13 +91,11 @@ const SignUp = () => {
 
       await setDoc(userDocRef, userData);
       await addUserIdToPointsArray(user.uid);
-      console.log("User information added to Firestore successfully!");
 
       // Redirect to the home page after successful sign-up
       navigate("/"); // Replace "/" with the path of your home page
 
     } catch (error) {
-      console.error("Error signing up:", error);
     }
   };
 

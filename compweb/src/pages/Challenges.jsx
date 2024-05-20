@@ -36,7 +36,6 @@ const newDailyChallenges = async () => {
   // Set new challenges
   await setDoc(challengesRef, { dailyChallenges: randomChallenges });
   setDailyChallenges(randomChallenges);
-  console.log("Daily challenges updated:", randomChallenges);
 };
 
 
@@ -46,7 +45,6 @@ const newDailyChallenges = async () => {
     await updateDoc(challengeRef, {
       [`dailyChallenges.${index}.users`]: arrayUnion(userName)
     });
-    console.log(`User ${userName} solved challenge ${index + 1}`);
   };
 
   useEffect(() => {
@@ -60,7 +58,6 @@ const newDailyChallenges = async () => {
       const isDailyReset = now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0;
       if (isDailyReset) {
         setDailyReset(true);
-        console.log("Daily reset!");
         await newDailyChallenges();
       } else {
         setDailyReset(false);
@@ -70,7 +67,6 @@ const newDailyChallenges = async () => {
       const isWeeklyReset = now.getDay() === 0 && isDailyReset;
       if (isWeeklyReset) {
         setWeeklyReset(true);
-        console.log("Weekly reset!");
       } else {
         setWeeklyReset(false);
       }
@@ -80,7 +76,6 @@ const newDailyChallenges = async () => {
       const isMonthlyReset = now.getDate() === endOfMonth.getDate() && isDailyReset;
       if (isMonthlyReset) {
         setMonthlyReset(true);
-        console.log("Monthly reset!");
       } else {
         setMonthlyReset(false);
       }

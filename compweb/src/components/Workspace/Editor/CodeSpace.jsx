@@ -9,23 +9,14 @@ export default class MonacoEditor extends React.Component {
   _models = {};
 
   createModals(fileTabs, fileCode, treeData) {
-    console.log("CREATING MODALS");
-    console.log("fileTabs", fileTabs);
-    console.log("fileCode", fileCode);
-    console.log("treeData", treeData);
     treeData.forEach(file => {
-        console.log("CREATING MODAL FOR FILE", file);
         if (!file.droppable) {
-            console.log("CREATING MODAL");
             this._models[file.id] = monaco.editor.createModel(fileCode[file.id], file.data.language, new monaco.Uri().with({ path: file.id }));
-            console.log("MODAL JUST CreATED", this._models[file.id]);
         }
     });
-    console.log("ALL MODALS CreATED", this._models);  
   }
 
   componentDidMount() {
-    console.log("COMPONENT MOUNTED");
 
     const { fileTabs, fileCode, treeData, path, value, language, onValueChange, ...options } = this.props;
 
@@ -38,8 +29,6 @@ export default class MonacoEditor extends React.Component {
 
     this._editor.setModel(this._models[path]);
 
-    console.log("path", path, "this._models[path]", this._models[path]);
-
     // Not sure if these lines should reference the editor or the model
     this._subscription = this._models[path].onDidChangeContent(() => {
         this.props.onValueChange(this._models[path].getValue());
@@ -49,26 +38,19 @@ export default class MonacoEditor extends React.Component {
     fetch('/themes/Night Owl Custom.json')
       .then(data => data.json())
       .then(data => {
-        console.log("theme data:", data);
         monaco.editor.defineTheme('night-owl', data);
         this._editor.updateOptions({ theme: 'night-owl' });
       });
   }
 
   componentDidUpdate(prevProps) {
-    console.log("COMPONENT UPDATED, prevProps", prevProps);
 
     const { fileTabs, fileCode, treeData, path, value, language, onValueChange, ...options } = this.props;
-  
-    console.log("MOST RECENT PROPS", this.props);
 
     if (prevProps.treeData && treeData && prevProps.treeData !== treeData && treeData.length > prevProps.treeData.length) {
       const newFile = treeData.filter(obj2 => !prevProps.treeData.some(obj1 => JSON.stringify(obj1) === JSON.stringify(obj2)))[0];
-      console.log("this is the newfile", newFile);
       if (!newFile.droppable) {
-          console.log("CREATING MODAL");
           this._models[newFile.id] = monaco.editor.createModel(fileCode[newFile.id], newFile.data.language, new monaco.Uri().with({ path: newFile.id }));
-          console.log("MODAL JUST CreATED", this._models[newFile.id]);
       }
     }
 
@@ -94,7 +76,6 @@ export default class MonacoEditor extends React.Component {
   }
 
   componentWillUnmount() {
-    console.log("COMPONENT IS UNMOUNTING");
 
     Object.values(this._models).forEach(model => model.dispose());
     this._editor && this._editor.dispose();

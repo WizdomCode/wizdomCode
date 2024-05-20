@@ -80,14 +80,11 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
               const userData = userSnapshot.data();
               setUserData(userData); // Set the user data in the state
             } else {
-              console.log("No such document!");
             }
           }
           else {
-            console.log("NO CURRENT USER UH OH", currentUser)
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
         }
       };
   
@@ -116,10 +113,8 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                 let problemData = docRef.data();
                 return problemData;
             } else {
-              console.log("No such document!");
             }
           } catch (error) {
-            console.error("Error fetching document: ", error);
           }
         }
       };
@@ -128,13 +123,11 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
         const problemDataPromises = problemIds.map(problem_id => fetchProblemData(problem_id));
         const problemsData = await Promise.all(problemDataPromises);
         problemsData.forEach((problemData, index) => {
-            console.log(`Problem data for id ${problemIds[index]}:`, problemData);
         });
         return problemsData;
     };
 
     useEffect(() => {
-        console.log("CHANGE IN USERDATA", userData);
 
         const updateUserSolvedCategories = async (userUid) => {
             try {
@@ -154,12 +147,9 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                     points: 10 + (userDocSnapshot.data().points || 0), // Increment points
                     coins: 100 + (userDocSnapshot.data().points || 0),
                 });
-                console.log(`props.categoryId "${stringId}" solved! Points updated.`);
                 } else {
-                console.log(`props.categoryId "${stringId}" already solved.`);
                 }
             } catch (error) {
-                console.error("Error updating user document:", error);
             }
         }
 
@@ -168,15 +158,12 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
             let numProblems = 0;    
 
             const data = await addGroup(props.problemIds);
-            console.log("questions", data);
             for (let question of data) {
                 if (userData && userData.solved && userData.solved.includes(question.title)) {
                     count++;
                 }
                 numProblems++;
             }
-            console.log("count", count);
-            console.log("numProblems", numProblems);
             setProblemsCompleted(count);
             setNumProblems(numProblems);
             setQuestions(data);
@@ -185,7 +172,6 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                 return count === numProblems;
                 };
             
-                console.log("Category passed:", `${props.categoryId.unitTitle}${props.categoryId.rowIndex}${props.categoryId.lessonIndex}`, problemPassed());
         
                 // If the problem is solved, update the user's document
                 if (problemPassed() && auth.currentUser) {
@@ -326,7 +312,6 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
             setLastPressed(lessonIndex);
             setIsQuestionListOpen(true); // Open question list when a new LessonBackgroundRect is clicked
         }
-        console.log("Last pressed:", lessonIndex);
     };    
 
     const smoothScroll = (end) => {
@@ -374,10 +359,8 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                 let problemData = docRef.data();
                 return problemData;
             } else {
-              console.log("No such document!");
             }
           } catch (error) {
-            console.error("Error fetching document: ", error);
           }
         }
       };
@@ -386,16 +369,12 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
         const problemDataPromises = problemIds.map(problem_id => fetchProblemData(problem_id));
         const problemsData = await Promise.all(problemDataPromises);
         problemsData.forEach((problemData, index) => {
-            console.log(`Problem data for id ${problemIds[index]}:`, problemData);
         });
         return problemsData;
     };
 
     useEffect(() => {
         const fetchData = async () => {
-            console.log("what", lessons);
-            console.log("what", lessons[lastPressed]);
-            console.log("what", lessons[lastPressed].problemIds);
             const data = await addGroup(lessons[lastPressed].problemIds);
             setQuestions(data);
         };
@@ -421,14 +400,11 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                 const userData = userSnapshot.data();
                 setUserData(userData); // Set the user data in the state
               } else {
-                console.log("No such document!");
               }
             }
             else {
-              console.log("NO CURRENT USER UH OH", currentUser)
             }
           } catch (error) {
-            console.error("Error fetching user data:", error);
           }
         };
     
@@ -464,17 +440,13 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                     <img src='/leftarrow.png' alt='Left' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/>
                 </button>}
                 <div className="unit-lessons-wrapper" ref={scrollContainer}>
-                    {console.log('Scroll Container:', scrollContainer)}
                     {lessons.map((row, rowIndex) => {
-                        console.log(`Row ${rowIndex}:`, row);
                         return (
                             <>
                                 <div className='lesson-row'>
                                     {row.map((lesson, lessonIndex) => {
-                                        console.log(`Lesson ${lessonIndex} in Row ${rowIndex}:`, unitTitle);
                                         return (
                                             <LessonBackgroundRect key={lessonIndex} {...lesson} onButtonClick={() => {
-                                                console.log(`Button clicked in Lesson ${lessonIndex} in Row ${rowIndex}`);
                                                 handleButtonClick(lessonIndex);
                                                 dispatch({ type: 'SET_ACTIVE_CATEGORY_ID', payload: { unitTitle: unitTitle, rowIndex: rowIndex, lessonIndex: lessonIndex }});
                                             }} isFocused={lessonIndex === lastPressed && isQuestionListOpen} division={division} categoryId={{ unitTitle: unitTitle, rowIndex: rowIndex, lessonIndex: lessonIndex }}/>
@@ -483,9 +455,6 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                                 </div>
                                 <React.Fragment>
                                     {
-                                    console.log("activeCategoryId", activeCategoryId),
-                                    console.log("unitTitle", unitTitle),
-                                    console.log("rowIndex", rowIndex),
                                     activeCategoryId && activeCategoryId.unitTitle === unitTitle && activeCategoryId.rowIndex === rowIndex && lessonQuestionList && (
                                         <div className="question-list-rect" style={{ zIndex: 9999 }} ref={ref}>
                                             <div>
@@ -624,12 +593,6 @@ const Paths = (props) => {
 
     const tabIndex = useSelector(state => state.lessonTabIndex);
 
-    console.log("Default tabs:", defaultTabs);
-    console.log("Default tab ind:", tabIndex);
-    console.log("Default tab data:", defaultTabs[tabIndex]['data']);
-
-    console.log("State after fetch:", useSelector(state => state)); // Log the state after dispatch
-
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -682,17 +645,14 @@ const Paths = (props) => {
               let problemData = docRef.data();
               return problemData;
             } else {
-              console.log("No such document!");
             }
           } catch (error) {
-            console.error("Error fetching document: ", error);
           }
         }
       };
       
       const addGroup = async (problemId) => {
         const problemData = await fetchProblemData(problemId);
-        console.log(`Problem data for id ${problemId}:`, problemData);
         return problemData;
       };    
       
@@ -720,11 +680,6 @@ const Paths = (props) => {
     }, [tabIndex]); // Add state as a dependency to useEffect
 
     const submitCode = async () => {
-        console.log("sent data:", JSON.stringify({
-          language: code.language,
-          code: code.code,
-          test_cases: testCases
-        }));
     
         // Start the timer
         const startTime = performance.now();
@@ -744,11 +699,8 @@ const Paths = (props) => {
         // End the timer and calculate the elapsed time
         const endTime = performance.now();
         const elapsedTime = endTime - startTime;
-        console.log(`Execution time: ${elapsedTime} milliseconds`);
     
-        console.log("sent code");
         const data = await response.json();
-        console.log(data);
     
         setResults(data);
       };
@@ -770,16 +722,12 @@ const Paths = (props) => {
                         solved: arrayUnion(questionName), // Add the question name to the solved array
                         points: points + (userDocSnapshot.data().points || 0) // Increment points
                     });
-                    console.log(`Question "${questionName}" solved! Points updated.`);
                 } else {
-                    console.log(`Question "${questionName}" already solved.`);
                 }
             } catch (error) {
-                console.error("Error updating user document:", error);
             }
         };
 
-        console.log("dewfaluts results", results);
     
         // Example parsing
         const problemPassed = () => {
@@ -795,10 +743,6 @@ const Paths = (props) => {
                 return false;
             }
         };
-    
-        console.log("Problem passed:", problemPassed());
-    
-        console.log("lessonProblemData[tabIndex]", lessonProblemData[tabIndex]);
 
         // If the problem is solved, update the user's document
         if (problemPassed() && lessonProblemData[tabIndex]) {
@@ -839,8 +783,6 @@ const Paths = (props) => {
         for (let unit of data) {
             for (let row of unit) {
                 for (let lesson of row) {
-                    console.log("lesson", lesson);
-                    console.log("currentProblemId", currentProblemId);
                     let problemIds = lesson.problemIds;
                     if (problemIds.includes(currentProblemId)) {
                         let currentIndex = problemIds.indexOf(currentProblemId);
@@ -900,11 +842,9 @@ const Paths = (props) => {
                 const userData = userSnapshot.data();
                 setUserData(userData); // Set the user data in the state
             } else {
-                console.log("No such document!");
             }
             }
         } catch (error) {
-            console.error("Error fetching user data:", error);
         }
         };
 
