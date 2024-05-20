@@ -626,7 +626,7 @@ const submitCode = async () => {
     // Once the condition is met, set results to the data received so far
       const docRef = doc(db, "Results", request_id);
       try {
-        await deleteDoc(docRef);
+      //  await deleteDoc(docRef);
         console.log("Document successfully deleted!");
       } catch (error) {
           console.error("Error deleting document:", error);
@@ -819,10 +819,10 @@ const submitCode = async () => {
   return (
     <>
       <Navigation />
-      <div style={{ display: 'flex', direction: 'row', height: 'calc(100vh - 50px)' }}>
+      <div style={{ display: 'flex', direction: 'row', height: 'calc(100vh - 50px)', width: '100vw' }}>
       <SideNav />
-      <PanelGroup direction="horizontal">
-      <Panel defaultSize={43} minSize={14} collapsible={true} collapsedSize={0}>
+      <PanelGroup direction="horizontal" style={{ overflow: 'auto' }}>
+      <Panel defaultSize={35} minSize={14} collapsible={true} collapsedSize={0}>
       <div className={styles.row}>
         <div className={styles.problemStatement}>
           <div className={styles.scrollableContent}>
@@ -831,7 +831,7 @@ const submitCode = async () => {
                 <div 
                   className={styles.buttonRow}
                   onDragOver={(e) => e.preventDefault()} // Add this line
-                  style={{ backgroundColor: theme.colors.editorBackground[0] }}
+                  style={{ backgroundColor: 'var(--site-bg)' }}
                 >
                   {tabs.map((tab, index) => (
                     <>
@@ -1161,12 +1161,11 @@ const submitCode = async () => {
       </div>
       </Panel>
       <PanelResizeHandle className={styles.panelResizeHandle} />
-      <Panel defaultSize={43} minSize={14} collapsible={true} collapsedSize={0}>
-          <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
-      </Panel>
-      <PanelResizeHandle className={styles.panelResizeHandle} />
-      <Panel defaultSize={14} minSize={14} collapsible={true} collapsedSize={0}>
-        <FileList />
+      <Panel defaultSize={65} minSize={14} collapsible={true} collapsedSize={0} style={{ overflow: 'auto' }}>
+        <div style={{ display: 'flex', direction: 'row' }}>
+          { isFileListOpen && <FileList style={{ flex: '1' }}/>}
+          <CodeEditor style={{ flex: '4' }} boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
+        </div>
       </Panel>
       </PanelGroup>
       </div>

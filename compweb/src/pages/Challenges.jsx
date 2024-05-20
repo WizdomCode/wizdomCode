@@ -5,7 +5,6 @@ import { doc, setDoc, deleteField, updateDoc, arrayUnion } from "firebase/firest
 const Challenges = () => {
   const [dailyReset, setDailyReset] = useState(false);
   const [monthlyReset, setMonthlyReset] = useState(false);
-  const [dailyReset, setDailyReset] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const dailyChallengeArray = ["challenge 1sui dsiuasdfiju", "challenge 2 askdiasd", "challenge 3  jdas", "challenge 4 aujsds"];
   const [dailyChallenges, setDailyChallenges] = useState([]);

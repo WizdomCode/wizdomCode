@@ -25,6 +25,9 @@ import { TEMPLATE_CODE } from '../templates.js';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import {
+  IconTrash
+} from '@tabler/icons-react';
 
 const initialData = [
   {
@@ -616,17 +619,22 @@ const FileList = (props) => {
   const templateIsClicked = useSelector(state => state.templateIsClicked);
 
   return (
-    <div>
+    <div style={{ minWidth: '240px' }}>
         <div style={{ height: "60px", alignItems: "center", display: "flex", direction: "row" }}>
             <ChevronRightIcon 
                 style={{ height: "30px", width: "30px" }}
                 onClick={() => { dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: false }); }}    
             />
         </div>
+        <div className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
+            <p className={`${styles.marginSpacing} ${styles.classTwo}`}>Files</p>
+            <div className={`${styles.rightAlign} ${styles.vertCenterIcons}`}>
+                <NoteAddOutlinedIcon className={`${styles.languageIcon}`} onClick={() => setShowFileForm(!showFileForm)}/>
+                <CreateNewFolderOutlinedIcon className={`${styles.languageIcon}`} onClick={() => setShowFolderForm(!showFolderForm)}/>
+                <IconTrash className={`${styles.languageIcon}`} onClick={() => handleFileDelete()}/>
+            </div>
+        </div>
             <div className={styles.marginSpacing}>
-          {!showFileForm && (
-                <button onClick={() => setShowFileForm(true)}>Create File</button>
-            )}
             {showFileForm && (
                 <div>
                   <form onSubmit={handleFileSubmit}>
@@ -647,9 +655,6 @@ const FileList = (props) => {
                   </form>
                 </div>
             )}
-            {!showFolderForm && (
-                <button onClick={() => setShowFolderForm(true)}>Create Folder</button>
-            )}
             {showFolderForm && (
                 <form onSubmit={handleFolderSubmit}>
                     <input
@@ -663,7 +668,6 @@ const FileList = (props) => {
                     <button type="submit">Submit</button>
                 </form>
             )}
-            <button onClick={() => handleFileDelete()}>Delete</button>
             <ul>
                 {userData && userData.ide && Object.keys(userData.ide).map((itemName) => (
                     renderFileOrFolder(itemName, userData.ide[itemName].__isFolder)
@@ -680,14 +684,6 @@ const FileList = (props) => {
                 </div>
             )}
             </div>
-        <br />
-        <div className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
-            <p className={`${styles.marginSpacing} ${styles.classTwo}`}>Files</p>
-            <div className={`${styles.rightAlign} ${styles.vertCenterIcons}`}>
-                <NoteAddOutlinedIcon className={`${styles.languageIcon}`} onClick={() => setShowFileForm(true)}/>
-                <CreateNewFolderOutlinedIcon className={`${styles.languageIcon}`} onClick={() => setShowFolderForm(true)}/>
-            </div>
-        </div>
         <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
           <Tree
             tree={treeData}

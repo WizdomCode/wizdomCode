@@ -21,7 +21,8 @@ import {
   IconSettings,
   IconLogout,
   IconSwitchHorizontal,
-  IconUserCircle
+  IconUserCircle,
+  IconSearch
 } from '@tabler/icons-react';
 import classes from './NavbarMinimal.module.css';
 
@@ -44,9 +45,7 @@ const UsacoIcon = () => <img src='/usaco.png' alt="Usaco Paths" style={{width: r
 const CCCIcon = () => <img src='/ccc.png' alt="CCC Paths" style={{width: rem(40), height: rem(40)}}/>;
 
 const mockdata = [
-    { icon: IconHome2, label: 'Home', path: '/' },
-    { icon: IconDatabase, label: 'Problems', path: '/problems' },
-    { icon: LeaderboardRoundedIcon, label: 'Leaderboard', path: '/leaderboard' },
+    { icon: IconSearch, label: 'Problems', path: '/problems' },
 ];
 
 const contestdata = [

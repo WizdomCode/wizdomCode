@@ -60,7 +60,9 @@ import {
 import { DndProvider } from "react-dnd";
 import CodeSpace from './CodeSpace.jsx';
 import { CodeHighlight } from '@mantine/code-highlight';
-
+import {
+  IconFolderOpen
+} from '@tabler/icons-react';
 
 const FILE_EXTENSION = {
   python: ".py",
@@ -534,22 +536,22 @@ const CodeEditor = (props) => {
   return (
     <>
       <Main open={filesOpen} style={{ width: '100%' }}>
-      <div className={styles.scrollableContent} style={{ backgroundColor: mantineTheme.colors.editorBackground[0] }}>
+      <div className={styles.scrollableContent} style={{ backgroundColor: 'var(--code-bg)' }}>
         <div className={styles.tabWrapper}>
-        <div className={styles.buttonRow} style={{ backgroundColor: mantineTheme.colors.siteBackground[0], justifyContent: 'space-between', display: 'flex', flexDirection: 'row', width: '100%', maxWidth: '100%', boxSizing: 'border-box'}}>
+        <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', width: '100%', maxWidth: '100%', boxSizing: 'border-box'}}>
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            {<IconFolderOpen 
+              className={styles.newTab}
+              onClick={() => dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true })}
+              style={{ ...(filesOpen && { display: 'none' }), marginRight: '10px' }}            
+            />}
             {fileTabs.map((tab, index) => (
-              <button className={styles.button} style={{background: index === activeTabIndex ? mantineTheme.colors.editorBackground[0] : mantineTheme.colors.siteBackground[0], color: index === activeTabIndex ? "white" : "white"}} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
+              <button className={styles.button} style={{background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white"}} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
                 <p className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
                 {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
               </button>          
             ))
             }
-            {<button 
-              className={styles.newTab}
-              onClick={handleDrawerOpen}
-              style={{ ...(filesOpen && { display: 'none' }) }}            
-            ><img src='/add.png' alt="Description" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/></button>}
           </div>
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             <ThemeProvider theme={darkTheme}>
@@ -655,17 +657,17 @@ const CodeEditor = (props) => {
         <Panel>
         <div className={styles.inputOutputSection}>
           <div className={styles.tabWrapper}>
-              <div className={styles.buttonRow} style={{ backgroundColor: mantineTheme.colors.siteBackground[0] }}>
+              <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)' }}>
                 <button 
                   className={styles.buttonTab} 
-                  style={{background: inputOutputTab === 'input' ? mantineTheme.colors.editorBackground[0] : mantineTheme.colors.siteBackground[0], color: "white"}} 
+                  style={{background: inputOutputTab === 'input' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white"}} 
                   onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
                 >
                   <p className={styles.buttonText}>Input</p>
                 </button>
                 <button 
                   className={styles.buttonTab} 
-                  style={{background: inputOutputTab === 'output' ? mantineTheme.colors.editorBackground[0] : mantineTheme.colors.siteBackground[0], color: "white"}} 
+                  style={{background: inputOutputTab === 'output' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white"}} 
                   onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
                 >
                   <p className={styles.buttonText}>Output</p>

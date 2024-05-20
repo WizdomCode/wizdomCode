@@ -240,7 +240,7 @@ const Navigation = () => {
 
   return (
     <>
-      <Box style={{ backgroundColor: theme.colors.navbar[0]}}>
+      <Box style={{ backgroundColor: 'var(--site-bg)' }}>
         <header className={classes.header}>
           <Group justify="space-between" h="100%">
             <Link to="/">
@@ -250,19 +250,23 @@ const Navigation = () => {
             <Group h="100%" gap={0} visibleFrom="sm" ml="200">
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
-                  <a href="#" className={classes.link}>
-                    <Center inline>
-                      <Box component="span" mr={5}>
-                        <Link to='/problems'>
-                          Workspace
-                        </Link>
-                      </Box>
-                      <IconChevronDown
-                        style={{ width: rem(16), height: rem(16) }}
-                        color={theme.colors.blue[6]}
-                      />
-                    </Center>
-                  </a>
+                  <div style={{ position: 'relative', height: '100%' }}>
+                    <a href="#" className={classes.link}>
+                      <Center inline>
+                        <Box component="span" mr={5}>
+                          <Link to='/problems'>
+                            Workspace
+                          </Link>
+                        </Box>
+                        <IconChevronDown
+                          style={{ width: rem(16), height: rem(16) }}
+                          color={theme.colors.blue[6]}
+                        />
+                      </Center>
+                    </a>
+                    { (location.pathname === '/problems' || location.pathname === '/ccc' || location.pathname === '/usaco') && 
+                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'blue', height: '2px' }}/>}
+                  </div>
                 </HoverCard.Target>
 
                 <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
@@ -280,19 +284,23 @@ const Navigation = () => {
 
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
-                  <a href="#" className={classes.link}>
-                    <Center inline>
-                      <Box component="span" mr={5}>
-                        <Link to='/problems'>
-                          Community
-                        </Link>
-                      </Box>
-                      <IconChevronDown
-                        style={{ width: rem(16), height: rem(16) }}
-                        color={theme.colors.blue[6]}
-                      />
-                    </Center>
-                  </a>
+                  <div style={{ position: 'relative', height: '100%' }}>
+                    <a href="#" className={classes.link}>
+                      <Center inline>
+                        <Box component="span" mr={5}>
+                          <Link to='/problems'>
+                            Community
+                          </Link>
+                        </Box>
+                        <IconChevronDown
+                          style={{ width: rem(16), height: rem(16) }}
+                          color={theme.colors.blue[6]}
+                        />
+                      </Center>
+                    </a>
+                    { (location.pathname === '/userprofile' || location.pathname === '/leaderboard') && 
+                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'blue', height: '2px' }}/>}
+                  </div>
                 </HoverCard.Target>
 
                 <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
