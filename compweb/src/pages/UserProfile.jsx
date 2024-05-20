@@ -31,7 +31,6 @@ const UserProfile = () => {
         if (snapshot.exists()) {
             return snapshot.data();
         } else {
-            console.log(`Document with ID ${docId} does not exist.`);
             return null;
         }
       }
@@ -46,7 +45,7 @@ const UserProfile = () => {
       return documentsData;
     }
 
-    if (!problemData) getProblemData().then(data => { console.log("Problemdata", data); setProblemData(data); });
+    if (!problemData) getProblemData().then(data => { setProblemData(data); });
   }, [userData]);
 
   useEffect(() => {
@@ -66,15 +65,12 @@ const UserProfile = () => {
           if (userSnapshot.exists()) {
             // Extract required user information from the snapshot
             const userData = userSnapshot.data();
-            console.log("Fetched userData", userData);
             setUserData(userData); // Set the user data in the state
             setEditedUserData(userData); // Initialize editedUserData with user data
           } else {
-            console.log("No such document!");
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
       }
     };
 
@@ -93,7 +89,6 @@ const UserProfile = () => {
       setUserData(editedUserData); // Update userData with edited data
       setEditMode(false); // Exit edit mode
     } catch (error) {
-      console.error("Error saving user data:", error);
     }
   };
 

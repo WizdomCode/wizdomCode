@@ -27,10 +27,8 @@ const Question = ({ questionID, testCaseFolder}) => {
         if (docRef.exists()) {
           setProblem(docRef.data());
         } else {
-          console.log("No such document!");
         }
       } catch (error) {
-        console.error("Error fetching document: ", error);
       }
     };
 
@@ -43,15 +41,9 @@ const fetchTestCasesData = async () => {
     for (let i = 1; i <= 10; i++) {
       const fileName = `${i}.in`;
 
-      // console.log("Processing file:", fileName);
-
       try {
         const inputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName}`);
         const outputResponse = await axios.get(`${process.env.PUBLIC_URL}/TestCaseData/${testCaseFolder}/${fileName.replace(".in", ".out")}`);
-
-        // console.log("File Name:", fileName);
-        // console.log("Input Response:", inputResponse.data);
-        // console.log("Output Response:", outputResponse.data);
 
         testCaseArray.push({
           key: fileName.replace(".in", ""),
@@ -59,16 +51,12 @@ const fetchTestCasesData = async () => {
           output: outputResponse.data,
         });
       } catch (error) {
-        console.error("Error processing file:", fileName, error);
       }
     }
-
-    // console.log("Test Cases:", testCaseArray);
 
     setTestCases(testCaseArray);
     setIsLoading(false); // Set the loading state to false after fetching the test cases data
   } catch (error) {
-    console.error("Error fetching test cases: ", error);
   }
 };
 

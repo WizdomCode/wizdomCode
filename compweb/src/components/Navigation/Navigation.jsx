@@ -126,14 +126,11 @@ const Navigation = () => {
             // Extract required user information from the snapshot
             const userData = userSnapshot.data();
             dispatch({ type: 'SET_USER_INFO', payload: userData });
-            console.log("NAVBAR USER DATA", userData);
             setUserData(userData); // Set the user data in the state
           } else {
-            console.log("No such document!");
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
       }
     };
 
@@ -233,7 +230,6 @@ const Navigation = () => {
   }
 
   useEffect(() => {
-    console.log("sidebar authenticatedUser percep:", authenticatedUser);
   }, [authenticatedUser]);
 
   const location = useLocation();

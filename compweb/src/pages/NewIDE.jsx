@@ -36,16 +36,13 @@ const NewIDE = () => {
                     [`${folderPath}${inputValue}`]: fileTypeInputValue // Add file type to fileTypes map
                 };
                 await setDoc(ideRef, { ide: updatedIdeMap, fileTypes: updatedFileTypes }, { merge: true });
-                console.log("Document successfully written!");
             } else {
-                console.log("No such document!");
             }
             setInputValue("");
             setFileTypeInputValue(""); // Clear file type input value
             setShowFileForm(false);
             fetchUserData();
         } catch (error) {
-            console.error("Error writing document: ", error);
         }
     };
     
@@ -64,16 +61,13 @@ const NewIDE = () => {
                         [`${folderPath}${inputValue}`]: {} // Create an empty object for the folder
                     };
                     await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-                    console.log("Document successfully written!");
                 }
             } else {
-                console.log("No such document!");
             }
             setInputValue("");
             setShowFolderForm(false);
             fetchUserData(); // Call fetchUserData to update the file list
         } catch (error) {
-            console.error("Error writing document: ", error);
         }
     };
     
@@ -86,12 +80,9 @@ const NewIDE = () => {
                 const itemData = ideSnapshot.data().ide[itemName];
                 setSelectedItem(itemName);
                 setEditedContent(itemData); // Set the edited content to the selected item data
-                console.log(itemName)
             } else {
-                console.log("No such document!");
             }
         } catch (error) {
-            console.error("Error fetching item data:", error);
         }
     };
 
@@ -108,13 +99,10 @@ const NewIDE = () => {
                     [selectedItem]: editedContent // Update the content of the selected item
                 };
                 await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-                console.log("Document successfully updated!");
                 setIsContentSaved(true);
             } else {
-                console.log("No such document!");
             }
         } catch (error) {
-            console.error("Error updating document:", error);
         }
     };
 
@@ -142,11 +130,9 @@ const NewIDE = () => {
                     const userData = userSnapshot.data();
                     setUserData(userData);
                 } else {
-                    console.log("No such document!");
                 }
             }
         } catch (error) {
-            console.error("Error fetching user data:", error);
         }
     };
     const renderFileOrFolder = (itemName, isFolder) => {
@@ -180,10 +166,8 @@ const NewIDE = () => {
                     const savedContent = ideSnapshot.data().ide[selectedItem];
                     setIsContentSaved(savedContent === editedContent);
                 } else {
-                    console.log("No such document!");
                 }
             } catch (error) {
-                console.error("Error checking content saved:", error);
             }
         };
 

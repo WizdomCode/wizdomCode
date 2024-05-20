@@ -70,24 +70,8 @@ const AddProblem = () => {
                 topics
             });
     
-            console.log("Writing...", {
-                title,
-                contest,
-                description,
-                folder,
-                inputFormat,
-                outputFormat,
-                constraints,
-                points: Number(points),
-                sample1,
-                sample2,
-                specificContest,
-                topics
-            });
 
-            console.log("Document written with ID: ", questionDocRef.id);
         } catch (error) {
-            console.error("Error adding document: ", error);
         }
 
         const fetchTestCasesData = async () => {
@@ -102,8 +86,7 @@ const AddProblem = () => {
                     const fileListResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
                     const fileList = fileListResponse.data;
 
-                    console.log("fileListResponse", fileListResponse);
-                    
+                   
                     fileList.sort();
         
                     for (let i = 0; i < fileList.length; i += 2) {
@@ -114,30 +97,25 @@ const AddProblem = () => {
                             const inputResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
                             const outputResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
         
-                            console.log("inputResponse", inputResponse);
-                            console.log("outputResponse", outputResponse);
         
                             let inputRef = ref(storage, `/TestCaseData/${testCaseFolder}/${String(i + 1).padStart(4, '0')}.txt`);
                             let inputUploadPromise = uploadString(inputRef, String(inputResponse.data)).then((snapshot) => {
-                                console.log("Uploaded input");
+                    
                             });
         
                             let outputRef = ref(storage, `/TestCaseData/${testCaseFolder}/${String(i + 2).padStart(4, '0')}.txt`);
                             let outputUploadPromise = uploadString(outputRef, String(outputResponse.data)).then((snapshot) => {
-                                console.log("Uploaded output");
+                         
                             });
         
                             uploadPromises.push(inputUploadPromise, outputUploadPromise);
                         } catch (error) {
-                            console.error("Error processing files:", inputFileName, outputFileName, error);
                         }
                     }
 
                     await Promise.all(uploadPromises);
-                    console.log("All files have been successfully uploaded to Firebase Storage.");
                 }
             } catch (error) {
-                console.error("Error fetching test cases: ", error);
             }
         };        
     
@@ -176,12 +154,10 @@ const AddProblem = () => {
     useEffect(() => {
         let filtered = questions;
         
-        console.log("search", search);
     
         if (search) {
           filtered = filtered.filter((q) => {
             if (q.title) {
-              console.log("q", q);
               return q.title.toLowerCase().includes(search.toLowerCase());
             }
             return false; // return false if there's no title, so it doesn't get included in the filtered array
@@ -209,7 +185,6 @@ const AddProblem = () => {
       }
       
       function cleanNewLines() {
-        console.log("Cleaning lines");
 
         const regex = /(?<=[^\n.!?:])\n/g;
     
@@ -426,7 +401,7 @@ const AddProblem = () => {
                                                 type="button"
                                                 className='open-question'
                                                 onClick={() => {
-                                                    console.log("SELECTED PROBLEM:", q);
+                                                   
                                                     if (q.title) setTitle(q.title);
                                                     if (q.contest) setContest(q.contest);
                                                     if (q.description) setDescription(q.description);

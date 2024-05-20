@@ -75,7 +75,6 @@ const Leaderboard = () => {
         const rankedUsers = assignRanks(userData);
         setUsers(rankedUsers);
       } catch (error) {
-        console.error("Error fetching users:", error);
       }
     };
 
@@ -95,7 +94,6 @@ const Leaderboard = () => {
       usersData[i].rank = currentRank;
 
       if (userData && usersData[i].username === userData.username) {
-        console.log("Your rank:", usersData[i]);
         setCurrentUserRankData(usersData[i]);
       }
 

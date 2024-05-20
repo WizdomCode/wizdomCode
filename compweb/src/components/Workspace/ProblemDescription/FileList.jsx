@@ -134,11 +134,9 @@ const FileList = (props) => {
             const userData = userSnapshot.data();
             setUserData(userData); // Set the user data in the state
           } else {
-            console.log("No such document!");
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
       }
     };
   
@@ -165,7 +163,6 @@ const FileList = (props) => {
 
   useEffect(() => {
     if (fileTabs[activeTabIndex]) {
-      console.log(fileTabs[activeTabIndex]);
       setCode(fileTabs[activeTabIndex].code);
     }
   }, [activeTabIndex]);
@@ -173,7 +170,6 @@ const FileList = (props) => {
   // Update the ref whenever the language changes
   useEffect(() => {
     languageRef.current = language;
-    console.log("language", language);
   }, [language]);
 
   const inputData = useSelector(state => state.inputData);
@@ -191,7 +187,6 @@ const FileList = (props) => {
   useEffect(() => {
       if (editorRef.current) {
           Object.entries(TEMPLATES).forEach(([label, templates], index) => {
-              console.log("AAAAAAAAAAAAAAAAAAH");
               editorRef.current.addAction({
                   id: `insert-template-${index}`,
                   label: label,
@@ -235,7 +230,6 @@ const FileList = (props) => {
       // Check if the user is authenticated
       const currentUser = auth.currentUser;
       if (!currentUser) {
-        console.log("User is not authenticated");
         return;
       }
   
@@ -253,16 +247,12 @@ const FileList = (props) => {
   
             if (savedCode) {
               setCode(savedCode); // Set the code to the saved code
-              console.log("Code loaded for question:", questionName);
             } else {
               setCode(props.boilerPlate); // Use default boilerplate code
-              console.log("No saved code found for question. Using default boilerplate.");
             }
           } else {
-            console.log("No such document!");
           }
         } catch (error) {
-          console.error("Error fetching code:", error);
         }
       }
     };
@@ -287,7 +277,6 @@ const FileList = (props) => {
     const handleFileSubmit = async (event) => {
         event.preventDefault();
 
-        console.log(openFile);
         const parentId = openFile ? (openFile.droppable ? openFile.id : openFile.parent) : 0;
         const newFile = { 
             id: treeData[treeData.length - 1].id + 1, 
@@ -295,7 +284,6 @@ const FileList = (props) => {
             text: inputValue, 
             data: { language: fileTypeInputValue } 
         };
-        console.log("New file created", newFile);
     
         dispatch({ type: 'ADD_FILE_TAB', payload: { id: treeData[treeData.length - 1].id + 1, language: fileTypeInputValue, name: inputValue, code: "" } });
 
@@ -309,7 +297,6 @@ const FileList = (props) => {
     const handleFolderSubmit = async (event) => {
         event.preventDefault();
 
-        console.log(openFile);
         const parentId = openFile ? (openFile.droppable ? openFile.id : openFile.parent) : 0;
         const newFile = { 
             id: treeData[treeData.length - 1].id + 1, 
@@ -317,7 +304,6 @@ const FileList = (props) => {
             text: inputValue, 
             droppable: true
         };
-        console.log("New file created", newFile);
     
         const newTreeData = [...treeData, newFile];
         setTreeData(newTreeData);    
@@ -336,27 +322,22 @@ const FileList = (props) => {
                           [`${folderPath}${inputValue}`]: {} // Create an empty object for the folder
                       };
                       await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-                      console.log("Document successfully written!");
                   }
               } else {
-                  console.log("No such document!");
               }
               setInputValue("");
               setShowFolderForm(false);
               fetchUserData(); // Call fetchUserData to update the file list
           } catch (error) {
-              console.error("Error writing document: ", error);
           }
         }
     };
 
 
     useEffect(() => {
-      console.log("Change in activeTabIndex", activeTabIndex);
     }, [activeTabIndex]);
     
     useEffect(() => {
-      console.log("Change in fileTabs", fileTabs);
     }, [fileTabs]);
     
      const handleItemClick = async (itemName) => {
@@ -380,13 +361,10 @@ const FileList = (props) => {
                     // If file doesn't exist, create a new file and set it as the active tab
                     dispatch({ type: 'ADD_FILE_TAB', payload: { language: itemType, name: itemName, code: itemData } });
                     dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
-                    console.log("New tab:", { language: itemType, name: itemName, code: itemData });
                 }
             } else {
-                console.log("No such document!");
             }
         } catch (error) {
-            console.error("Error fetching item data:", error);
         }
     };
 
@@ -403,27 +381,20 @@ const FileList = (props) => {
                     [fileTabs[activeTabIndex].name]: code // Update the content of the selected item
                 };
                 await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-                console.log("Document successfully updated!");
                 setIsContentSaved(true);
 
                 const updateFileCode = async (newFileCode) => {
-                  console.log("updating firestore code");
-                  console.log(newFileCode);
                 
                   try {
                     await setDoc(ideRef, { code: newFileCode }, { merge: true });
-                    console.log("Document written successfully");
                   } catch (error) {
-                    console.error("Error writing document: ", error);
                   }
                 }; 
             
                 updateFileCode(fileCode);
             } else {
-                console.log("No such document!");
             }
         } catch (error) {
-            console.error("Error updating document:", error);
         }
     };
 
@@ -451,11 +422,9 @@ const FileList = (props) => {
                     const userData = userSnapshot.data();
                     setUserData(userData);
                 } else {
-                    console.log("No such document!");
                 }
             }
         } catch (error) {
-            console.error("Error fetching user data:", error);
         }
     };
     const renderFileOrFolder = (itemName, isFolder) => {
@@ -481,7 +450,6 @@ const FileList = (props) => {
     useEffect(() => {
         // Compare edited content with content saved in Firebase
         const checkContentSaved = async () => {
-            console.log("WE CHECKING IF THE CODE IS SAVED");
         };
 
         checkContentSaved(); // Call the function on component mount and whenever editedContent or selectedItem changes
@@ -492,11 +460,9 @@ const FileList = (props) => {
   const fileCode = useSelector(state => state.fileCode);
 
   useEffect(() => {
-    console.log("CHANGE IN FILECODE", fileCode);
   }, [fileCode]);
 
   const handleDrop = async (newTreeData) => {
-    console.log("newTreeData", newTreeData);
     setTreeData(newTreeData);
   }; 
 
@@ -506,15 +472,10 @@ const FileList = (props) => {
         const uid = auth.currentUser.uid;
       
         const docRef = doc(db, "IDE", uid);
-    
-        console.log("updating firestore tree");
-        console.log(newTreeData);
         
         try {
             await setDoc(docRef, { files: newTreeData }, { merge: true });
-            console.log("Document written successfully");
         } catch (error) {
-            console.error("Error writing document: ", error);
         }
       }
     }; 
@@ -528,20 +489,16 @@ const FileList = (props) => {
       const docSnap = await getDoc(docRef);
   
       if (docSnap.exists()) {
-        console.log("STORED TREE DATA", docSnap.data().files);
         setTreeData(docSnap.data().files || initialData);
 
-        console.log("STORED CODE DATA", docSnap.data().code);
         dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
       } else {
-        console.log("No such document!");
         setTreeData(initialData);
         dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
       }
     };  
 
     if (userId) {
-      console.log("Change in userId", userId);
       fetchData(userId);
     }
   }, [userId]);
@@ -563,7 +520,6 @@ const FileList = (props) => {
           // If file doesn't exist, create a new file and set it as the active tab
           dispatch({ type: 'ADD_FILE_TAB', payload: { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] } });
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
-          console.log("New tab:", { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] });
       }
     };
 
@@ -581,8 +537,6 @@ const FileList = (props) => {
       dispatch({ type: 'DELETE_FILE_CODE', key: id });
 
       if (fileTabs.length > 1) {
-        console.log("New filetabs len", fileTabs.length);
-        console.log("prevIndex", activeTabIndex);
 
         if (activeTabIndex === fileTabs.length - 1) {
           setCode(fileTabs[activeTabIndex - 1].code);
@@ -593,8 +547,6 @@ const FileList = (props) => {
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
           return;
         }
-        console.log("b");
-        console.log("prevIndex", activeTabIndex);
         setCode(fileTabs[activeTabIndex].code);
         dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex });
         return;
@@ -692,7 +644,7 @@ const FileList = (props) => {
             render={(node, { depth, isOpen, onToggle }) => (
               <div 
                 style={{ marginLeft: depth * 10, backgroundColor: openFile && openFile.text === node.text ? 'darkblue' : 'transparent' }}
-                onClick={() => {console.log(node, "clicked"); setOpenFile(node);}}
+                onClick={() => {setOpenFile(node);}}
                 className={styles.vertCenterIcons}
               >
                 {node.droppable && (
@@ -721,9 +673,8 @@ const FileList = (props) => {
             <CopyToClipboard text={node.data && node.data.language ? TEMPLATE_CODE[node.text][node.data.language] : ''}>
               <div 
                 style={{ marginLeft: depth * 10, backgroundColor: openTemplate && openTemplate.name === node.text ? 'darkblue' : 'transparent' }}
-                onClick={() => {console.log(TEMPLATE_CODE[node.text][node.data.language], "copied code");}}
+                onClick={() => {}}
                 onMouseEnter={() => {
-                    console.log(node, "hovered"); 
                     setHoveredFile(node); 
                     if (!node.droppable)
                     dispatch({ type: 'SET_OPEN_TEMPLATE', payload: { name: node.text, language: node.data.language }})}}

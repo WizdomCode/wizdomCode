@@ -180,11 +180,9 @@ const CodeEditor = (props) => {
             const userData = userSnapshot.data();
             setUserData(userData); // Set the user data in the state
           } else {
-            console.log("No such document!");
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
       }
     };
   
@@ -214,7 +212,6 @@ const CodeEditor = (props) => {
 
   useEffect(() => {
     if (fileTabs[activeTabIndex]) {
-      console.log(fileTabs[activeTabIndex]);
       setCode(fileTabs[activeTabIndex].code);
     }
   }, [activeTabIndex]);
@@ -222,7 +219,6 @@ const CodeEditor = (props) => {
   // Update the ref whenever the language changes
   useEffect(() => {
     languageRef.current = language;
-    console.log("language", language);
   }, [language]);
 
   const inputOutputTab = useSelector(state => state.inputOutputTab);
@@ -241,7 +237,6 @@ const CodeEditor = (props) => {
   useEffect(() => {
       if (editorRef.current) {
           Object.entries(TEMPLATE_CODE).forEach(([label, templates], index) => {
-              console.log("AAAAAAAAAAAAAAAAAAH");
               editorRef.current.addAction({
                   id: `insert-template-${index}`,
                   label: label,
@@ -277,12 +272,10 @@ const CodeEditor = (props) => {
       })
     }
 
-    console.log("CODE TO SUBMIT", code);
-    if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language) console.log("Language", fileTabs[activeTabIndex].language);
+    if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language);
   }, [code]);
 
   const submitCode = async () => {
-    console.log("CUSTOM TEST:", localInputData);
 
     // Start the timer
     const startTime = performance.now();
@@ -302,11 +295,7 @@ const CodeEditor = (props) => {
     // End the timer and calculate the elapsed time
     const endTime = performance.now();
     const elapsedTime = endTime - startTime;
-    console.log(`Execution time: ${elapsedTime} milliseconds`);
-
-    console.log("sent code");
     const data = await response.json();
-    console.log(data);
     setLocalOutputData(data[0].stdout + `\nExecution time: ${data[0].time}s`);
   };  
 
@@ -331,7 +320,6 @@ const CodeEditor = (props) => {
       // Check if the user is authenticated
       const currentUser = auth.currentUser;
       if (!currentUser) {
-        console.log("User is not authenticated");
         return;
       }
   
@@ -349,16 +337,12 @@ const CodeEditor = (props) => {
   
             if (savedCode) {
               setCode(savedCode); // Set the code to the saved code
-              console.log("Code loaded for question:", questionName);
             } else {
               setCode(props.boilerPlate); // Use default boilerplate code
-              console.log("No saved code found for question. Using default boilerplate.");
             }
           } else {
-            console.log("No such document!");
           }
         } catch (error) {
-          console.error("Error fetching code:", error);
         }
       }
     };
@@ -372,22 +356,16 @@ const CodeEditor = (props) => {
   
     // Determine the question name based on the location and Redux state
     if (location.pathname === '/problems' && currentTab && currentTab.data) {
-      console.log("a");
-      console.log("This is the question name:", currentTab.data.title);
       questionName = currentTab.data.title;
     } else if (lessonProblemData && lessonProblemData[tabIndex]) {
-      console.log("b");
-      console.log("This is the question name:", lessonProblemData[tabIndex].data.title);
       questionName = lessonProblemData[tabIndex].data.title;
     } else {
-      console.log("No active question");
       return; // Exit the function if there's no active question
     }
   
     // Check if the user is authenticated
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.log("User is not authenticated");
       return;
     }
   
@@ -404,12 +382,9 @@ const CodeEditor = (props) => {
           await updateDoc(userDocRef, {
             [`questionsIDE.${questionName}`]: code
           });
-          console.log("Word", code, "saved for question:", questionName);
         } else {
-          console.log("No such document!");
         }
       } catch (error) {
-        console.error("Error saving code:", error);
       }
     }
   }
@@ -427,17 +402,12 @@ const CodeEditor = (props) => {
     const [currentFolder, setCurrentFolder] = useState("ide"); // Default folder is "ide"
 
     const handleTabClose = (index) => {
-      console.log("removing index", index);
-      console.log("Current filetabs len", fileTabs.length);
 
       dispatch({ type: 'REMOVE_FILE_TAB_BY_INDEX', payload: index });
     
       if (fileTabs.length > 1) {
-        console.log("New filetabs len", fileTabs.length);
-        console.log("prevIndex", activeTabIndex);
 
         if (activeTabIndex === fileTabs.length - 1) {
-          console.log("New filetabs len", fileTabs.length);
           setCode(fileTabs[activeTabIndex - 1].code);
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
           return;
@@ -446,8 +416,6 @@ const CodeEditor = (props) => {
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
           return;
         }
-        console.log("b");
-        console.log("prevIndex", activeTabIndex);
         setCode(fileTabs[activeTabIndex].code);
         dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex });
         return;
@@ -459,11 +427,9 @@ const CodeEditor = (props) => {
     };
 
     useEffect(() => {
-      console.log("Change in activeTabIndex", activeTabIndex);
     }, [activeTabIndex]);
     
     useEffect(() => {
-      console.log("Change in fileTabs", fileTabs);
     }, [fileTabs]);
 
     useEffect(() => {
@@ -490,11 +456,9 @@ const CodeEditor = (props) => {
                     const userData = userSnapshot.data();
                     setUserData(userData);
                 } else {
-                    console.log("No such document!");
                 }
             }
         } catch (error) {
-            console.error("Error fetching user data:", error);
         }
     };
 
@@ -502,7 +466,6 @@ const CodeEditor = (props) => {
   const fileCode = useSelector(state => state.fileCode);
 
   useEffect(() => {
-    console.log("CHANGE IN FILECODE", fileCode);
   }, [fileCode]);
 
   const openFile = useSelector(state => state.openFile);
@@ -522,7 +485,6 @@ const CodeEditor = (props) => {
           // If file doesn't exist, create a new file and set it as the active tab
           dispatch({ type: 'ADD_FILE_TAB', payload: { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] } });
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
-          console.log("New tab:", { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] });
       }
     };
 
@@ -697,7 +659,6 @@ const CodeEditor = (props) => {
                 fetch('/themes/Night Owl Custom.json')
                   .then(data => data.json())
                   .then(data => {
-                    console.log("theme data:", data);
                     monaco.editor.defineTheme('night-owl', data);
                     editor.updateOptions({ theme: 'night-owl' });
                   })
@@ -715,7 +676,6 @@ const CodeEditor = (props) => {
                 fetch('/themes/Night Owl Custom.json')
                   .then(data => data.json())
                   .then(data => {
-                    console.log("theme data:", data);
                     monaco.editor.defineTheme('night-owl', data);
                     editor.updateOptions({ theme: 'night-owl' });
                   })
