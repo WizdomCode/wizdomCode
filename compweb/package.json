@@ -10,6 +10,7 @@
     "@mantine/code-highlight": "^7.9.0",
     "@mantine/core": "^7.8.1",
     "@mantine/hooks": "^7.8.1",
+    "@mantinex/dev-icons": "^1.0.2",
     "@mantinex/mantine-logo": "^1.0.1",
     "@minoru/react-dnd-treeview": "^3.4.4",
     "@monaco-editor/react": "^4.6.0",

@@ -194,6 +194,8 @@ const IDE = (props) => {
   const [solutions, setSolutions] = useState([]);
   const [questionName, setQuestionName] = useState();
 
+  const [editorSize, setEditorSize] = useState();
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -1126,11 +1128,9 @@ const submitCode = async () => {
       </div>
       </Panel>
       <PanelResizeHandle className={styles.panelResizeHandle} />
-      <Panel defaultSize={65} minSize={14} collapsible={true} collapsedSize={0} style={{ overflow: 'auto' }}>
-        <div style={{ display: 'flex', direction: 'row' }}>
-          { isFileListOpen && <FileList style={{ flex: '1' }}/>}
-          <CodeEditor style={{ flex: '4' }} boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
-        </div>
+      <Panel defaultSize={65} minSize={14} collapsible={true} collapsedSize={0} style={{display: 'grid', gridTemplateColumns: '1fr 3fr'}}>
+        { isFileListOpen && <FileList />}
+        <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
       </Panel>
       </PanelGroup>
       </div>
