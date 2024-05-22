@@ -9,6 +9,7 @@ import Divider from '@mui/material/Divider';
 import { useLocation } from "react-router-dom";
 import { 
   NativeSelect,
+  Text,
 } from '@mantine/core';
 import {
   Tree,
@@ -569,21 +570,28 @@ const FileList = (props) => {
   const [hoveredFile, setHoveredFile] = useState(null);
   const openTemplate = useSelector(state => state.openTemplate);
   const templateIsClicked = useSelector(state => state.templateIsClicked);
+  const filesSectionOpen = useSelector(state => state.filesSectionOpen);
+  const templatesSectionOpen = useSelector(state => state.templatesSectionOpen);
 
   return (
-    <div style={{ minWidth: '240px' }}>
-        <div style={{ height: "60px", alignItems: "center", display: "flex", direction: "row" }}>
+    <div style={{ minWidth: '240px', backgroundColor: 'var(--site-bg)', borderRight: '1px solid var(--border)' }}>
+        <div style={{ height: "49px", alignItems: "center", display: "flex", direction: "row", borderBottom: '1px solid var(--border)' }}>
             <ChevronRightIcon 
-                style={{ height: "30px", width: "30px" }}
+                style={{ marginLeft: '10px', height: "30px", width: "30px" }}
                 onClick={() => { dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: false }); }}    
             />
         </div>
-        <div className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
-            <p className={`${styles.marginSpacing} ${styles.classTwo}`}>Files</p>
+        <div style={{ marginTop: '4px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
+            <span className={styles.vertCenterIcons} onClick={() => dispatch({ type: 'TOGGLE_FILES_SECTION_OPEN' })}>{filesSectionOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
+            <p className={`${styles.marginSpacing} ${styles.classTwo}`} style={{ color: 'var(--dim-text)' }}>
+              <Text fw={700} size="lg">
+                FILES
+              </Text>
+            </p>
             <div className={`${styles.rightAlign} ${styles.vertCenterIcons}`}>
-                <NoteAddOutlinedIcon className={`${styles.languageIcon}`} onClick={() => setShowFileForm(!showFileForm)}/>
-                <CreateNewFolderOutlinedIcon className={`${styles.languageIcon}`} onClick={() => setShowFolderForm(!showFolderForm)}/>
-                <IconTrash className={`${styles.languageIcon}`} onClick={() => handleFileDelete()}/>
+                <NoteAddOutlinedIcon style={{ color: 'var(--dim-text)' }} className={`${styles.languageIcon}`} onClick={() => setShowFileForm(!showFileForm)}/>
+                <CreateNewFolderOutlinedIcon style={{ color: 'var(--dim-text)' }} className={`${styles.languageIcon}`} onClick={() => setShowFolderForm(!showFolderForm)}/>
+                <IconTrash style={{ color: 'var(--dim-text)' }} className={`${styles.languageIcon}`} onClick={() => handleFileDelete()}/>
             </div>
         </div>
             <div className={styles.marginSpacing}>
@@ -620,11 +628,6 @@ const FileList = (props) => {
                     <button type="submit">Submit</button>
                 </form>
             )}
-            <ul>
-                {userData && userData.ide && Object.keys(userData.ide).map((itemName) => (
-                    renderFileOrFolder(itemName, userData.ide[itemName].__isFolder)
-                ))}
-            </ul>
             {selectedItem && (
                 <div>
                     {isContentSaved ? (
@@ -636,68 +639,88 @@ const FileList = (props) => {
                 </div>
             )}
             </div>
-        <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
-          <Tree
-            tree={treeData}
-            rootId={0}
-            onDrop={handleDrop}
-            render={(node, { depth, isOpen, onToggle }) => (
-              <div 
-                style={{ marginLeft: depth * 10, backgroundColor: openFile && openFile.text === node.text ? 'darkblue' : 'transparent' }}
-                onClick={() => {setOpenFile(node);}}
-                className={styles.vertCenterIcons}
-              >
-                {node.droppable && (
-                  <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}</span>
-                )}
-                <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
-                {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
-              </div>
-            )}
-            dragPreviewRender={(monitorProps) => (
-              <div>{monitorProps.item.text}</div>
-            )}
-            style={{ height: "100%" }}
-          />
-        </DndProvider>        
-        <div className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
-            <p className={`${styles.marginSpacing} ${styles.classTwo}`}>CODE TEMPLATES</p>
+        { filesSectionOpen &&
+          <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
+            <Tree
+              tree={treeData}
+              rootId={0}
+              onDrop={handleDrop}
+              render={(node, { depth, isOpen, onToggle }) => (
+                <div 
+                  style={{ backgroundColor: openFile && openFile.text === node.text ? 'var(--selected-item)' : hoveredFile === node ? 'var(--hover)' : 'transparent' }}
+                  onClick={() => {setOpenFile(node);}}
+                  onMouseEnter={() => {
+                    setHoveredFile(node);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredFile(null); 
+                  }}
+                >
+                  <div style={{ marginLeft: (depth + 1) * 20, color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)' }} className={styles.vertCenterIcons}>
+                    {node.droppable && (
+                      <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
+                    )}
+                    <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
+                    {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
+                  </div>
+                </div>
+              )}
+              dragPreviewRender={(monitorProps) => (
+                <div>{monitorProps.item.text}</div>
+              )}
+              style={{ height: "100%" }}
+            />
+          </DndProvider> 
+        }   
+        <div style={{ marginTop: '4px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
+            <span className={styles.vertCenterIcons} onClick={() => dispatch({ type: 'TOGGLE_TEMPLATES_SECTION_OPEN' })}>{templatesSectionOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
+            <p className={`${styles.marginSpacing} ${styles.classTwo}`} style={{ color: 'var(--dim-text)' }}>
+              <Text fw={700} size="lg">
+                CODE TEMPLATES
+              </Text>
+            </p>
             <div className={`${styles.rightAlign} ${styles.vertCenterIcons}`}>
             </div>
         </div>
-        <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
-          <Tree
-            tree={TEMPLATES}
-            rootId={0}
-            render={(node, { depth, isOpen, onToggle }) => (
-            <CopyToClipboard text={node.data && node.data.language ? TEMPLATE_CODE[node.text][node.data.language] : ''}>
-              <div 
-                style={{ marginLeft: depth * 10, backgroundColor: openTemplate && openTemplate.name === node.text ? 'darkblue' : 'transparent' }}
-                onClick={() => {}}
-                onMouseEnter={() => {
-                    setHoveredFile(node); 
-                    if (!node.droppable)
-                    dispatch({ type: 'SET_OPEN_TEMPLATE', payload: { name: node.text, language: node.data.language }})}}
-                onMouseLeave={() => {
-                    setHoveredFile(null); 
-                    if (!node.droppable && !templateIsClicked)
-                    dispatch({ type: 'SET_OPEN_TEMPLATE', payload: null });}}          
-                className={styles.vertCenterIcons}
-              >
-                {node.droppable && (
-                  <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}</span>
-                )}
-                <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
-                {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
-              </div>
-              </CopyToClipboard>
-            )}
-            dragPreviewRender={(monitorProps) => (
-              <div>{monitorProps.item.text}</div>
-            )}
-            style={{ height: "100%" }}
-          />
-        </DndProvider>
+        { templatesSectionOpen &&
+          <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
+            <Tree
+              tree={TEMPLATES}
+              rootId={0}
+              render={(node, { depth, isOpen, onToggle }) => (
+              <CopyToClipboard text={node.data && node.data.language ? TEMPLATE_CODE[node.text][node.data.language] : ''}>
+                <div 
+                  style={{ 
+                    marginLeft: (depth + 1) * 20,
+                    backgroundColor: openFile && openFile.text === node.text ? 'var(--selected-item)' : hoveredFile === node ? 'var(--hover)' : 'transparent',
+                    color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)'
+                  }}
+                  onClick={() => {}}
+                  onMouseEnter={() => {
+                      setHoveredFile(node); 
+                      if (!node.droppable)
+                      dispatch({ type: 'SET_OPEN_TEMPLATE', payload: { name: node.text, language: node.data.language }})}}
+                  onMouseLeave={() => {
+                      setHoveredFile(null); 
+                      if (!node.droppable && !templateIsClicked)
+                      dispatch({ type: 'SET_OPEN_TEMPLATE', payload: null });}}          
+                  className={styles.vertCenterIcons}
+                >
+                  {node.droppable && (
+                    <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandMoreIcon />: <ChevronRightIcon />}</span>
+                  )}
+                  <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
+                  {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
+                </div>
+                </CopyToClipboard>
+              )}
+              dragPreviewRender={(monitorProps) => (
+                <div>{monitorProps.item.text}</div>
+              )}
+              style={{ height: "100%" }}
+            />
+          </DndProvider>
+        }
     </div>
   );
 };

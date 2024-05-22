@@ -10,7 +10,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { auth, app, db } from "../../../firebase.js";
 import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
 import { styled, alpha } from '@mui/material/styles';
-import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import EditIcon from '@mui/icons-material/Edit';
@@ -51,6 +50,9 @@ import { dark } from '@mui/material/styles/createPalette.js';
 import { 
   NativeSelect,
   useMantineTheme,
+  Stack,
+  Group,
+  Button
 } from '@mantine/core';
 import {
   Tree,
@@ -63,6 +65,7 @@ import { CodeHighlight } from '@mantine/code-highlight';
 import {
   IconFolderOpen
 } from '@tabler/icons-react';
+import { InlineCodeHighlight } from '@mantine/code-highlight';
 
 const FILE_EXTENSION = {
   python: ".py",
@@ -495,21 +498,25 @@ const CodeEditor = (props) => {
 
   const openTemplate = useSelector(state => state.openTemplate);
 
+  const isFileListOpen = useSelector(state => state.isFileListOpen);
+
   return (
     <>
       <Main open={filesOpen} style={{ width: '100%' }}>
       <div className={styles.scrollableContent} style={{ backgroundColor: 'var(--code-bg)' }}>
-        <div className={styles.tabWrapper}>
-        <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', width: '100%', maxWidth: '100%', boxSizing: 'border-box'}}>
+        <div className={styles.tabWrapper} style={{ height: '54px', borderBottom: '1px solid var(--border)'}}>
+        <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', width: '100%', maxWidth: '100%', boxSizing: 'border-box', height: '50px' }}>
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            {<IconFolderOpen 
-              className={styles.newTab}
-              onClick={() => dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true })}
-              style={{ ...(filesOpen && { display: 'none' }), marginRight: '10px' }}            
-            />}
+            {!isFileListOpen && 
+              <IconFolderOpen 
+                className={styles.newTab}
+                onClick={() => dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true })}
+                style={{ ...(filesOpen && { display: 'none' }), paddingRight: '10px', borderRight: '1px solid var(--border)' }}            
+              />
+            }
             {fileTabs.map((tab, index) => (
-              <button className={styles.button} style={{background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white"}} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
-                <p className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
+              <button className={styles.button} style={{ height: '50px', background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
+                <p style={{ color: index === activeTabIndex ? 'white' : 'var(--dim-text)' }} className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
                 {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
               </button>          
             ))
@@ -579,7 +586,7 @@ const CodeEditor = (props) => {
         </div>
         <br />
         <PanelGroup direction="vertical" style={{ width: '100%' }}>
-        <Panel style={{ width: '100%' }} defaultSize={70}>
+        <Panel style={{ width: '100%' }} defaultSize={66}>
         {openTemplate ? 
         (
           <div>
@@ -610,39 +617,85 @@ const CodeEditor = (props) => {
               path={fileTabs[activeTabIndex].id}
             />
           </div> :
-          <div>
-            Open a file to start coding!
-          </div>
+          <Stack align="center" justify="center" style={{ height: '100%' }}>
+            <Group>
+              <Stack align="flex-end">
+                <div>
+                  Show all commands
+                </div>
+                <div>
+                  Go to file
+                </div>
+                <div>
+                  Find in files
+                </div>
+                <div>
+                  Toggle full screen
+                </div>
+                <div>
+                  Show settings
+                </div>
+              </Stack>
+              <Stack>
+                <div>
+                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={'Shift'} language="txt" /> + <InlineCodeHighlight code={'P'} language="txt" />
+                </div>
+                <div>
+                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={'P'} language="txt" />
+                </div>
+                <div>
+                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={'Shift'} language="txt" /> + <InlineCodeHighlight code={'F'} language="txt" />
+                </div>
+                <div>
+                  {' '}<InlineCodeHighlight code={'F11'} language="txt" />
+                </div>
+                <div>
+                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={','} language="txt" />
+                </div>
+              </Stack>
+            </Group>
+          </Stack>
         )}
         </Panel>
-        <PanelResizeHandle style={{ position: 'relative', cursor: 'row-resize', background: '#ccc', height: '10px', zIndex: 1 }}/>
+        <PanelResizeHandle style={{ position: 'relative', cursor: 'row-resize', background: 'var(--border)', height: '1px', zIndex: 1 }}/>
         <Panel>
         <div className={styles.inputOutputSection}>
-          <div className={styles.tabWrapper}>
+          <div className={styles.tabWrapper} style={{ borderBottom: '1px solid var(--border)' }}>
               <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)' }}>
                 <button 
                   className={styles.buttonTab} 
-                  style={{background: inputOutputTab === 'input' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white"}} 
+                  style={{background: inputOutputTab === 'input' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
                   onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
                 >
-                  <p className={styles.buttonText}>Input</p>
+                  <p style={{color: inputOutputTab === 'input' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Input</p>
                 </button>
                 <button 
                   className={styles.buttonTab} 
-                  style={{background: inputOutputTab === 'output' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white"}} 
+                  style={{background: inputOutputTab === 'output' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
                   onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
                 >
-                  <p className={styles.buttonText}>Output</p>
+                  <p style={{color: inputOutputTab === 'output' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Output</p>
                 </button>
                 <div className={styles.rightAlign}>
-                  <button 
-                    className={styles.buttonIcon}
-                    onClick={() => {
-                    submitCode();
-                    dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
-                  }}>
-                    <p className={styles.buttonText}>RUN</p>
-                  </button>
+                  <Group gap={8}>
+                    <Button
+                      variant="light"
+                      className={styles.buttonIcon}
+                      onClick={() => {
+                      submitCode();
+                      dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
+                    }}>
+                      RUN
+                    </Button>
+                    <Button
+                      className={styles.buttonIcon}
+                      onClick={() => {
+                      submitCode();
+                      dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
+                    }}>
+                      SUBMIT
+                    </Button>
+                  </Group>
                 </div>
               </div>
           </div>
@@ -660,7 +713,7 @@ const CodeEditor = (props) => {
                   .then(data => data.json())
                   .then(data => {
                     monaco.editor.defineTheme('night-owl', data);
-                    editor.updateOptions({ theme: 'night-owl' });
+                    editor.updateOptions({ theme: 'night-owl', fontSize: 18 });
                   })
               }}
             />
@@ -677,7 +730,7 @@ const CodeEditor = (props) => {
                   .then(data => data.json())
                   .then(data => {
                     monaco.editor.defineTheme('night-owl', data);
-                    editor.updateOptions({ theme: 'night-owl' });
+                    editor.updateOptions({ theme: 'night-owl', fontSize: 18 });
                   })
               }}
             />

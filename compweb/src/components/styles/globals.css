@@ -1,12 +1,22 @@
 :root {
-  --dark-bg:#1B1B32;
-  --light-bg: #3B3B4F;
-  --code-bg: #0A0A23;
   --navbar: #0A0A23;
   --site-bg: #16161e;
   --code-bg: #1a1b26;
+  --border: black;
+  --accent: #3D59A1;
+  --hover: #13131A;
+  --selected-item: #202330;
+  --dim-text: #A9B1D6;
 }
 
 .body {
   background-color: var(--site-bg);
+}
+
+a {
+  text-decoration: none;
+}
+
+ul {
+  padding-left: 0;
 }

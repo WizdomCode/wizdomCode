@@ -7,13 +7,6 @@
   width: 100%;
 }
 
-.wrapper {
-  width: 97%;
-  margin-left: 1%;
-  margin-right: 2%;
-  background-color: transparent;
-}
-
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -114,7 +107,6 @@
   box-sizing: border-box;
   overflow: auto;
   width: 100%;
-  padding-left: 10px;
 }
 
 .scrollableContent {
@@ -295,6 +287,5 @@ ul {
 }
 
 .panelResizeHandle {
-  width: 4px;
   background-color: transparent;
 }

@@ -1,6 +1,7 @@
 import { Title, Text, Button, Container } from '@mantine/core';
 import { Dots } from './Dots.jsx';
 import classes from './HeroText.module.css';
+import { Link, useLocation } from "react-router-dom";
 
 export function Hero() {
   return (
@@ -35,9 +36,11 @@ export function Hero() {
             <Button className={classes.control} size="md" variant="default" color="gray">
                 I HAVE AN ACCOUNT
             </Button>
-            <Button className={classes.control} size="md">
-                GET STARTED
-            </Button>
+            <Link to={'/signup'}>
+                <Button className={classes.control} size="md">
+                    GET STARTED
+                </Button>
+            </Link>
             </div>
         </div>
         </Container>

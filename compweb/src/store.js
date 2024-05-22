@@ -51,7 +51,9 @@ int main() {
   isFileListOpen: true,
   activeCategoryId: null,
   lessonQuestionList: null,
-  userInfo: null
+  userInfo: null,
+  filesSectionOpen: true,
+  templatesSectionOpen: true
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -279,6 +281,18 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         userInfo: action.payload
+      }
+    }
+    case 'TOGGLE_FILES_SECTION_OPEN': {
+      return {
+        ...state,
+        filesSectionOpen: !state.filesSectionOpen
+      }
+    }
+    case 'TOGGLE_TEMPLATES_SECTION_OPEN': {
+      return {
+        ...state,
+        templatesSectionOpen: !state.templatesSectionOpen
       }
     }
     default:

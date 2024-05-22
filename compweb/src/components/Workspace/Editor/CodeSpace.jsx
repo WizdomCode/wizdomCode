@@ -24,7 +24,8 @@ export default class MonacoEditor extends React.Component {
 
     this._editor = monaco.editor.create(this._node.current, {
       ...options,
-      automaticLayout: true
+      automaticLayout: true,
+      fontSize: 18
     });
 
     this._editor.setModel(this._models[path]);

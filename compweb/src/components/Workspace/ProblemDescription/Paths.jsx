@@ -22,7 +22,7 @@ import { BRONZE_UNIT_DESCRIPTIONS, BRONZE_UNIT_LESSONS, BRONZE_UNIT_TITLES } fro
 import { SILVER_UNIT_DESCRIPTIONS, SILVER_UNIT_LESSONS, SILVER_UNIT_TITLES } from "../lessons.js";
 import { GOLD_UNIT_DESCRIPTIONS, GOLD_UNIT_LESSONS, GOLD_UNIT_TITLES } from "../lessons.js";
 import { PLAT_UNIT_DESCRIPTIONS, PLAT_UNIT_LESSONS, PLAT_UNIT_TITLES } from "../lessons.js";
-import Button from '@mui/material/Button';
+import { Button } from '@mantine/core';
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
@@ -431,7 +431,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                                 <br />
                                 <p>{unitDescription}</p>
                             </div>
-                            {true && <div className="unit-header-right"><button className="start-button">Start</button></div>}
+                            {true && <div className="unit-header-right"><Button color="var(--accent)" size="md">Start</Button></div>}
                         </div>
                     </Item>
                 </ThemeProvider>

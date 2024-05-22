@@ -52,7 +52,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
         onDragEnter={dragEnter}
         onDragOver={dragOver}
         className={styles.buttonTab} 
-        style={{border: 'calc(0.0625rem* var(--mantine-scale)) solid var(--mantine-color-dark-4)', background: isActive ? 'var(--site-bg)' : 'var(--site-bg)', color: "white", width: `${text.length * 1.3}ch`, minWidth: '156px'}} 
+        style={{border: 'calc(0.0625rem* var(--mantine-scale)) solid var(--border)', borderTop: 'none', background: isActive ? 'var(--site-bg)' : 'var(--site-bg)', color: "white", width: `${text.length * 1.3}ch`, minWidth: '156px'}} 
         onMouseOver={() => setIsHovered(true)}
         onMouseOut={() => setIsHovered(false)}  
         onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
@@ -81,7 +81,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
         }
       </button>
       
-      { isActive && <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'blue', height: '2px' }}/>}
+      { isActive && <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
     </div>
   );
 };

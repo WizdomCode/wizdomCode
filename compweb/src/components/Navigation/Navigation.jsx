@@ -247,21 +247,23 @@ const Navigation = () => {
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
                   <div style={{ position: 'relative', height: '100%' }}>
-                    <a href="#" className={classes.link}>
-                      <Center inline>
-                        <Box component="span" mr={5}>
-                          <Link to='/problems'>
-                            Workspace
-                          </Link>
-                        </Box>
-                        <IconChevronDown
-                          style={{ width: rem(16), height: rem(16) }}
-                          color={theme.colors.blue[6]}
-                        />
-                      </Center>
-                    </a>
+                    <Link to='/problems'>
+                      <a href="#" className={classes.link}>
+                        <Center inline>
+                          <Box component="span" mr={5}>
+                            <Text c={(location.pathname === '/problems' || location.pathname === '/ccc' || location.pathname === '/usaco') ? 'white' : 'var(--dim-text)'}>
+                              Workspace
+                            </Text>
+                          </Box>
+                          <IconChevronDown
+                            style={{ width: rem(16), height: rem(16) }}
+                            color={theme.colors.blue[6]}
+                          />
+                        </Center>
+                      </a>
+                    </Link>
                     { (location.pathname === '/problems' || location.pathname === '/ccc' || location.pathname === '/usaco') && 
-                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'blue', height: '2px' }}/>}
+                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
                   </div>
                 </HoverCard.Target>
 
@@ -281,21 +283,23 @@ const Navigation = () => {
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
                   <div style={{ position: 'relative', height: '100%' }}>
-                    <a href="#" className={classes.link}>
-                      <Center inline>
-                        <Box component="span" mr={5}>
-                          <Link to='/problems'>
-                            Community
-                          </Link>
-                        </Box>
-                        <IconChevronDown
-                          style={{ width: rem(16), height: rem(16) }}
-                          color={theme.colors.blue[6]}
-                        />
-                      </Center>
-                    </a>
+                    <Link to='/problems'>
+                      <a href="#" className={classes.link}>
+                        <Center inline>
+                          <Box component="span" mr={5}>
+                            <Text c={(location.pathname === '/userprofile' || location.pathname === '/leaderboard') ? 'white' : 'var(--dim-text)'}>
+                              Community
+                            </Text>
+                          </Box>
+                          <IconChevronDown
+                            style={{ width: rem(16), height: rem(16) }}
+                            color={theme.colors.blue[6]}
+                          />
+                        </Center>
+                      </a>
+                    </Link>
                     { (location.pathname === '/userprofile' || location.pathname === '/leaderboard') && 
-                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'blue', height: '2px' }}/>}
+                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
                   </div>
                 </HoverCard.Target>
 
@@ -313,7 +317,7 @@ const Navigation = () => {
               </HoverCard>
             </Group>
 
-            <Group visibleFrom="sm">
+            <Group visibleFrom="sm" gap={8}>
 
               { authenticatedUser ? <Menu
                 width={260}
@@ -421,13 +425,17 @@ const Navigation = () => {
                 offset={4}          
               >
                 <Popover.Target>
-                  <NotificationsNoneIcon className={classes.notificationButton} />
+                  <ThemeIcon variant="default" size="lg" color="indigo">
+                    <NotificationsNoneIcon className={classes.notificationButton} />
+                  </ThemeIcon>
                 </Popover.Target>
                 <Popover.Dropdown>
                   <Text size="xs">Your notifs</Text>
                 </Popover.Dropdown>
               </Popover>
-              <IconBrandDiscord className={classes.discordButton} />
+              <ThemeIcon color="indigo" size="lg">
+                <IconBrandDiscord />
+              </ThemeIcon>
               <Menu
                 width={260}
                 position="bottom-end"
@@ -437,7 +445,9 @@ const Navigation = () => {
                 withinPortal
               >
                 <Menu.Target>
-                  <ShareIcon className={classes.shareButton}/>
+                  <ThemeIcon variant="default" size="lg" color="indigo">
+                    <ShareIcon className={classes.shareButton}/>
+                  </ThemeIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item

@@ -48,7 +48,9 @@ import CardMedia from '@mui/material/CardMedia';
 import ProblemDescription from './ProblemDescription.jsx';
 import Navigation from '../../Navigation/Navigation.jsx';
 import { 
-  useMantineTheme
+  useMantineTheme,
+  ScrollArea,
+  Container
 } from '@mantine/core';
 import FileList from './FileList.jsx';
 import { SideNav } from '../../Navigation/SideNav.jsx';
@@ -790,9 +792,9 @@ const submitCode = async () => {
       <SideNav />
       <PanelGroup direction="horizontal" style={{ overflow: 'auto' }}>
       <Panel defaultSize={35} minSize={14} collapsible={true} collapsedSize={0}>
-      <div className={styles.row}>
-        <div className={styles.problemStatement}>
-          <div className={styles.scrollableContent}>
+      <div className={styles.row} style={{ backgroundColor: 'var(--site-bg)' }}>
+        <div className={styles.problemStatement} style={{ borderRight: '1px solid var(--border)' }}>
+          <ScrollArea scrollHideDelay={0}>
             { props.currentPage === 'problems' && ( 
               <div className={styles.tabWrapper}>
                 <div 
@@ -829,146 +831,16 @@ const submitCode = async () => {
               <>
                 <Leaderboard />
               </>
-            ) : props.currentPage === 'home' ? (
-              <div className='universal'>
-                <div className={styles.wrapper}>
-                  <div className='hero'>
-                    <div>
-                      <br />
-                      <h1>Learn competitive programming.</h1>
-                      <h1>Master any contest.</h1>
-                      <br />
-                      <p className={styles.customLatex}>Notice: This is a conceptual version. This project is very early in development and we welcome any and all feedback or suggestions. Contact us: competitive.programming2197@gmail.com</p>
-                      <br />
-                      <Link to="/signup" className={styles.img}>
-                        <button className={styles.runAll} style={{color: 'white'}}>Get started</button>
-                      </Link>
-                      <br /> 
-                    </div>
-                  </div>
-                  <br /> 
-                  <ThemeProvider theme={darkTheme}>
-                    <Box sx={{ width: '100%' }}>
-                      <Card variant="outlined">
-                        <CardMedia
-                          sx={{ height: 140 }}
-                          image="/problems.png"
-                          title="green iguana"
-                        />
-                        <CardContent>
-                          <Typography gutterBottom variant="h5" component="div">
-                            Problem database
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Study from 10+ hand-picked problems on the ultimate platform for preparing for competitive programming contests.
-                          </Typography>
-                        </CardContent>
-                        <CardActions>
-                          <Link to="/problems" className={styles.img}>
-                            <Button size="small">Get Started</Button>
-                          </Link>
-                        </CardActions>
-                      </Card>
-                    </Box>
-                    <br />
-                    <Box sx={{ width: '100%' }}>
-                      <Card variant="outlined">
-                      <CardMedia
-                          sx={{ height: 140 }}
-                          image="/duopaths.png"
-                          title="green iguana"
-                        />
-                        <CardContent>
-                          <Typography gutterBottom variant="h5" component="div">
-                            Learning paths
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Waste no time learning topics in a logical progression.
-                          </Typography>
-                        </CardContent>
-                        <CardActions>
-                          <Link to="/ccc" className={styles.img}>
-                            <Button size="small">CCC Topics</Button>
-                          </Link>
-                          <Link to="/usaco" className={styles.img}>
-                            <Button size="small">USACO Topics</Button>
-                          </Link>
-                        </CardActions>
-                      </Card>
-                    </Box>
-                    <br />
-                    <Box sx={{ width: '100%' }}>
-                      <Card variant="outlined">
-                      <CardMedia
-                          sx={{ height: 140 }}
-                          image="/workspace.png"
-                          title="green iguana"
-                        />
-                        <CardContent>
-                          <Typography gutterBottom variant="h5" component="div">
-                            Feature-rich workspace
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Instantly test code against official problem data or custom inputs.
-                          </Typography>
-                        </CardContent>
-                        <CardActions>
-                          <Button size="small">Learn More</Button>
-                        </CardActions>
-                      </Card>
-                    </Box>
-                    <br />
-                    <Box sx={{ width: '100%' }}>
-                      <Card variant="outlined">
-                      <CardMedia
-                          sx={{ height: 140 }}
-                          image="/templates.png"
-                          title="green iguana"
-                        />
-                        <CardContent>
-                          <Typography gutterBottom variant="h5" component="div">
-                            Code Templates
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Waste no time crafting solutions with our extensive collection of code templates.
-                          </Typography>
-                        </CardContent>
-                        <CardActions>
-                          <Button size="small">Learn More</Button>
-                        </CardActions>
-                      </Card>
-                    </Box>
-                  </ThemeProvider>
-                  <br />
-                  <br />
-                  <h1>Start from a contest</h1>
-                  <br />
-                  <Link to="/ccc" className={styles.img}>
-                    <button className={styles.runAll} style={{color: 'white'}}>CCC</button>
-                  </Link>
-                  <br />
-                  <Link to="/usaco" className={styles.img}>
-                    <button className={styles.runAll} style={{color: 'white'}}>USACO</button>
-                  </Link>
-                  <br />
-                </div>
-              </div>
             ) : props.currentPage === 'profile' ? (
               <>
                 <UserProfile />
               </>          
-            ) : props.currentPage === 'login' ? (
-              <>
-                <Login />
-              </>          
-            ) : props.currentPage === 'signup' ? (
-              <>
-                <SignUp />
-              </>          
             ) : currentTab.type === 'problem' ? (
-              <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} displayCases={displayCases} results={results} solutions={solutions} />
+              <Container>
+                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} displayCases={displayCases} results={results} solutions={solutions} />
+              </Container>
             ) : currentTab.type === 'newTab' ? (
-              <div className={styles.wrapper}>
+              <Container>
                 <div className='hero'> 
                   <div className={styles.description}>
                     <h2 className="title">Problems</h2>
@@ -1118,17 +990,17 @@ const submitCode = async () => {
                   </ThemeProvider>
                 </div>
                 <br />
-              </div>
+              </Container>
             ) : (
               <div className={styles.wrapper}>
               </div>
             )}
-          </div>
+          </ScrollArea>
         </div>
       </div>
       </Panel>
       <PanelResizeHandle className={styles.panelResizeHandle} />
-      <Panel defaultSize={65} minSize={14} collapsible={true} collapsedSize={0} style={{display: 'grid', gridTemplateColumns: '1fr 3fr'}}>
+      <Panel defaultSize={65} minSize={14} collapsible={true} collapsedSize={0} style={{display: 'grid', gridTemplateColumns: isFileListOpen ? '1fr 3fr' : '1fr' }}>
         { isFileListOpen && <FileList />}
         <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
       </Panel>

@@ -16,7 +16,7 @@ const CircleProgressBar = ({ progress }) => {
         cy="120" // center of the circle adjusted according to the new SVG size
       />
       <circle
-        stroke="blue"
+        stroke="var(--accent)"
         fill="transparent"
         strokeWidth="15" // increased stroke width
         strokeDasharray={circumference + ' ' + circumference}

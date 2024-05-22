@@ -80,7 +80,7 @@ export function SideNav() {
 
   return (
     <>
-      <nav className={classes.navbar}>
+      <nav className={classes.navbar} style={{ backgroundColor: 'var(--site-bg)' }}>
         <Center>
           <Stack justify="center" gap={10}>
             {links}
