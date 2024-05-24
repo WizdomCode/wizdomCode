@@ -52,7 +52,8 @@ import {
   useMantineTheme,
   Stack,
   Group,
-  Button
+  Button,
+  Code
 } from '@mantine/core';
 import {
   Tree,
@@ -637,21 +638,21 @@ const CodeEditor = (props) => {
                 </div>
               </Stack>
               <Stack>
-                <div>
-                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={'Shift'} language="txt" /> + <InlineCodeHighlight code={'P'} language="txt" />
-                </div>
-                <div>
-                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={'P'} language="txt" />
-                </div>
-                <div>
-                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={'Shift'} language="txt" /> + <InlineCodeHighlight code={'F'} language="txt" />
-                </div>
-                <div>
-                  {' '}<InlineCodeHighlight code={'F11'} language="txt" />
-                </div>
-                <div>
-                  {' '}<InlineCodeHighlight code={'Ctrl'} language="txt" /> + <InlineCodeHighlight code={','} language="txt" />
-                </div>
+              <div>
+                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>Shift</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>P</Code>
+              </div>
+              <div>
+                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>P</Code>
+              </div>
+              <div>
+                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>Shift</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>F</Code>
+              </div>
+              <div>
+                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>F11</Code>
+              </div>
+              <div>
+                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>,</Code>
+              </div>
               </Stack>
             </Group>
           </Stack>

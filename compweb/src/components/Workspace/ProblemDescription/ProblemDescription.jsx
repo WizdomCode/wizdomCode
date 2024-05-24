@@ -20,15 +20,19 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css'; // don't forget to import katex styles
-import { Button, Overlay, AspectRatio } from '@mantine/core';
+import { Button, Overlay, AspectRatio, Group, Container } from '@mantine/core';
 import { getCategory, getDifficultyLevel } from '../../../../public/CATEGORY_NAMES.js';
+import {
+  IconNotebook,
+  IconCircleDashedCheck,
+  IconBook
+} from '@tabler/icons-react'
 
-const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, results, solutions }) => {
+const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, results, solutions, selectedTab }) => {
   // Example usage of getCategory// prints "String Algorithms"
   
   // Example usage of getDifficultyLevel // prints { level: 'Intermediate', number: 1 }
 
-  const [selectedTab, setSelectedTab] = useState('question');
   const [selectedSolution, setSelectedSolution] = useState(null);
   const [testCasesVisible, setTestCasesVisible] = useState(false);
 
@@ -52,13 +56,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
   }
 
   return (
-    <>
-      <div className={styles.tabs}>
-        <button onClick={() => setSelectedTab('question')}>Question</button>
-        <button onClick={() => setSelectedTab('solution')}>Solution</button>
-        <button onClick={() => setSelectedTab('editorial')}>Editorial</button>
-      </div>
-      
+    <Container>
       {selectedTab === 'question' && (            
         <div className={styles.wrapper}>
           <br />
@@ -246,7 +244,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
             {/* Add editorial content here */}
           </div>
         )}
-    </>
+    </Container>
   );
 };
 

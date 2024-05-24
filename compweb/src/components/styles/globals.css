@@ -9,6 +9,10 @@
   --dim-text: #A9B1D6;
 }
 
+#root {
+  background-color: var(--code-bg);
+}
+
 .body {
   background-color: var(--site-bg);
 }
@@ -19,4 +23,8 @@ a {
 
 ul {
   padding-left: 0;
+}
+
+.m_b183c0a2 {
+  font-size: medium !important;
 }

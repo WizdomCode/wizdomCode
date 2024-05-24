@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from 'react-redux';
 import SpiderChart from "./SpiderChart";
 import { Tabs, rem, Avatar, Button, Group, Table, Fieldset, TextInput, Textarea } from '@mantine/core';
-import { IconPhoto, IconMessageCircle, IconSettings, IconMapPin } from '@tabler/icons-react';
+import { IconPhoto, IconMessageCircle, IconSettings, IconMapPin, IconCheck, IconBook } from '@tabler/icons-react';
 import styles from './UserProfile.module.css';
 
 const UserProfile = () => {
@@ -105,6 +105,28 @@ const UserProfile = () => {
     }));
   };
 
+  function extractYear(text) {
+    const regex = /\b\d{4}\b/;
+    let match = text.match(regex);
+    return match ? match[0] : null;
+  }
+  
+  function extractLevel(text) {
+    if (text.substring(0, 5) === 'USACO') {
+      const fullLvl = text.split(', ')[1];
+      return fullLvl.substring(0, fullLvl.length - 9) + 'P' + fullLvl.substring(fullLvl.length - 1);
+    } else {
+      const fullLvls = text.split(', ').slice(1);
+      console.log('fullLvls', fullLvls);
+      let fullstr = '';
+      for (let lvl of fullLvls) {
+        console.log(lvl);
+        fullstr += lvl[0] + lvl[lvl.length - 1] + ', ';
+      } 
+      return fullstr.substring(0, fullstr.length - 2);
+    }
+  }
+
   return (
     <>
       <div style={{ height: '160px', backgroundColor: 'var(--navbar)', borderRadius: '8px' }}/>
@@ -199,16 +221,24 @@ const UserProfile = () => {
             <Table>
               <Table.Thead>
                 <Table.Tr>
+                  <Table.Th>Contest</Table.Th>
+                  <Table.Th>Year</Table.Th>
+                  <Table.Th>Level</Table.Th>
                   <Table.Th>Name</Table.Th>
                   <Table.Th>Points</Table.Th>
                   <Table.Th>Topics</Table.Th>
                   <Table.Th>Contest</Table.Th>
+                  <Table.Th><IconCheck /></Table.Th>
+                  <Table.Th><IconBook /></Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 { problemData && 
                   problemData.map((problem) => (
                     <Table.Tr key={problem.title}>
+                      <Table.Td>{problem.contest}</Table.Td>
+                      <Table.Td>{extractYear(problem.specificContest)}</Table.Td>
+                      <Table.Td>{extractLevel(problem.specificContest)}</Table.Td>
                       <Table.Td>{problem.title}</Table.Td>
                       <Table.Td>{problem.points}</Table.Td>
                       <Table.Td>{problem.topics}</Table.Td>

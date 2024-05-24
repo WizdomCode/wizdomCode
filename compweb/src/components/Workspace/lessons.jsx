@@ -1,14 +1,25 @@
+import React from 'react'
+import {
+    IconBraces,
+    IconPlusMinus,
+    IconRepeat,
+    IconCheckbox,
+    IconBracketsContain,
+    IconBlockquote
+} from '@tabler/icons-react'
+import "../styles/Paths.css";
+
 export const JUINOR_UNIT_TITLES = ["J1, J2, J3: Basic Programming", "J4: Problem Solving", "J5: Advanced Topics"];
 export const JUINOR_UNIT_DESCRIPTIONS = ["", "", ""];
 export const JUNIOR_UNIT_LESSONS = [
     [
-        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: "/open.png", problemIds: ["Next in line", "Who is in the Middle?", "Squares", "Conveyor Belt Sushi", "Cupcake Party"] },
-        { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: "/open.png", problemIds: ["Shifty Sum", "Epidemiology"] }],
-        [{ category: "4 Problems", lessonName: "Loops", imgPath: "/open.png", problemIds: ["Tournament Selection"] },
-        { category: "7 Problems", lessonName: "Conditions", imgPath: "/open.png", problemIds: ["Special Day"] }],
-        [{ category: "1 Problem", lessonName: "Arrays", imgPath: "/open.png", problemIds: ["Occupy parking"] }],
-        [{ category: "4 Problems", lessonName: "Basic String Manipulation", imgPath: "/open.png", problemIds: ["Happy or Sad"] },
-        { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/open.png", problemIds: ["Smile with Similes"] }],
+        [{ category: "5 Problems", lessonName: "Basic Syntax", imgPath: <IconBraces className="lesson-component-icon"/>, problemIds: ["Next in line", "Who is in the Middle?", "Squares", "Conveyor Belt Sushi", "Cupcake Party"] },
+        { category: "6 Problems", lessonName: "Arithmetic operations", imgPath: <IconPlusMinus className="lesson-component-icon"/>, problemIds: ["Shifty Sum", "Epidemiology"] }],
+        [{ category: "4 Problems", lessonName: "Loops", imgPath: <IconRepeat className="lesson-component-icon"/>, problemIds: ["Tournament Selection"] },
+        { category: "7 Problems", lessonName: "Conditions", imgPath: <IconCheckbox className='lesson-component-icon'/>, problemIds: ["Special Day"] }],
+        [{ category: "1 Problem", lessonName: "Arrays", imgPath: <IconBracketsContain className='lesson-component-icon'/>, problemIds: ["Occupy parking"] }],
+        [{ category: "4 Problems", lessonName: "Basic String Manipulation", imgPath: <IconBlockquote className='lesson-component-icon'/>, problemIds: ["Happy or Sad"] },
+        { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/nestedloop.svg", problemIds: ["Smile with Similes"] }],
     ],
     [
         [{ category: "4 Problems", lessonName: "Time Complexity", imgPath: "/open.png", problemIds: ["Epidemiology"] }],

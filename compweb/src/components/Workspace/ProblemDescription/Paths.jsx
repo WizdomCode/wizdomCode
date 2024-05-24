@@ -15,14 +15,13 @@ import remarkGfm from 'remark-gfm';
 import axios from "axios";
 import Tab from "./Tab.jsx";
 import { initializeAnalytics } from "firebase/analytics";
-import { JUINOR_UNIT_TITLES, JUINOR_UNIT_DESCRIPTIONS, JUNIOR_UNIT_LESSONS } from '../lessons.js';
-import { SENIOR_UNIT_DESCRIPTIONS, SENIOR_UNIT_LESSONS, SENIOR_UNIT_TITLES } from "../lessons.js";
-import { TEST_UNIT_LESSONS } from "../lessons.js";
-import { BRONZE_UNIT_DESCRIPTIONS, BRONZE_UNIT_LESSONS, BRONZE_UNIT_TITLES } from "../lessons.js";
-import { SILVER_UNIT_DESCRIPTIONS, SILVER_UNIT_LESSONS, SILVER_UNIT_TITLES } from "../lessons.js";
-import { GOLD_UNIT_DESCRIPTIONS, GOLD_UNIT_LESSONS, GOLD_UNIT_TITLES } from "../lessons.js";
-import { PLAT_UNIT_DESCRIPTIONS, PLAT_UNIT_LESSONS, PLAT_UNIT_TITLES } from "../lessons.js";
-import { Button } from '@mantine/core';
+import { JUINOR_UNIT_TITLES, JUINOR_UNIT_DESCRIPTIONS, JUNIOR_UNIT_LESSONS } from '../lessons.jsx';
+import { SENIOR_UNIT_DESCRIPTIONS, SENIOR_UNIT_LESSONS, SENIOR_UNIT_TITLES } from "../lessons.jsx";
+import { TEST_UNIT_LESSONS } from "../lessons.jsx";
+import { BRONZE_UNIT_DESCRIPTIONS, BRONZE_UNIT_LESSONS, BRONZE_UNIT_TITLES } from "../lessons.jsx";
+import { SILVER_UNIT_DESCRIPTIONS, SILVER_UNIT_LESSONS, SILVER_UNIT_TITLES } from "../lessons.jsx";
+import { GOLD_UNIT_DESCRIPTIONS, GOLD_UNIT_LESSONS, GOLD_UNIT_TITLES } from "../lessons.jsx";
+import { PLAT_UNIT_DESCRIPTIONS, PLAT_UNIT_LESSONS, PLAT_UNIT_TITLES } from "../lessons.jsx";
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
@@ -35,6 +34,8 @@ import zIndex from "@mui/material/styles/zIndex.js";
 import { useClickOutside } from '@mantine/hooks';
 import ArrowDropUpRoundedIcon from '@mui/icons-material/ArrowDropUpRounded';
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
+import { Card, Overlay, Button, Text, Container, Stack, Group, Title } from '@mantine/core';
+import ProblemDescription from './ProblemDescription.jsx';
 
 const Item = styled(Paper)(({ theme }) => ({
   textAlign: 'center',
@@ -272,8 +273,15 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                             // onClick={handleTooltipOpen}
                             onClick={onButtonClick}
                             tabIndex="0" // Add this to make the div focusable
+                            style={{ backgroundColor: 'var(--code-bg)' }}
                         >
-                            <img className="lesson-icon" src={ props.imgPath } alt="sad"></img>
+                            { props.imgPath && typeof props.imgPath === 'string' ? (
+                                <img className="lesson-component-icon" src={ props.imgPath } alt="sad"></img>
+                            ) : (
+                                <>
+                                    {props.imgPath}
+                                </>
+                            )}
                             <div>
                                 <Item className={`bottom-rectangle ${props.lessonName.length > 12 ? 'long-lesson-name' : 'lesson-name'}`}>{ props.lessonName }</Item>
                             </div>
@@ -422,19 +430,18 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     
     return (
         <div className="universal">
-            <div className="hero" style={{background: false ? "url('/val.png') no-repeat center center" : ""}}>
-                <ThemeProvider theme={darkTheme}>
-                    <Item elevation={5}>
-                        <div className="unit-header">
-                            <div className="unit-header-left">
-                                <h1 className='unit-title'>{unitTitle}</h1>
-                                <br />
-                                <p>{unitDescription}</p>
-                            </div>
-                            {true && <div className="unit-header-right"><Button color="var(--accent)" size="md">Start</Button></div>}
-                        </div>
-                    </Item>
-                </ThemeProvider>
+            <div style={{height: '10rem', display: 'flex', alignItems: 'center', background: false ? "url('/val.png') no-repeat center center" : ""}}>
+                <Container style={{ width: '100%' }}>
+                    <Card radius="md" style={{ width: '100%', justifyContent: 'center' }} h={90} bg={'var(--selected-item)'}>
+                        <Group justify="space-between">
+                            <Stack justify="center">
+                                <Title order={2}>{unitTitle}</Title>
+                                { unitDescription && <p>{unitDescription}</p>}
+                            </Stack>
+                            {true && <Button color="var(--accent)" size="md">Start</Button>}
+                        </Group>
+                    </Card>
+                </Container>
             </div>
                 { false && <button onClick={scrollLeft} className="scroll-button left">
                     <img src='/leftarrow.png' alt='Left' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/>
@@ -851,24 +858,32 @@ const Paths = (props) => {
         fetchUserData();
     }, []);
 
+    const [solutions, setSolutions] = useState([]);
+    const [selectedTab, setSelectedTab] = useState('question');
+
+    useEffect(() => {
+        const fetchSolutions = async () => {
+          try {
+            // Get a reference to the question document
+            const questionDocRef = doc(db, "Questions", lessonProblemData[tabIndex].data.title);
+            const questionDocSnapshot = await getDoc(questionDocRef);
+    
+            if (questionDocSnapshot.exists()) {
+              const questionData = questionDocSnapshot.data();
+              const solutions = questionData.solutions || [];
+              setSolutions(solutions);
+            } else {
+            }
+          } catch (error) {
+          }
+        };
+    
+        fetchSolutions();
+      }, [tabIndex]);
+
     return (
         <div className="universal">
             <div className={styles.paths}>
-                <div className={styles.tabWrapper}>
-                    <div className={styles.buttonRow}>
-                        {defaultTabs.map((tab, index) => (
-                            <Tab
-                                key={index}
-                                index={index}
-                                tab={tab}
-                                isActive={tabIndex === index}
-                                type='lesson'
-                            />
-                        ))}
-                        <div className={styles.rightAlign}>
-                        </div>
-                    </div>
-                </div>
                 {!lessonProblemData[tabIndex].data ? (
                     defaultTabs[tabIndex].data === 'Junior' ? (
                         <>
@@ -878,7 +893,6 @@ const Paths = (props) => {
                                     <br />
                                 </React.Fragment>
                             ))}
-                            <Link to = "/computercontest">CCC junior</Link> 
                         </>
                     ) : defaultTabs[tabIndex].data === 'Senior' ? (
                         <>
@@ -888,7 +902,6 @@ const Paths = (props) => {
                                     <br />
                                 </React.Fragment>
                             ))}
-                            <Link to = "/computercontest">CCC senior</Link>
                         </>
                     
                     ) : defaultTabs[tabIndex].data === 'Bronze' ? (
@@ -899,7 +912,6 @@ const Paths = (props) => {
                                     <br />
                                 </React.Fragment>
                             ))}
-                            <Link to = "/computercontest">USACO bronze</Link> 
                         </>
                     ) : defaultTabs[tabIndex].data === 'Silver' ? (
                         <>
@@ -909,7 +921,6 @@ const Paths = (props) => {
                                     <br />
                                 </React.Fragment>
                             ))}
-                            <Link to = "/computercontest">USACO silver</Link> 
                         </>
                     ) : defaultTabs[tabIndex].data === 'Gold' ? (
                         <>
@@ -919,7 +930,6 @@ const Paths = (props) => {
                                     <br />
                                 </React.Fragment>
                             ))}
-                            <Link to = "/computercontest">USACO gold</Link> 
                         </>
                     ) : (
                     <>
@@ -929,12 +939,13 @@ const Paths = (props) => {
                                     <br />
                                 </React.Fragment>
                             ))}
-                        <Link to = "/computercontest">USACO plat</Link> 
                     </>
                     )
                 ) : (
                     <>
                         { true && (
+                    <>
+                        <ProblemDescription userData={userData} currentTab={lessonProblemData[tabIndex]} submitCode={submitCode} displayCases={lessonProblemData[tabIndex].data.testCases} results={results} solutions={solutions} selectedTab={selectedTab}/>
                         <div className={styles.wrapper}>
                             <br />
                                 <div className={styles.problemTitleRow}>
@@ -1085,6 +1096,7 @@ const Paths = (props) => {
                                 )}
                             </div>
                         </div>
+                    </>
                         )} 
                     </>
                 )}

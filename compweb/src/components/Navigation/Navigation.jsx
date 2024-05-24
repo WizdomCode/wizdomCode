@@ -145,14 +145,14 @@ const Navigation = () => {
     <Link to={item.link} key={item.title}>
       <UnstyledButton className={classes.subLink} p={10}>
         <Group wrap="nowrap" align="flex-start">
-          <ThemeIcon size={34} variant="default" radius="md">
+          <ThemeIcon size={34} variant="light" radius="md">
             <item.icon style={{ width: rem(22), height: rem(22) }} color={theme.colors.blue[6]} />
           </ThemeIcon>
           <div>
             <Text size="sm" fw={500}>
               {item.title}
             </Text>
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="var(--dim-text)">
               {item.description}
             </Text>
           </div>
@@ -165,14 +165,14 @@ const Navigation = () => {
     <Link to={item.link} key={item.title}>
       <UnstyledButton className={classes.subLink} p={10}>
         <Group wrap="nowrap" align="flex-start">
-          <ThemeIcon size={34} variant="default" radius="md">
+          <ThemeIcon size={34} variant="light" radius="md">
             <item.icon style={{ width: rem(22), height: rem(22) }} color={theme.colors.blue[6]} />
           </ThemeIcon>
           <div>
             <Text size="sm" fw={500}>
               {item.title}
             </Text>
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="var(--dim-text)">
               {item.description}
             </Text>
           </div>
@@ -267,12 +267,12 @@ const Navigation = () => {
                   </div>
                 </HoverCard.Target>
 
-                <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
+                <HoverCard.Dropdown style={{ overflow: 'hidden', border: '1px solid var(--border)' }} bg={'var(--code-bg)'}>
                   <Group justify="space-between" px="md">
                     <Text fw={500}>Workspace</Text>
                   </Group>
 
-                  <Divider my="sm" />
+                  <Divider my="sm" color='var(--border)'/>
 
                   <SimpleGrid cols={2} spacing={0}>
                     {links}
@@ -303,12 +303,12 @@ const Navigation = () => {
                   </div>
                 </HoverCard.Target>
 
-                <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
+                <HoverCard.Dropdown style={{ overflow: 'hidden', border: '1px solid var(--border)' }} bg={'var(--code-bg)'}>
                   <Group justify="space-between" px="md">
                     <Text fw={500}>Community</Text>
                   </Group>
 
-                  <Divider my="sm" />
+                  <Divider my="sm" color='var(--border)'/>
 
                   <SimpleGrid cols={2} spacing={0}>
                     {communityLinks}

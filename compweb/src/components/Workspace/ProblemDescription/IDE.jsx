@@ -43,18 +43,24 @@ import Achievements from '../../../pages/Achievements.jsx';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
 import ProblemDescription from './ProblemDescription.jsx';
 import Navigation from '../../Navigation/Navigation.jsx';
 import { 
   useMantineTheme,
   ScrollArea,
-  Container
+  Container,
+  Group,
+  Button
 } from '@mantine/core';
 import FileList from './FileList.jsx';
 import { SideNav } from '../../Navigation/SideNav.jsx';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import {
+  IconNotebook,
+  IconCircleDashedCheck,
+  IconBook
+} from '@tabler/icons-react'
 
 const card = (
   <React.Fragment>
@@ -785,6 +791,18 @@ const submitCode = async () => {
 
   const isFileListOpen = useSelector(state => state.isFileListOpen);
 
+  // Lesson tab handling
+  const defaultTabs = props.currentPage === 'ccc' ? [
+        { type: 'division', data: 'Junior'},
+        { type: 'division', data: 'Senior'}
+    ] : [
+        { type: 'division', data: 'Bronze'},
+        { type: 'division', data: 'Silver'},
+        { type: 'division', data: 'Gold'},
+        { type: 'division', data: 'Platinum'}
+    ];
+  const tabIndex = useSelector(state => state.lessonTabIndex);
+
   return (
     <>
       <Navigation />
@@ -794,51 +812,76 @@ const submitCode = async () => {
       <Panel defaultSize={35} minSize={14} collapsible={true} collapsedSize={0}>
       <div className={styles.row} style={{ backgroundColor: 'var(--site-bg)' }}>
         <div className={styles.problemStatement} style={{ borderRight: '1px solid var(--border)' }}>
-          <ScrollArea scrollHideDelay={0}>
-            { props.currentPage === 'problems' && ( 
-              <div className={styles.tabWrapper}>
-                <div 
-                  className={styles.buttonRow}
-                  onDragOver={(e) => e.preventDefault()} // Add this line
-                  style={{ backgroundColor: 'var(--site-bg)' }}
-                >
-                  {tabs.map((tab, index) => (
-                    <>
-                      {linePosition.index === index.toString() && linePosition.position === 'left' && <div className={styles.line} />}
-                      <Tab
-                        key={index}
-                        index={index}
-                        tab={tab}
-                        isActive={currentTab === tab}
-                        setDraggedTab={setDraggedTab}
-                      />
-                      {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
-                    </>
-                  ))}
-                  <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
-                    <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
-                  </button>
-                  <div className={styles.rightAlign}>
+          <ScrollArea scrollbars="x" scrollHideDelay={0} className={styles.scrollableContent} style={{ height: '58.848px' }} styles={{
+            scrollbar: { background: 'transparent', backgroundColor: 'transparent', height: '7px', opacity: '1' },
+            thumb: { backgroundColor: 'var(--selected-item)', borderRadius: '0' }
+          }}>
+            { props.currentPage === 'problems' ? ( 
+              <>
+                <div className={styles.tabWrapper}>
+                  <div 
+                    className={styles.buttonRow}
+                    onDragOver={(e) => e.preventDefault()} // Add this line
+                    style={{ backgroundColor: 'var(--site-bg)' }}
+                  >
+                    {tabs.map((tab, index) => (
+                      <>
+                        {linePosition.index === index.toString() && linePosition.position === 'left' && <div className={styles.line} />}
+                        <Tab
+                          key={index}
+                          index={index}
+                          tab={tab}
+                          isActive={currentTab === tab}
+                          setDraggedTab={setDraggedTab}
+                        />
+                        {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
+                      </>
+                    ))}
+                    <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
+                      <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
+                    </button>
+                    <div className={styles.rightAlign}>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </>
+              ) : (
+                <div className={styles.tabWrapper}>
+                    <div className={styles.buttonRow}>
+                        {defaultTabs.map((tab, index) => (
+                            <Tab
+                                key={index}
+                                index={index}
+                                tab={tab}
+                                isActive={tabIndex === index}
+                                type='lesson'
+                            />
+                        ))}
+                        <div className={styles.rightAlign}>
+                        </div>
+                    </div>
+                </div>
               )}
+          </ScrollArea>
+          { props.currentPage === 'problems' && currentTab.type === 'problem' &&
+            <Group gap={0} bg={'var(--code-bg)'} mt={6}>
+              <Button style={{ color: selectedTab === 'question' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconNotebook style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('question')}>Description</Button>
+              <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
+              <Button style={{ color: selectedTab === 'solution' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconCircleDashedCheck style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('solution')}>Solution</Button>
+              <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
+              <Button style={{ color: selectedTab === 'editorial' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconBook style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('editorial')}>Editorial</Button>
+            </Group>
+          }
+          <ScrollArea scrollHideDelay={0} className={styles.scrollableContent} styles={{
+            scrollbar: { background: 'transparent', backgroundColor: 'transparent', width: '15px', opacity: '1' },
+            thumb: { backgroundColor: 'var(--selected-item)', borderRadius: '0' }
+          }}>
             { props.currentPage === 'ccc' || props.currentPage === 'usaco' ? (
               <>
                 <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
               </>
-            ) : props.currentPage === 'leaderboard' ? (
-              <>
-                <Leaderboard />
-              </>
-            ) : props.currentPage === 'profile' ? (
-              <>
-                <UserProfile />
-              </>          
             ) : currentTab.type === 'problem' ? (
-              <Container>
-                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} displayCases={displayCases} results={results} solutions={solutions} />
-              </Container>
+                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} displayCases={displayCases} results={results} solutions={solutions} selectedTab={selectedTab}/>
             ) : currentTab.type === 'newTab' ? (
               <Container>
                 <div className='hero'> 
