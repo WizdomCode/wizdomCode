@@ -28,3 +28,48 @@ ul {
 .m_b183c0a2 {
   font-size: medium !important;
 }
+
+.mantine-Table-table {
+  border: 1px solid var(--border) !important;
+}
+
+.mantine-Table-tr	{
+  border: 1px solid var(--border) !important;
+}
+
+table {
+  width: 100%;
+  color: white !important;
+  font-family: "Ubuntu Mono";
+}
+
+thead {
+  margin-top: 12px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  text-align: left;
+}
+
+th {
+  padding-left: 5px;
+}
+
+tr {
+  height: 40px;
+}
+
+td {
+  padding-left: 10px;
+  background-color: var(--code-bg);
+}
+
+input {
+  color: black;
+  background-color: transparent;
+  border: none;
+}
+
+input:focus {
+  outline: none;
+}

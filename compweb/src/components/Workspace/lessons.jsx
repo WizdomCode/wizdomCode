@@ -5,7 +5,10 @@ import {
     IconRepeat,
     IconCheckbox,
     IconBracketsContain,
-    IconBlockquote
+    IconBlockquote,
+    IconClockCode,
+    IconTool,
+    IconNumbers
 } from '@tabler/icons-react'
 import "../styles/Paths.css";
 
@@ -22,9 +25,9 @@ export const JUNIOR_UNIT_LESSONS = [
         { category: "4 Problems", lessonName: "Nested Loops", imgPath: "/nestedloop.svg", problemIds: ["Smile with Similes"] }],
     ],
     [
-        [{ category: "4 Problems", lessonName: "Time Complexity", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
-        [{ category: "5 Problems", lessonName: "Implementation", imgPath: "/open.png", problemIds: ["Epidemiology"] },
-        { category: "7 Problems", lessonName: "Number Theory Basics", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
+        [{ category: "4 Problems", lessonName: "Time Complexity", imgPath: <IconClockCode className='lesson-component-icon'/>, problemIds: ["Epidemiology"] }],
+        [{ category: "5 Problems", lessonName: "Implementation", imgPath: <IconTool className='lesson-component-icon'/>, problemIds: ["Epidemiology"] },
+        { category: "7 Problems", lessonName: "Number Theory Basics", imgPath: <IconNumbers className='lesson-component-icon'/>, problemIds: ["Epidemiology"] }],
         [{ category: "1 Problem", lessonName: "Greedy", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
     ], 
     [

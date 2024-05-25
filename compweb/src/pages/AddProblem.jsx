@@ -25,6 +25,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css'; 
+import { Container } from "@mantine/core";
 
 const ariaLabel = { 'aria-label': 'description' };
 
@@ -32,7 +33,48 @@ const lightTheme = createTheme({
     palette: {
       mode: 'light',
     },
-  });  
+  }); 
+  
+const TODO = `
+useEffect(() => {
+  const fetchQuestions = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Questions"));
+      const allDataDocRef = doc(db, "ProblemMetadata", "AllData");
+
+      const questionsData = querySnapshot.docs.map(async (doc) => {
+        const data = doc.data();
+        const updateData = {
+          contest: data.contest,
+          folder: data.folder,
+          points: data.points,
+          specificContest: data.specificContest,
+          title: data.title,
+          topics: data.topics,
+        };
+
+        // Update the All Data document with the new field
+        await updateDoc(allDataDocRef, {
+          [doc.id]: updateData,
+        });
+
+        return {
+          id: doc.id,
+          ...data,
+        };
+      });
+
+      const resolvedQuestionsData = await Promise.all(questionsData);
+      setQuestions(resolvedQuestionsData);
+    } catch (error) {
+      console.error("Error fetching questions: ", error);
+      // Handle the error according to your application's requirements
+    }
+  };
+
+  fetchQuestions();
+}, []);
+`
 
 const AddProblem = () => {
     const [title, setTitle] = useState("");
@@ -169,18 +211,38 @@ const AddProblem = () => {
 
     const currentPageData = filteredQuestions.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
 
+    function isList(str) {
+      const regex = /^(- |\d+\. )/;
+      return regex.test(str);
+    }
+    
+    function parseText(str) {
+      return str
+        .split('\n')
+        .map((str) => {
+          if (str.startsWith('<img')) {
+            console.log(str);
+            return `<div class="${styles.descriptionImgWrapper}">${str}</div>`
+          } else if (!isList(str)) {
+            return `<span class="${styles.descriptionText}">${str}</span><br />`;
+          } else {
+            return `<span class="${styles.indent}">${str}</span>\n`;
+          }
+        })
+        .join('\n')
+    }
+
     function customParser(text) {
         const newText = text
           .split('!table')
           .map((str, index) => {
             if (index % 2 === 0) {
-              return `<em class="${styles.descriptionText}">${str}</em><br />`;
+              return `${parseText(str)}`;
             } else {
               return str;
             }
           })
           .join('')
-          .replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
         return newText;
       }
       
@@ -227,7 +289,7 @@ const AddProblem = () => {
                 minSize={500}
             >
             <div id="split-0" style={{ height: "100vh", overflow: "auto", background: "#1B1B32", backgroundColor: "#1B1B32" }}>
-            <div className={styles.wrapper}>
+              <Container>
                 <br />
                 {title && <h1 className={styles.title}>{title}</h1>}
                 <br />
@@ -247,7 +309,8 @@ const AddProblem = () => {
                   {inputFormat && (
                     <>
                       <h3>Input Format</h3>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(inputFormat.replace(/\\n/g, '\n'))} />
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeRaw, rehypeKatex]} children={customParser(inputFormat.replace(/\\n/g, '\n'))} className={styles.reactMarkDown} />
                       <div className={styles.divider}></div>
                       <br />
                     </>
@@ -255,7 +318,8 @@ const AddProblem = () => {
                   {outputFormat && (
                     <>
                       <h3>Output Format</h3>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(outputFormat.replace(/\\n/g, '\n'))} />
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeRaw, rehypeKatex]} children={customParser(outputFormat.replace(/\\n/g, '\n'))} />
                       <div className={styles.divider}></div>
                       <br />
                     </>
@@ -287,7 +351,8 @@ const AddProblem = () => {
                       {sample1.explanation && 
                         <>
                         <h3>Explanation for Sample 1</h3>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(sample1.explanation.replace(/\\n/g, '\n'))} />
+                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeRaw, rehypeKatex]} children={customParser(sample1.explanation.replace(/\\n/g, '\n'))} />
                         <br />
                         </>
                       }
@@ -314,7 +379,8 @@ const AddProblem = () => {
                       {sample2.explanation && 
                         <>
                         <h3>Explanation for Sample 2</h3>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(sample2.explanation.replace(/\\n/g, '\n'))} />
+                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeRaw, rehypeKatex]} children={customParser(sample2.explanation.replace(/\\n/g, '\n'))} />
                         <br />
                         </>
                       }
@@ -341,7 +407,8 @@ const AddProblem = () => {
                       {sample3.explanation && 
                         <>
                         <h3>Explanation for Sample 3</h3>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(sample3.explanation.replace(/\\n/g, '\n'))} />
+                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeRaw, rehypeKatex]} children={customParser(sample3.explanation.replace(/\\n/g, '\n'))} />
                         <br />
                         </>
                       }
@@ -360,7 +427,7 @@ const AddProblem = () => {
                 <br />
                 <button className={styles.runAll} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
                 <br />
-              </div>                
+              </Container>                
             </div>
             <div id="split-1">
             <section style={{ height: "100vh", overflow: "auto" }}>

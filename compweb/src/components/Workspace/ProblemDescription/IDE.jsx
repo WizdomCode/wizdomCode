@@ -51,7 +51,8 @@ import {
   ScrollArea,
   Container,
   Group,
-  Button
+  Button,
+  Table
 } from '@mantine/core';
 import FileList from './FileList.jsx';
 import { SideNav } from '../../Navigation/SideNav.jsx';
@@ -59,7 +60,8 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import {
   IconNotebook,
   IconCircleDashedCheck,
-  IconBook
+  IconBook,
+  IconCheck
 } from '@tabler/icons-react'
 
 const card = (
@@ -373,17 +375,35 @@ const IDE = (props) => {
     }),
   }; 
   
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      const querySnapshot = await getDocs(collection(db, "Questions"));
-      const questionsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setQuestions(questionsData);
-    };
+  const allMetaData = useSelector(state => state.allMetaData);
 
-    fetchQuestions();
+  useEffect(() => {
+    if (allMetaData) setQuestions(Object.values(allMetaData));
+  }, [allMetaData]);
+
+  useEffect(() => {
+      const docRef = doc(db, "ProblemMetadata", "AllData");
+  
+      const fetchData = async () => {
+          try {
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                  const data = docSnap.data();
+                  dispatch({ type: 'SET_ALL_META_DATA', payload: data });
+              } else {
+                  console.log('No such document!');
+              }
+          } catch (error) {
+              console.log('Error getting document:', error);
+          }
+      };
+  
+      if (!allMetaData) {
+          console.log("Fetching all problem metadata...");
+          fetchData();
+      } else {
+          console.log("All problem metadata already exsitsw");
+      }
   }, []);
 
   useEffect(() => {
@@ -803,6 +823,26 @@ const submitCode = async () => {
     ];
   const tabIndex = useSelector(state => state.lessonTabIndex);
 
+  function extractYear(text) {
+    const regex = /\b\d{4}\b/;
+    let match = text.match(regex);
+    return match ? match[0] : null;
+  }
+  
+  function extractLevel(text) {
+    if (text.substring(0, 5) === 'USACO') {
+      const fullLvl = text.split(', ')[1];
+      return fullLvl.substring(0, fullLvl.length - 9) + 'P' + fullLvl.substring(fullLvl.length - 1);
+    } else {
+      const fullLvls = text.split(', ').slice(1);
+      let fullstr = '';
+      for (let lvl of fullLvls) {
+        fullstr += lvl[0] + lvl[lvl.length - 1] + ', ';
+      } 
+      return fullstr.substring(0, fullstr.length - 2);
+    }
+  }
+
   return (
     <>
       <Navigation />
@@ -979,44 +1019,44 @@ const submitCode = async () => {
                 <div className="question-list">
                   <div className="wrapper">
                     <div className="question-list-rect">
-                      <div>
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Name</th>
-                              <th>Points</th>
-                              <th>Topics</th>
-                              <th>Contest</th>
-                              <th>Solved</th>
-                              <th>Problems</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {currentPageData.map((q) => (
-                              <tr key={q.id}>
-                                <td>{q.title}</td>
-                                <td>{q.points}</td>
-                                <td>{q.topics.join(", ")}</td>
-                                <td>{q.contest}</td>
-                                  { userData && userData.solved ? <td>{userData.solved.includes(q.id) ? "yes" : "no"}</td> : <td>no</td> }
-                                <td>
-                                  <button
-                                    type="button"
-                                    className='open-question'
+                      <Table>
+                        <Table.Thead>
+                          <Table.Tr>
+                            <Table.Th>Contest</Table.Th>
+                            <Table.Th>Level</Table.Th>
+                            <Table.Th>Title</Table.Th>
+                            <Table.Th>Year</Table.Th>
+                            <Table.Th>Points</Table.Th>
+                            <Table.Th>Topics</Table.Th>
+                            <Table.Th><IconCheck /></Table.Th>
+                          </Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>
+                          { currentPageData && 
+                            currentPageData.map((problem) => (
+                              <Table.Tr key={problem.title}>
+                                <Table.Td>{problem.contest}</Table.Td>
+                                <Table.Td>{extractLevel(problem.specificContest)}</Table.Td>
+                                <Table.Td>
+                                  <Link 
                                     onClick={() => {
-                                      setQuestionID(q.title);
-                                      setTestCaseFolder(q.folder);
+                                      setQuestionID(problem.title);
+                                      setTestCaseFolder(problem.folder);
                                       window.scrollTo(0, 0); // This will scroll the page to the top
                                     }}
                                   >
-                                    <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                                    {problem.title}
+                                  </Link>
+                                </Table.Td>
+                                <Table.Td>{extractYear(problem.specificContest)}</Table.Td>
+                                <Table.Td>{problem.points}</Table.Td>
+                                <Table.Td>{problem.topics.join(", ")}</Table.Td>
+                                { userData && userData.solved ? <Table.Td>{userData.solved.includes(problem.id) ? "yes" : "no"}</Table.Td> : <Table.Td>no</Table.Td> }
+                              </Table.Tr>
+                            ))
+                          }
+                        </Table.Tbody>
+                      </Table>
                     </div>
                   </div>
                 </div>

@@ -27,6 +27,7 @@ import {
   IconCircleDashedCheck,
   IconBook
 } from '@tabler/icons-react'
+import { CodeHighlight } from '@mantine/code-highlight';
 
 const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, results, solutions, selectedTab }) => {
   // Example usage of getCategory// prints "String Algorithms"
@@ -40,20 +41,40 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
     setSelectedSolution(selectedSolution === index ? null : index);
   };
 
-  function customParser(text) {
-    const newText = text
-      .split('!table')
-      .map((str, index) => {
-        if (index % 2 === 0) {
-          return `<em class="${styles.descriptionText}">${str}</em><br />`;
+  function isList(str) {
+    const regex = /^(- |\d+\. )/;
+    return regex.test(str);
+  }
+  
+  function parseText(str) {
+    return str
+      .split('\n')
+      .map((str) => {
+        if (str.startsWith('<img')) {
+          console.log(str);
+          return `<div class="${styles.descriptionImgWrapper}">${str}</div>`
+        } else if (!isList(str)) {
+          return `<span class="${styles.descriptionText}">${str}</span><br />`;
         } else {
-          return str;
+          return `<span class="${styles.indent}">${str}</span>\n`;
         }
       })
-      .join('')
-      .replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
-    return newText;
+      .join('\n')
   }
+
+  function customParser(text) {
+      const newText = text
+        .split('!table')
+        .map((str, index) => {
+          if (index % 2 === 0) {
+            return `${parseText(str)}`;
+          } else {
+            return str;
+          }
+        })
+        .join('')
+      return newText;
+    }
 
   return (
     <Container>
@@ -81,21 +102,23 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
             {currentTab.data.inputFormat && (
               <>
                 <h3>Input Format</h3>
-                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))} />
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))}
+                />
                 <div className={styles.divider}></div>
                 <br />
               </>
             )}
-            {false && currentTab.data.constraints && (
+            {currentTab.data.constraints && (
               <>
                 <h3>Constraints</h3>
-                <ul>
-                  {Object.entries(currentTab.data.constraints).map(([key, value]) => (
-                    <li key={key}>
-                      <strong>{key}:</strong> {value}
-                    </li>
-                  ))}
-                </ul>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  children={customParser(currentTab.data.constraints.replace(/\\n/g, '\n'))}
+                />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -103,7 +126,11 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
             {currentTab.data.outputFormat && (
               <>
                 <h3>Output Format</h3>
-                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))} />
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))}
+                />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -111,13 +138,19 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
             {currentTab.data.sample1 && currentTab.data.sample1.input && (
               <>
                 <h3>Sample Input 1</h3>
-                <pre className={styles.codeSnippet}>{currentTab.data.sample1.input.replace(/\\n/g, '\n')}</pre>
+                <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample1.input.replace(/\\n/g, '\n')} language="txt" />
                 <br />
                 <h3>Output for Sample Input 1</h3>
-                <pre className={styles.codeSnippet}>{currentTab.data.sample1.output.replace(/\\n/g, '\n')}</pre>
+                <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample1.output.replace(/\\n/g, '\n')} language="txt" />
                 <br />
                 <h3>Explanation for Sample 1</h3>
-                {currentTab.data.sample1.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} />}
+                {currentTab.data.sample1.explanation && 
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                    children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} 
+                  />
+                }
                 <br />
                 <div className={styles.divider}></div>
                 <br />
@@ -126,14 +159,19 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
             {currentTab.data.sample2 && currentTab.data.sample2.input && (
               <>
                 <h3>Sample Input 2</h3>
-                <pre className={styles.codeSnippet}>{currentTab.data.sample2.input.replace(/\\n/g, '\n')}</pre>
+                <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample2.input.replace(/\\n/g, '\n')} language="txt" />
                 <br />
                 <h3>Output for Sample Input 2</h3>
-                <pre className={styles.codeSnippet}>{currentTab.data.sample2.output.replace(/\\n/g, '\n')}</pre>
+                <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample2.output.replace(/\\n/g, '\n')} language="txt" />
                 <br />
                 <h3>Explanation for Sample 2</h3>
-                {currentTab.data.sample2.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} />}
-                <br />
+                {currentTab.data.sample2.explanation && 
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                    children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} 
+                  />
+                }                <br />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -141,14 +179,19 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
             {currentTab.data.sample3 && currentTab.data.sample3.input && (
               <>
                 <h3>Sample Input 3</h3>
-                <pre className={styles.codeSnippet}>{currentTab.data.sample3.input.replace(/\\n/g, '\n')}</pre>
+                <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample3.input.replace(/\\n/g, '\n')} language="txt" />
                 <br />
                 <h3>Output for Sample Input 3</h3>
-                <pre className={styles.codeSnippet}>{currentTab.data.sample3.output.replace(/\\n/g, '\n')}</pre>
+                <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample3.output.replace(/\\n/g, '\n')} language="txt" />
                 <br />
                 <h3>Explanation for Sample 3</h3>
-                {currentTab.data.sample3.explanation && <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} />}
-                <br />
+                {currentTab.data.sample3.explanation && 
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                    children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} 
+                  />
+                }                <br />
                 <div className={styles.divider}></div>
                 <br />
               </>

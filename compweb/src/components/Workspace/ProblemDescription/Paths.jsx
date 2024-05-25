@@ -62,7 +62,9 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
     const [userData, setUserData] = useState(null);
     const [numProblems, setNumProblems] = useState(0);
     const [problemsCompleted, setProblemsCompleted] = useState(0);
-  
+
+    const allMetaData = useSelector(state => state.allMetaData);
+                
     useEffect(() => {
       const fetchUserData = async () => {
         try {
@@ -108,15 +110,7 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
 
     const fetchProblemData = async (questionID) => {
         if (questionID) {
-          try {
-            const docRef = await getDoc(doc(db, "Questions", questionID));
-            if (docRef.exists()) {
-                let problemData = docRef.data();
-                return problemData;
-            } else {
-            }
-          } catch (error) {
-          }
+          return allMetaData[questionID];
         }
       };
 
@@ -160,7 +154,7 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
 
             const data = await addGroup(props.problemIds);
             for (let question of data) {
-                if (userData && userData.solved && userData.solved.includes(question.title)) {
+                if (question && question.title && userData && userData.solved && userData.solved.includes(question.title)) {
                     count++;
                 }
                 numProblems++;
@@ -204,70 +198,6 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
             <CircleProgressBar progress={problemsCompleted / numProblems * 100} style={{position: 'absolute', zIndex: 1}}/>
             <ClickAwayListener onClickAway={handleTooltipClose}>
                 <div style={{position: 'absolute', zIndex: 2, top: 25, left: 35, right: -10, bottom: 0}}>
-                    <HtmlTooltip
-                        title={
-                            <React.Fragment>
-                                {questions.length !== 0 && (
-                                    <div className="question-list-rect" style={{ zIndex: 9999 }}>
-                                        <div>
-                                        <table>
-                                            <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Points</th>
-                                                <th>Topics</th>
-                                                <th>Contest</th>
-                                                <th>Solved</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {questions.map((q) => (
-                                                <tr key={q.id}>
-                                                <td>{q.title}</td>
-                                                <td>{q.points}</td>
-                                                <td>{q.topics.join(", ")}</td>
-                                                <td>{q.contest}</td>
-                                                { userData && userData.solved ? <td>{userData.solved.includes(q.title) ? "yes" : "no"}</td> : <td>no</td> }
-                                                <td>
-                                                    <button
-                                                    type="button"
-                                                    className='open-question'
-                                                    onClick={() => {
-                                                        window.scrollTo(0, 0); // This will scroll the page to the top
-                                                        dispatch({
-                                                            type: 'SET_LESSON_META_DATA',
-                                                            index: tabIndex,
-                                                            payload: {
-                                                                division: props.division,
-                                                                lesson: props.lessonName,
-                                                                problem_id: q.title // TODO: This becomes problem if question id in firebase differs from question title
-                                                            },
-                                                        })
-                                                    }}
-                                                    >
-                                                    <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
-                                                    </button>
-                                                </td>
-                                                </tr>
-                                            ))}
-                                            </tbody>
-                                        </table>
-                                        </div>
-                                    </div>
-                                )}
-                            </React.Fragment>
-                        }
-                        PopperProps={{
-                            disablePortal: true,
-                        }}
-                        onClose={handleTooltipClose}
-                        open={open}
-                        disableFocusListener
-                        disableHoverListener
-                        disableTouchListener
-                        arrow
-                    >
                         <div 
                             className={`lesson-background-rect ${ open ? 'hovered' : ''}`}
                             // onClick={handleTooltipOpen}
@@ -286,7 +216,6 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                                 <Item className={`bottom-rectangle ${props.lessonName.length > 12 ? 'long-lesson-name' : 'lesson-name'}`}>{ props.lessonName }</Item>
                             </div>
                         </div>
-                    </HtmlTooltip>
                     {activeCategoryId && activeCategoryId.unitTitle === props.categoryId.unitTitle && activeCategoryId.lessonIndex === props.categoryId.lessonIndex && activeCategoryId.rowIndex === props.categoryId.rowIndex &&
                         <ArrowDropUpRoundedIcon style={{ height: '100px', width: '100px', marginTop: '-30px', marginLeft: '35px' }}/>
                     }
@@ -359,35 +288,14 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
         }
     };
 
-    const fetchProblemData = async (questionID) => {
-        if (questionID) {
-          try {
-            const docRef = await getDoc(doc(db, "Questions", questionID));
-            if (docRef.exists()) {
-                let problemData = docRef.data();
-                return problemData;
-            } else {
-            }
-          } catch (error) {
-          }
-        }
-      };
-
-    const addGroup = async (problemIds) => {
-        const problemDataPromises = problemIds.map(problem_id => fetchProblemData(problem_id));
-        const problemsData = await Promise.all(problemDataPromises);
-        problemsData.forEach((problemData, index) => {
-        });
-        return problemsData;
-    };
+    const allMetaData = useSelector(state => state.allMetaData);
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await addGroup(lessons[lastPressed].problemIds);
-            setQuestions(data);
-        };
     
-        fetchData();
+        if (lessons && lessons[lastPressed] && allMetaData) {
+            const rowMetaData = lessons[activeCategoryId.rowIndex][activeCategoryId.lessonIndex].problemIds.map(problem_id => allMetaData[problem_id]);
+            setQuestions(rowMetaData);
+        }
     }, [lastPressed]);
 
     useEffect(() => {
@@ -478,32 +386,33 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                                                 </thead>
                                                 <tbody>
                                                 {lessonQuestionList.map((q) => (
+                                                    q && q.title &&
                                                     <tr key={q.id}>
-                                                    <td>{q.title}</td>
-                                                    <td>{q.points}</td>
-                                                    <td>{q.topics.join(", ")}</td>
-                                                    <td>{q.contest}</td>
-                                                    { userData && userData.solved ? <td>{userData.solved.includes(q.title) ? "yes" : "no"}</td> : <td>no</td> }
-                                                    <td>
-                                                        <button
-                                                        type="button"
-                                                        className='open-question'
-                                                        onClick={() => {
-                                                            window.scrollTo(0, 0); // This will scroll the page to the top
-                                                            dispatch({
-                                                                type: 'SET_LESSON_META_DATA',
-                                                                index: tabIndex,
-                                                                payload: {
-                                                                    division: division,
-                                                                    lesson: lastPressed,
-                                                                    problem_id: q.title // TODO: This becomes problem if question id in firebase differs from question title
-                                                                },
-                                                            })
-                                                        }}
-                                                        >
-                                                        <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
-                                                        </button>
-                                                    </td>
+                                                        <td>{q.title}</td>
+                                                        <td>{q.points}</td>
+                                                        <td>{q.topics.join(", ")}</td>
+                                                        <td>{q.contest}</td>
+                                                        { userData && userData.solved ? <td>{userData.solved.includes(q.title) ? "yes" : "no"}</td> : <td>no</td> }
+                                                        <td>
+                                                            <button
+                                                            type="button"
+                                                            className='open-question'
+                                                            onClick={() => {
+                                                                window.scrollTo(0, 0); // This will scroll the page to the top
+                                                                dispatch({
+                                                                    type: 'SET_LESSON_META_DATA',
+                                                                    index: tabIndex,
+                                                                    payload: {
+                                                                        division: division,
+                                                                        lesson: lastPressed,
+                                                                        problem_id: q.title // TODO: This becomes problem if question id in firebase differs from question title
+                                                                    },
+                                                                })
+                                                            }}
+                                                            >
+                                                            <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 ))}
                                                 </tbody>
@@ -516,65 +425,38 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                         );
                     })}
                 </div>
-                { false && <button onClick={scrollRight} className="scroll-button right">
-                    <img src='/rightarrow.png' alt='Right' style={{maxWidth: "50px", maxHeight: "50px", background: "transparent"}}/>
-                </button>}
-            {isQuestionListOpen && questions.length !== 0 && (
-                <div className="question-list">
-                <div className="wrapper">
-                  <div className="question-list-rect">
-                    <div>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Points</th>
-                            <th>Topics</th>
-                            <th>Contest</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {questions.map((q) => (
-                            <tr key={q.id}>
-                              <td>{q.title}</td>
-                              <td>{q.points}</td>
-                              <td>{q.topics.join(", ")}</td>
-                              <td>{q.contest}</td>
-                              <td>
-                                <button
-                                  type="button"
-                                  className='open-question'
-                                  onClick={() => {
-                                    window.scrollTo(0, 0); // This will scroll the page to the top
-                                    dispatch({
-                                        type: 'SET_LESSON_META_DATA',
-                                        index: tabIndex,
-                                        payload: {
-                                            division: division,
-                                            lesson: lastPressed,
-                                            problem_id: q.title // TODO: This becomes problem if question id in firebase differs from question title
-                                        },
-                                    })
-                                  }}
-                                >
-                                  <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
         </div>
     );
 };
 
 const Paths = (props) => {
+    const allMetaData = useSelector(state => state.allMetaData);
+
+    useEffect(() => {
+        const docRef = doc(db, "ProblemMetadata", "AllData");
+    
+        const fetchData = async () => {
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    dispatch({ type: 'SET_ALL_META_DATA', payload: data });
+                } else {
+                    console.log('No such document!');
+                }
+            } catch (error) {
+                console.log('Error getting document:', error);
+            }
+        };
+    
+        if (!allMetaData) {
+            console.log("Fetching all problem metadata...");
+            fetchData();
+        } else {
+            console.log("All problem metadata already exsitsw");
+        }
+    }, []);
+
     function customParser(text) {
         const newText = text.replace(/`(.*?)`/g, `<span class="${styles.customLatex}">$1</span>`);
         return newText;

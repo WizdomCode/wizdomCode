@@ -53,7 +53,8 @@ int main() {
   lessonQuestionList: null,
   userInfo: null,
   filesSectionOpen: true,
-  templatesSectionOpen: true
+  templatesSectionOpen: true,
+  allMetaData: null
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -293,6 +294,12 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         templatesSectionOpen: !state.templatesSectionOpen
+      }
+    }
+    case 'SET_ALL_META_DATA': {
+      return {
+        ...state,
+        allMetaData: action.payload
       }
     }
     default:
