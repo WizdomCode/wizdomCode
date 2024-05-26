@@ -31,9 +31,9 @@ export const JUNIOR_UNIT_LESSONS = [
         [{ category: "1 Problem", lessonName: "Greedy", imgPath: "/open.png", problemIds: ["Epidemiology"] }],
     ], 
     [
-        [{ category: "4 Problems", lessonName: "BFS", imgPath: "/open.png", problemIds: ["Strategic Bombing"] },
-        { category: "5 Problems", lessonName: "DFS", imgPath: "/open.png", problemIds: ["Unfriend"] }],
         [{ category: "4 Problems", lessonName: "Recursion", imgPath: "/open.png", problemIds: ["Epidemiology"] },
+        { category: "5 Problems", lessonName: "DFS", imgPath: "/open.png", problemIds: ["Unfriend"] }],
+        [{ category: "4 Problems", lessonName: "BFS", imgPath: "/open.png", problemIds: ["Strategic Bombing"] },
         { category: "2 Problems", lessonName: "Dynamic Programming 1", imgPath: "/open.png", problemIds: ["Epidemiology"] }]
     ]
 ];

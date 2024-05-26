@@ -51,7 +51,6 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
       .split('\n')
       .map((str) => {
         if (str.startsWith('<img')) {
-          console.log(str);
           return `<div class="${styles.descriptionImgWrapper}">${str}</div>`
         } else if (!isList(str)) {
           return `<span class="${styles.descriptionText}">${str}</span><br />`;
@@ -207,8 +206,11 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
           <br />
           <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
           <br />
-          { 
-          testCasesVisible ?
+        </div> 
+      )}
+
+      { selectedTab === 'tests' && ( 
+        testCasesVisible ?
           <div className={styles.testCases}>
             {displayCases ? displayCases.map((testCase, index) => {
               const status = results[index]?.status?.description;
@@ -253,8 +255,6 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
           <div>
             <Button onClick={() => setTestCasesVisible(true)}>Show test cases</Button>
           </div>
-          }
-        </div> 
         )}
 
         {selectedTab === 'solution' && (

@@ -61,7 +61,8 @@ import {
   IconNotebook,
   IconCircleDashedCheck,
   IconBook,
-  IconCheck
+  IconCheck,
+  IconFlask
 } from '@tabler/icons-react'
 
 const card = (
@@ -601,18 +602,19 @@ const submitCode = async () => {
       const rdata = await getDoc(docRef);
       if (rdata.exists) {
         const ndata = rdata.data();
+        
+        console.log(ndata);
       
         // Check if results array exists in ndata
         if (ndata && ndata.results && Array.isArray(ndata.results)) {
-          // Iterate over results
-          for (let result of ndata.results) {
-            if (result.key === "stop") {
-              stopFetching = true;
-              break; // Exit loop if condition is met
-            }
-            xdata.push(result);
+          setResults(ndata.results);
+          
+          console.log("ndata.results.length", ndata.results.length);
+          console.log("displayCases.length", displayCases.length)
+          if (ndata.results.length >= displayCases.length) {
+            stopFetching = true;
+            break;
           }
-        } else {
         }
       
         if (!stopFetching) {
@@ -630,7 +632,6 @@ const submitCode = async () => {
       } catch (error) {
       }
 
-    setResults(xdata);
   };
   
 
@@ -906,6 +907,8 @@ const submitCode = async () => {
           { props.currentPage === 'problems' && currentTab.type === 'problem' &&
             <Group gap={0} bg={'var(--code-bg)'} mt={6}>
               <Button style={{ color: selectedTab === 'question' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconNotebook style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('question')}>Description</Button>
+              <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
+              <Button style={{ color: selectedTab === 'tests' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconFlask style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('tests')}>Test cases</Button>
               <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
               <Button style={{ color: selectedTab === 'solution' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconCircleDashedCheck style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('solution')}>Solution</Button>
               <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
