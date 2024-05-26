@@ -570,7 +570,7 @@ int main() {
     }
 };
 
-const submitCode = async () => {
+const submitCode = async (tests = testCases, numTests = testCases.length) => {
     setCurrentCode(codeState.code);
     // Start the timer
     const startTime = performance.now();
@@ -583,7 +583,7 @@ const submitCode = async () => {
       body: JSON.stringify({
         language: codeState.language,
         code: codeState.code,
-        test_cases: testCases
+        test_cases: tests
       })
     });
   
@@ -607,11 +607,20 @@ const submitCode = async () => {
       
         // Check if results array exists in ndata
         if (ndata && ndata.results && Array.isArray(ndata.results)) {
+          if (numTests === 1) {
+            const results = new Array(ndata.results[0].key - 1).fill(null);
+            results.push(ndata.results[0]);
+            setResults(results);
+
+            stopFetching = true;
+            break;
+          }
+
           setResults(ndata.results);
           
           console.log("ndata.results.length", ndata.results.length);
-          console.log("displayCases.length", displayCases.length)
-          if (ndata.results.length >= displayCases.length) {
+          console.log("numTests", numTests)
+          if (ndata.results.length >= numTests) {
             stopFetching = true;
             break;
           }
@@ -710,7 +719,7 @@ const submitCode = async () => {
     const problemPassed = () => {
       if (results && results.length !== 0) {
           for (let test of results) {
-              if (test.status.description !== 'Accepted') {
+              if (test && test.status.description !== 'Accepted') {
                   return false;
               }
           }
@@ -924,7 +933,7 @@ const submitCode = async () => {
                 <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
               </>
             ) : currentTab.type === 'problem' ? (
-                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} displayCases={displayCases} results={results} solutions={solutions} selectedTab={selectedTab}/>
+                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} testCases={testCases} displayCases={displayCases} results={results} solutions={solutions} selectedTab={selectedTab}/>
             ) : currentTab.type === 'newTab' ? (
               <Container>
                 <div className='hero'> 

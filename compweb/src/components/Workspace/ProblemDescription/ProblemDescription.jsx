@@ -25,11 +25,12 @@ import { getCategory, getDifficultyLevel } from '../../../../public/CATEGORY_NAM
 import {
   IconNotebook,
   IconCircleDashedCheck,
-  IconBook
+  IconBook,
+  IconPlayerPlay
 } from '@tabler/icons-react'
 import { CodeHighlight } from '@mantine/code-highlight';
 
-const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, results, solutions, selectedTab }) => {
+const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displayCases, results, solutions, selectedTab }) => {
   // Example usage of getCategory// prints "String Algorithms"
   
   // Example usage of getDifficultyLevel // prints { level: 'Intermediate', number: 1 }
@@ -204,7 +205,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
           </div>
           <br />
           <br />
-          <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
+          <button className={styles.runAll} onClick={() => submitCode()} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
           <br />
         </div> 
       )}
@@ -217,7 +218,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
                 const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
               return (
-                <div key={testCase.key} className={className}>
+                <div key={testCase.key}>
                   <br />
                   <h3 className={className}>
                     Case {testCase.key}
@@ -232,17 +233,19 @@ const ProblemDescription = ({ userData, currentTab, submitCode, displayCases, re
                     )}
                   <br />
                   <h4 className={className}>Input:</h4>
-                  <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
+                  <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.input).replace(/\\r\\n/g, '\n')} language="txt" />
                   <br />
                   <h4 className={className}>Expected Output:</h4>
-                  <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
+                  <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.output).replace(/\\r\\n/g, '\n')} language="txt" />
                   {results[index] && results[index].status.description === 'Wrong Answer' && (
                     <>
                       <br />
                       <h4 className={className}>Actual Output:</h4>
-                      <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
+                      <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"} language="txt" />
                     </>
                   )}
+                  <br />
+                  <Button onClick={() => {console.log(testCases); submitCode([testCases[testCase.key - 1]], 1);}} variant="light" leftSection={<IconPlayerPlay size={14} />} >Run</Button>
                 </div>
               );                
             }): (
