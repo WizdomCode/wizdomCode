@@ -1,17 +1,18 @@
 import { Image, Container, Title, Button, Group, Text, List, ThemeIcon, rem } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
-import classes from './Section.module.css';
+import classes from './HeroBullets.module.css';
 
-export function Section() {
+export function HeroBullets() {
   return (
-    <Container size="lg">
+    <Container size="md">
       <div className={classes.inner}>
         <div className={classes.content}>
           <Title className={classes.title}>
-            Free. Fun. <span className={classes.highlight}>Effective.</span>
+            The best <span className={classes.highlight}>all-in-one</span> platform to learn Competitve Programming <br />
           </Title>
           <Text c="dimmed" mt="md">
-            The Top Solver is the fastest and most robust way to learn competitive programming online.
+            Build fully functional accessible web applications faster than ever – Mantine includes
+            more than 120 customizable components and hooks to cover you in any situation
           </Text>
 
           <List
@@ -28,14 +29,22 @@ export function Section() {
               <b>250+ Problems</b> – practice all possible topics with problems pulled from your favorite programming contests
             </List.Item>
             <List.Item>
-              <b>59 Problemsets</b> – carefully designed to provide thorough understanding of topics
+              <b>60 Problemsets</b> – carefully designed to provide thorough understanding of topics
             </List.Item>
             <List.Item>
               <b>Linear progression</b> – Build your skills from the ground up by learning topics in a carefully designed progression
             </List.Item>
           </List>
+
+          <Group mt={30}>
+            <Button radius="xl" size="md" className={classes.control}>
+              Get started
+            </Button>
+            <Button variant="default" radius="xl" size="md" className={classes.control}>
+              Source code
+            </Button>
+          </Group>
         </div>
-        <Image src={'/logo512.png'} className={classes.image} />
       </div>
     </Container>
   );
