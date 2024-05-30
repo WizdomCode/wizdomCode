@@ -658,6 +658,19 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
       try {
         // Get a reference to the user's document
         const userDocRef = doc(db, "Users", userUid);
+        if (!questionDocSnapshot.exists() || !questionDocSnapshot.data().solutions) {
+          await setDoc(questionDocRef, { solutions: [] }, { merge: true });
+        }
+  
+        // Update the solutions array in the question document
+        const solutionMap = {
+          userId: userDocRef.username,
+          solution: code,
+          executionTime: executionTime
+        };
+        await updateDoc(questionDocRef, {
+          solutions: arrayUnion(solutionMap)
+        });
         
         // Check if the question is already solved by the user
         const userDocSnapshot = await getDoc(userDocRef);
@@ -678,20 +691,6 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
           const questionDocSnapshot = await getDoc(questionDocRef);
           
           // Check if solutions array exists, if not, create it
-          if (!questionDocSnapshot.exists() || !questionDocSnapshot.data().solutions) {
-            await setDoc(questionDocRef, { solutions: [] }, { merge: true });
-          }
-    
-          // Update the solutions array in the question document
-          const solutionMap = {
-            userId: userUid,
-            solution: code,
-            executionTime: executionTime,
-            score: 0
-          };
-          await updateDoc(questionDocRef, {
-            solutions: arrayUnion(solutionMap)
-          });
     
     
           // Check and update daily challenge progress
