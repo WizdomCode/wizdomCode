@@ -17,10 +17,11 @@ import CheckCircle from '@mui/icons-material/CheckCircle';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
+import SolutionDisplay from './SolutionDisplay';
+import { Container } from '@mantine/core';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css'; // don't forget to import katex styles
-import { Button, Overlay, AspectRatio, Group, Container } from '@mantine/core';
 import { getCategory, getDifficultyLevel } from '../../../../public/CATEGORY_NAMES.js';
 import {
   IconNotebook,
@@ -265,19 +266,15 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
             {/* Content for the solution tab */}
             <h1>Solution</h1>
             <div>
-              {solutions.map((solution, index) => (
-                <div key={index}>
-                  <span>User ID: {solution.userId}</span>
-                  <span>Execution Time: {solution.executionTime}</span>
-                  <span>Score: {solution.score}</span>
-                  <button onClick={() => toggleCodeVisibility(index)}>
-                    {selectedSolution === index ? 'Hide Code' : 'Show Code'}
-                  </button>
-                  <pre style={{ display: selectedSolution === index ? 'block' : 'none' }}>
-                    <code>{solution.solution}</code>
-                  </pre>
-                </div>
-              ))}
+            {solutions.map((solution, index) => (
+          <SolutionDisplay
+            key={index}
+            solution={solution}
+            index={index}
+            selectedSolution={selectedSolution}
+            toggleCodeVisibility={toggleCodeVisibility}
+          />
+        ))}
             </div>
             {/* Add solution content here */}
           </div>

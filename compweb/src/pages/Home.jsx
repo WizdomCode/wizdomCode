@@ -1,4 +1,4 @@
-import React, {  } from "react";
+import React from "react";
 import Navigation from "../components/Navigation/Navigation";
 import styles from '../components/styles/ProblemDescription.module.css';
 import "../Fonts.css";
@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import '../components/styles/Workspace.css';
 import "../components/styles/Paths.css";
 import Box from '@mui/material/Box';
-import { Container} from '@mantine/core';
+import { Container } from '@mantine/core';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
@@ -30,7 +30,16 @@ const Home = () => {
     return (
         <div style={{ backgroundColor: 'var(--site-bg)' }}>
             <Navigation />
-            <Container size="md"> {/* You can adjust the size (sm, md, lg, xl) or use a custom width */}
+            <Box 
+              sx={{ 
+                maxWidth: '1200px',  // Adjust this value to control the width
+                margin: '0 auto', 
+                padding: '20px',
+                transform: 'scale(1.1)', // Adjust this value to control the zoom
+                transformOrigin: 'top center',
+                marginBottom: '40px'  // Add margin-bottom to create space between the box and the footer
+              }}
+            >
               <Box sx={{ textAlign: 'center', width: '100%' }}>
                 <HeroText />
               </Box>
@@ -41,10 +50,10 @@ const Home = () => {
               <Box sx={{ textAlign: 'center', width: '100%' }}>
                 <FeaturesTitle />
               </Box>
-              <Box sx={{ textAlign: 'center', width: '100%' }}>
+              <Box sx={{ textAlign: 'center', width: '100%', marginBottom: '60px'  }}>
                 <FeaturesCards />
               </Box>
-            </Container>
+            </Box>
             <Footer />
         </div>
     );

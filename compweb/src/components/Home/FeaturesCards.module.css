@@ -10,6 +10,7 @@
   .description {
     max-width: rem(600px);
     margin: auto;
+    text-align: center;
   
     &::after {
       content: '';
