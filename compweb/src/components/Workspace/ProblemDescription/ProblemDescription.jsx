@@ -18,7 +18,6 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import SolutionDisplay from './SolutionDisplay';
-import { Container } from '@mantine/core';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex'; 
 import 'katex/dist/katex.min.css'; // don't forget to import katex styles
