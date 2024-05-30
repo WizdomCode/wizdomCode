@@ -8,7 +8,7 @@ import * as monaco from 'monaco-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { auth, app, db } from "../../../firebase.js";
-import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, doc, updateDoc, arrayUnion, setDoc, deleteDoc } from "firebase/firestore";
 import { styled, alpha } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -53,7 +53,10 @@ import {
   Stack,
   Group,
   Button,
-  Code
+  Code,
+  LoadingOverlay,
+  Loader,
+  Kbd
 } from '@mantine/core';
 import {
   Tree,
@@ -266,20 +269,19 @@ const CodeEditor = (props) => {
 
   useEffect(() => {
     props.getCode(code, language);
-    if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language) {
-      dispatch({
-        type: 'SET_CODE_STATE',
-        payload: {
-          language: fileTabs[activeTabIndex].language,
-          code: code
-        }
-      })
-    }
 
     if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language);
   }, [code]);
 
+  const codeState = useSelector(state => state.codeState); 
+
   const submitCode = async () => {
+
+    console.log("Submitted data", JSON.stringify({
+      language: fileTabs[activeTabIndex].language,
+      code: getEditorModels(),
+      test_cases: [{ key: 1, input: localInputData, output: ''}]
+    }));
 
     // Start the timer
     const startTime = performance.now();
@@ -290,8 +292,8 @@ const CodeEditor = (props) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        language: language,
-        code: code,
+        language: fileTabs[activeTabIndex].language,
+        code: getEditorModels(),
         test_cases: [{ key: 1, input: localInputData, output: ''}]
       })
     });
@@ -299,8 +301,45 @@ const CodeEditor = (props) => {
     // End the timer and calculate the elapsed time
     const endTime = performance.now();
     const elapsedTime = endTime - startTime;
-    const data = await response.json();
-    setLocalOutputData(data[0].stdout + `\nExecution time: ${data[0].time}s`);
+    console.log("elapsedTime", elapsedTime);
+
+    // Extract request_id from response
+    const { request_id } = await response.json();
+  
+    // Continuously fetch data from Firestore until the condition is met
+    let stopFetching = false;
+    while (!stopFetching) {
+      // Fetch data from Firestore using request_id
+      const docRef = doc(db, "Results", request_id);
+      const rdata = await getDoc(docRef);
+      if (rdata.exists) {
+        const ndata = rdata.data();
+        
+        console.log(ndata);
+      
+        // Check if results array exists in ndata
+        if (ndata && ndata.results && Array.isArray(ndata.results)) {
+          console.log("ndata.results", ndata.results);
+          setLocalOutputData(ndata.results[0].stdout);
+          dispatch({ type: 'TOGGLE_RUNNING_CUSTOM_CASE' });
+          stopFetching = true;
+          break;
+        }
+      
+        if (!stopFetching) {
+          // Delay before next fetch to avoid overwhelming the server
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } else {
+        break;
+      }
+    }
+    // Once the condition is met, set results to the data received so far
+    const docRef = doc(db, "Results", request_id);
+    try {
+      await deleteDoc(docRef);
+    } catch (error) {
+    }
   };  
 
 
@@ -501,6 +540,75 @@ const CodeEditor = (props) => {
 
   const isFileListOpen = useSelector(state => state.isFileListOpen);
 
+  const runningCustomCase = useSelector(state => state.runningCustomCase);
+
+  const getCurrentCodeSignal = useSelector(state => state.getCurrentCodeSignal);
+
+  const updateFileCodeSignal = useSelector(state => state.updateFileCodeSignal);
+
+  // Query state of models
+  const codeSpaceRef = useRef();
+
+  const getEditorModels = () => {
+    if (codeSpaceRef.current) {
+      const models = codeSpaceRef.current.getModels();
+      
+      console.log("models", models);
+
+      const currentCode = models[fileTabs[activeTabIndex].id].getValue();
+
+      console.log(currentCode);
+
+      dispatch({
+        type: 'SET_CODE_STATE',
+        payload: {
+          language: fileTabs[activeTabIndex].language,
+          code: currentCode
+        }
+      });
+
+      return currentCode;
+    }
+  }
+
+  useEffect(() => {
+    if (getCurrentCodeSignal) {
+      getEditorModels();
+      dispatch({ type: 'TOGGLE_GET_CODE_SIGNAL' });
+    }
+  }, [getCurrentCodeSignal]);
+
+  const updateFileCode = () => {
+    if (codeSpaceRef.current) {
+      const models = codeSpaceRef.current.getModels();
+
+      console.log("treeData", treeData);
+
+      const newFileCode = {};
+
+      treeData.forEach((file) => {
+        if (!file.droppable) {
+          console.log("Updating file", file);
+
+          const code = models[file.id].getValue();
+          
+          newFileCode[file.id] = code;
+        }
+      });
+
+      console.log("newFileCode", newFileCode);
+
+      dispatch({ type: 'SET_FILE_CODE', payload: newFileCode });
+    }
+  }
+
+  useEffect(() => {
+    if (updateFileCodeSignal) {
+      updateFileCode();
+      dispatch({ type: 'TOGGLE_UPDATE_FILE_CODE_SIGNAL' });
+    }
+  }, [updateFileCodeSignal]);
+
   return (
     <>
       <Main open={filesOpen} style={{ width: '100%' }}>
@@ -523,65 +631,64 @@ const CodeEditor = (props) => {
             ))
             }
           </div>
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <ThemeProvider theme={darkTheme}>
-              <div>
-                {['right'].map((anchor) => (
-                  <React.Fragment key={anchor}>
-                    <Button onClick={toggleDrawer(anchor, true)}>TEMPLATES</Button>
-                    <Drawer
-                      anchor={anchor}
-                      open={state[anchor]}
-                      onClose={toggleDrawer(anchor, false)}
-                    >
-                      {Object.entries(TEMPLATE_CODE).map(([templateName, languages], index) => (
-                        <Accordion expanded={expanded === `${index}`} onChange={handleChange(`${index}`)} key={`${index}`}>
-                          <AccordionSummary aria-controls={`${index}-content`} id={`${index}-header`}>
-                            <Typography>{`Insert ${templateName}`}</Typography>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                          {Object.entries(languages).map(([language, code]) => (
-                            <div key={language}>
-                              <Typography variant="h6">{language.toUpperCase()}</Typography>
-                              <div style={{position: 'relative'}}>
-                                <SyntaxHighlighter language={language.toLowerCase()} style={solarizedlight}>
-                                  {code}
-                                </SyntaxHighlighter>
-                                <CopyToClipboard text={code}>
-                                  <button style={{position: 'absolute', top: 2, right: 2}}><ContentCopyIcon /></button>
-                                </CopyToClipboard>
-                                </div>
-                            </div>
-                          ))}
-                          </AccordionDetails>
-                        </Accordion>
-                      ))}
-                    </Drawer>
-                  </React.Fragment>
-                ))}
-              </div>
-              <div>
+          <div className={styles.rightAlign}>
+            <Group gap={8}>
+              <ThemeProvider theme={darkTheme}>
+                <div>
+                  {['right'].map((anchor) => (
+                    <React.Fragment key={anchor}>
+                      <Button onClick={toggleDrawer(anchor, true)} display={'none'}>TEMPLATES</Button>
+                      <Drawer
+                        anchor={anchor}
+                        open={state[anchor]}
+                        onClose={toggleDrawer(anchor, false)}
+                      >
+                        {Object.entries(TEMPLATE_CODE).map(([templateName, languages], index) => (
+                          <Accordion expanded={expanded === `${index}`} onChange={handleChange(`${index}`)} key={`${index}`}>
+                            <AccordionSummary aria-controls={`${index}-content`} id={`${index}-header`}>
+                              <Typography>{`Insert ${templateName}`}</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                            {Object.entries(languages).map(([language, code]) => (
+                              <div key={language}>
+                                <Typography variant="h6">{language.toUpperCase()}</Typography>
+                                <div style={{position: 'relative'}}>
+                                  <SyntaxHighlighter language={language.toLowerCase()} style={solarizedlight}>
+                                    {code}
+                                  </SyntaxHighlighter>
+                                  <CopyToClipboard text={code}>
+                                    <button style={{position: 'absolute', top: 2, right: 2}}><ContentCopyIcon /></button>
+                                  </CopyToClipboard>
+                                  </div>
+                              </div>
+                            ))}
+                            </AccordionDetails>
+                          </Accordion>
+                        ))}
+                      </Drawer>
+                    </React.Fragment>
+                  ))}
+                </div>
+                <div>
+                  <IconButton
+                    className={styles.buttonIcon}
+                    onClick={() => {
+                  }}>
+                    <SaveIcon style={{color: 'white'}} onClick={() => { saveCode() }}/>
+                  </IconButton>
+                </div>
                 <IconButton
-                  className={styles.buttonIcon}
-                  onClick={() => {
-                }}>
-                  <SaveIcon style={{color: 'white'}} onClick={() => { saveCode() }}/>
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="end"
+                  onClick={handleDrawerOpen}
+                  sx={{ ...(true && { display: 'none' }) }}
+                >
+                  <MenuIcon style={{color: "white"}}/>
                 </IconButton>
-              </div>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                edge="end"
-                onClick={handleDrawerOpen}
-                sx={{ ...(true && { display: 'none' }) }}
-              >
-                <MenuIcon style={{color: "white"}}/>
-              </IconButton>
-              <MenuIcon
-                style={{color: "white"}}
-                onClick={() => { dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true }); }}
-              />
-            </ThemeProvider>
+              </ThemeProvider>
+              <Button onClick={getEditorModels}>fjdslkajf</Button>
+            </Group>
           </div>
         </div>
         </div>
@@ -605,17 +712,22 @@ const CodeEditor = (props) => {
         (fileTabs.length > 0 ?
           <div className={styles.codeEditor}>
             <CodeSpace
+              ref={codeSpaceRef}
               height="100%"
               language={fileTabs[activeTabIndex].language}
               value={fileCode[fileTabs[activeTabIndex].id]}
               onValueChange={(value) => {
+                console.log("Somehting is happening");
+                console.log("fileTabs[activeTabIndex]", fileTabs[activeTabIndex]);
                 dispatch({ type: 'UPDATE_FILE_CODE', key: fileTabs[activeTabIndex].id, value: value })
                 setCode(value);
+                dispatch({ type: 'UPDATE_IS_FILE_SAVED', payload: false });
               }}
               fileTabs={fileTabs}
               fileCode={fileCode}
               treeData={treeData}
               path={fileTabs[activeTabIndex].id}
+              dispatch={dispatch}
             />
           </div> :
           <Stack align="center" justify="center" style={{ height: '100%' }}>
@@ -639,19 +751,19 @@ const CodeEditor = (props) => {
               </Stack>
               <Stack>
               <div>
-                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>Shift</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>P</Code>
+                {' '}<Kbd style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Kbd> + <Kbd style={{ backgroundColor: 'var(--selected-item)' }}>Shift</Kbd> + <Kbd style={{ backgroundColor: 'var(--selected-item)' }}>P</Kbd>
               </div>
               <div>
-                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>P</Code>
+                {' '}<Kbd style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Kbd> + <Kbd style={{ backgroundColor: 'var(--selected-item)' }}>P</Kbd>
               </div>
               <div>
-                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>Shift</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>F</Code>
+                {' '}<Kbd style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Kbd> + <Kbd style={{ backgroundColor: 'var(--selected-item)' }}>Shift</Kbd> + <Kbd style={{ backgroundColor: 'var(--selected-item)' }}>F</Kbd>
               </div>
               <div>
-                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>F11</Code>
+                {' '}<Kbd style={{ backgroundColor: 'var(--selected-item)' }}>F11</Kbd>
               </div>
               <div>
-                {' '}<Code style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Code> + <Code style={{ backgroundColor: 'var(--selected-item)' }}>,</Code>
+                {' '}<Kbd style={{ backgroundColor: 'var(--selected-item)' }}>Ctrl</Kbd> + <Kbd style={{ backgroundColor: 'var(--selected-item)' }}>,</Kbd>
               </div>
               </Stack>
             </Group>
@@ -660,83 +772,88 @@ const CodeEditor = (props) => {
         </Panel>
         <PanelResizeHandle style={{ position: 'relative', cursor: 'row-resize', background: 'var(--border)', height: '1px', zIndex: 1 }}/>
         <Panel>
-        <div className={styles.inputOutputSection}>
-          <div className={styles.tabWrapper} style={{ borderBottom: '1px solid var(--border)' }}>
-              <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)' }}>
-                <button 
-                  className={styles.buttonTab} 
-                  style={{background: inputOutputTab === 'input' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
-                  onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
-                >
-                  <p style={{color: inputOutputTab === 'input' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Input</p>
-                </button>
-                <button 
-                  className={styles.buttonTab} 
-                  style={{background: inputOutputTab === 'output' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
-                  onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
-                >
-                  <p style={{color: inputOutputTab === 'output' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Output</p>
-                </button>
-                <div className={styles.rightAlign}>
-                  <Group gap={8}>
-                    <Button
-                      variant="light"
-                      className={styles.buttonIcon}
-                      onClick={() => {
-                      submitCode();
-                      dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
-                    }}>
-                      RUN
-                    </Button>
-                    <Button
-                      className={styles.buttonIcon}
-                      onClick={() => {
-                      submitCode();
-                      dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
-                    }}>
-                      SUBMIT
-                    </Button>
-                  </Group>
+          <div className={styles.inputOutputSection}>
+            <div className={styles.tabWrapper} style={{ borderBottom: '1px solid var(--border)' }}>
+                <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)' }}>
+                  <button 
+                    className={styles.buttonTab} 
+                    style={{background: inputOutputTab === 'input' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
+                    onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
+                  >
+                    <p style={{color: inputOutputTab === 'input' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Input</p>
+                  </button>
+                  <button 
+                    className={styles.buttonTab} 
+                    style={{background: inputOutputTab === 'output' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
+                    onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
+                  >
+                    <p style={{color: inputOutputTab === 'output' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Output</p>
+                  </button>
+                  <div className={styles.rightAlign}>
+                    <Group gap={8}>
+                      <Button
+                        loading={runningCustomCase}
+                        loaderProps={{ type: 'dots' }}
+                        variant="light"
+                        onClick={() => {
+                          dispatch({ type: 'TOGGLE_RUNNING_CUSTOM_CASE' });
+                          submitCode();
+                          dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
+                      }}>
+                        RUN
+                      </Button>
+                      <Button
+                        variant="outline" 
+                        onClick={() => {
+                        submitCode();
+                        dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
+                      }}>
+                        SUBMIT
+                      </Button>
+                    </Group>
+                  </div>
                 </div>
+            </div>
+            <br />
+            { inputOutputTab === 'input' ? (
+              <Editor
+                theme="vs-dark"
+                defaultLanguage="cpp"
+                height="80%"
+                value={localInputData}
+                onChange={(value) => setLocalInputData(value)}
+                onMount={(editor, monaco) => {
+                  editorRef.current = editor;
+                  fetch('/themes/Night Owl Custom.json')
+                    .then(data => data.json())
+                    .then(data => {
+                      monaco.editor.defineTheme('night-owl', data);
+                      editor.updateOptions({ theme: 'night-owl', fontSize: 18 });
+                    })
+                }}
+              />
+            ) : (
+              <div style={{ position: 'relative', height: '100%' }}>
+                <LoadingOverlay visible={runningCustomCase} zIndex={1000} overlayProps={{ radius: "sm", blur: 2, color: 'var(--code-bg)' }} loaderProps={{ mt: '-100', display: 'none' }}/>
+                <Editor
+                  theme="vs-dark"
+                  defaultLanguage="cpp"
+                  height="80%"
+                  value={localOutputData}
+                  onChange={(value) => setLocalOutputData(value)}
+                  onMount={(editor, monaco) => {
+                    editorRef.current = editor;
+                    fetch('/themes/Night Owl Custom.json')
+                      .then(data => data.json())
+                      .then(data => {
+                        monaco.editor.defineTheme('night-owl', data);
+                        editor.updateOptions({ theme: 'night-owl', fontSize: 18 });
+                      })
+                  }}
+                />
               </div>
+            )}
           </div>
-          <br />
-          { inputOutputTab === 'input' ? (
-            <Editor
-              theme="vs-dark"
-              defaultLanguage="cpp"
-              height="80%"
-              value={localInputData}
-              onChange={(value) => setLocalInputData(value)}
-              onMount={(editor, monaco) => {
-                editorRef.current = editor;
-                fetch('/themes/Night Owl Custom.json')
-                  .then(data => data.json())
-                  .then(data => {
-                    monaco.editor.defineTheme('night-owl', data);
-                    editor.updateOptions({ theme: 'night-owl', fontSize: 18 });
-                  })
-              }}
-            />
-          ) : (
-            <Editor
-              theme="vs-dark"
-              defaultLanguage="cpp"
-              height="80%"
-              value={localOutputData}
-              onChange={(value) => setLocalOutputData(value)}
-              onMount={(editor, monaco) => {
-                editorRef.current = editor;
-                fetch('/themes/Night Owl Custom.json')
-                  .then(data => data.json())
-                  .then(data => {
-                    monaco.editor.defineTheme('night-owl', data);
-                    editor.updateOptions({ theme: 'night-owl', fontSize: 18 });
-                  })
-              }}
-            />
-          )}
-        </div>
         </Panel>
         </PanelGroup>
       </div>

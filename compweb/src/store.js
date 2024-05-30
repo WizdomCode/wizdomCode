@@ -54,7 +54,13 @@ int main() {
   userInfo: null,
   filesSectionOpen: true,
   templatesSectionOpen: true,
-  allMetaData: null
+  allMetaData: null,
+  runningAllCases: false,
+  runningCustomCase: false,
+  getCurrentCodeSignal: false,
+  updateFileCodeSignal: false,
+  loadedFirestoreCode: false,
+  isFileSaved: undefined
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -218,6 +224,11 @@ function reducer(state = initialState, action) {
         ...state,
         activeFileTab: action.payload,
       }
+    case 'SET_FILE_CODE':
+      return {
+        ...state,
+        fileCode: action.payload,
+      }
     case 'UPDATE_FILE_CODE':
       console.log('UPDATE_FILE_CODE', {
         ...state.fileCode,
@@ -231,8 +242,11 @@ function reducer(state = initialState, action) {
         }
       }
     case 'DELETE_FILE_CODE':
+      console.log('DELETE_FILE_CODE', action.key);
+      console.log("state.fileCode", state.fileCode);
       const newFileCodeState = { ...state.fileCode };
       delete newFileCodeState[action.key];
+      console.log("newFileCodeState", newFileCodeState);
       return {
         ...state,
         fileCode: newFileCodeState
@@ -302,6 +316,57 @@ function reducer(state = initialState, action) {
         allMetaData: action.payload
       }
     }
+    case 'TOGGLE_RUNNING_ALL_CASES': {
+      return {
+        ...state,
+        runningAllCases: !state.runningAllCases
+      }
+    }
+    case 'TOGGLE_RUNNING_CUSTOM_CASE': {
+      return {
+        ...state,
+        runningCustomCase: !state.runningCustomCase
+      }
+    }    
+    case 'TOGGLE_GET_CODE_SIGNAL': {
+      return {
+        ...state,
+        getCurrentCodeSignal: !state.getCurrentCodeSignal
+      }
+    }
+    case 'TOGGLE_UPDATE_FILE_CODE_SIGNAL': {
+      return {
+        ...state,
+        updateFileCodeSignal: !state.updateFileCodeSignal
+      }
+    }
+    case 'LOADED_FIRESTORE_CODE': {
+      return {
+        ...state,
+        loadedFirestoreCode: true
+      }
+    }
+    case 'UPDATE_IS_FILE_SAVED':
+      return {
+        ...state, 
+        isFileSaved: {
+          ...state.isFileSaved,
+          [state.activeFileTab]: action.payload,
+        }
+      }
+    case 'DELETE_IS_FILE_SAVED':
+      const newIsFileSaved = { ...state.isFileSaved };
+      delete newIsFileSaved[action.key];
+      return {
+        ...state,
+        isFileSaved: newIsFileSaved
+      };
+    case 'REPLACE_IS_FILE_SAVED':
+      return {
+        ...state,
+        isFileSaved: action.payload
+      }
+
     default:
       return state;
   }

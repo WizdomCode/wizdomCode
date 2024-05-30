@@ -61,6 +61,12 @@ export default class MonacoEditor extends React.Component {
         editorStates.set(path, this._editor.saveViewState());
 
         this._editor.setModel(this._models[path]);
+
+        this._subscription && this._subscription.dispose();
+        
+        this._subscription = this._models[path].onDidChangeContent(() => {
+          this.props.onValueChange(this._models[path].getValue());
+        });
     }  
   
     if (value !== this._editor.getModel().getValue()) {
@@ -83,6 +89,10 @@ export default class MonacoEditor extends React.Component {
     this._subscription && this._subscription.dispose();
   }
 
+  getModels() {
+    return this._models;
+  }
+  
   render() {
     return <div className={styles.Editor} ref={this._node} style={{ width: '100%', height: '100%' }} />
   }

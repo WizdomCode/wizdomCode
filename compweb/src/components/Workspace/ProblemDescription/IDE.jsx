@@ -571,6 +571,10 @@ int main() {
 };
 
 const submitCode = async (tests = testCases, numTests = testCases.length) => {
+    if (numTests !== 1) dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' });
+
+    dispatch({ type: 'TOGGLE_GET_CODE_SIGNAL' });
+
     setCurrentCode(codeState.code);
     // Start the timer
     const startTime = performance.now();
@@ -621,6 +625,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
           console.log("ndata.results.length", ndata.results.length);
           console.log("numTests", numTests)
           if (ndata.results.length >= numTests) {
+            if (numTests !== 1) dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' });
             stopFetching = true;
             break;
           }

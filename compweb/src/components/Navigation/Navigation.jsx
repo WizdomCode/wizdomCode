@@ -33,7 +33,8 @@ import {
   useMantineTheme,
   Avatar,
   Menu,
-  Popover
+  Popover,
+  ActionIcon
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -425,17 +426,17 @@ const Navigation = () => {
                 offset={4}          
               >
                 <Popover.Target>
-                  <ThemeIcon variant="default" size="lg" color="indigo">
-                    <NotificationsNoneIcon className={classes.notificationButton} />
-                  </ThemeIcon>
+                  <ActionIcon variant="light" aria-label="Notifications" size="lg" ml={8}>
+                    <NotificationsNoneIcon />
+                  </ActionIcon>
                 </Popover.Target>
                 <Popover.Dropdown>
                   <Text size="xs">Your notifs</Text>
                 </Popover.Dropdown>
               </Popover>
-              <ThemeIcon color="indigo" size="lg">
+              <ActionIcon variant="filled" size="lg" aria-label="Settings">
                 <IconBrandDiscord />
-              </ThemeIcon>
+              </ActionIcon>
               <Menu
                 width={260}
                 position="bottom-end"
@@ -445,9 +446,9 @@ const Navigation = () => {
                 withinPortal
               >
                 <Menu.Target>
-                  <ThemeIcon variant="default" size="lg" color="indigo">
-                    <ShareIcon className={classes.shareButton}/>
-                  </ThemeIcon>
+                  <ActionIcon variant="light" aria-label="Share" size="lg">
+                    <ShareIcon />
+                  </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item

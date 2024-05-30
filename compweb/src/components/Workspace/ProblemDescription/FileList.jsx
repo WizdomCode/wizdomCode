@@ -293,6 +293,8 @@ const FileList = (props) => {
         const newTreeData = [...treeData, newFile];
         dispatch({ type: 'SET_TREE_DATA', payload: newTreeData });
         setTreeData(newTreeData);
+
+        setOpenFile(newFile);
     };
     
     const handleFolderSubmit = async (event) => {
@@ -393,6 +395,8 @@ const FileList = (props) => {
                 }; 
             
                 updateFileCode(fileCode);
+
+                dispatch({ type: 'UPDATE_IS_FILE_SAVED', payload: true });
             } else {
             }
         } catch (error) {
@@ -484,23 +488,52 @@ const FileList = (props) => {
     updateTree(treeData);
   }, [treeData]);
   
+  const loadedFirestoreCode = useSelector(state => state.loadedFirestoreCode);
+
   useEffect(() => {
     const fetchData = async (userId) => {
       const docRef = doc(db, "IDE", userId);
       const docSnap = await getDoc(docRef);
   
       if (docSnap.exists()) {
-        setTreeData(docSnap.data().files || initialData);
+        const data = docSnap.data();
 
-        dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
+        console.log("docSnap.exists()", data);
+
+        console.log("data.files", data.files || initialData);
+
+        setTreeData(data.files || initialData);
+
+        console.log("data.code", data.code);
+
+        if (data.code) {
+          console.log("data.code", data.code);
+          dispatch({type: 'REPLACE_FILE_CODE', newState: data.code});
+        } else {
+          console.log("data.code is undefined, retrying...");
+          fetchData(userId);
+        }  
       } else {
+        console.log("docSnap does not exist");
+
         setTreeData(initialData);
+
+        console.log("docSnap.data().code", docSnap.data().code);
+
         dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
       }
     };  
 
-    if (userId) {
+    if (userId && !loadedFirestoreCode) {
       fetchData(userId);
+      dispatch({ type: 'LOADED_FIRESTORE_CODE' });
+
+      const initialSaveStates = {};
+      for (let key in fileCode) {
+        initialSaveStates[key] = true;
+      }
+
+      dispatch({ type: 'REPLACE_IS_FILE_SAVED', payload: initialSaveStates });
     }
   }, [userId]);
 
@@ -531,6 +564,8 @@ const FileList = (props) => {
 
   const handleFileDelete = () => {
     if (openFile && openFile.id) {
+      console.log("openFile", openFile);
+      
       const id = openFile.id;
       const removeIndex = fileTabs.findIndex(object => object.id === id);
       dispatch({ type: 'REMOVE_FILE_TAB_BY_ID', payload: id });
@@ -573,6 +608,8 @@ const FileList = (props) => {
   const filesSectionOpen = useSelector(state => state.filesSectionOpen);
   const templatesSectionOpen = useSelector(state => state.templatesSectionOpen);
 
+  const isFileSaved = useSelector(state => state.isFileSaved);
+
   return (
     <div style={{ minWidth: '240px', backgroundColor: 'var(--site-bg)', borderRight: '1px solid var(--border)' }}>
         <div style={{ height: "49px", alignItems: "center", display: "flex", direction: "row", borderBottom: '1px solid var(--border)' }}>
@@ -581,7 +618,7 @@ const FileList = (props) => {
                 onClick={() => { dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: false }); }}    
             />
         </div>
-        <div style={{ marginTop: '4px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
+        <div style={{ marginTop: '4px' , paddingLeft: '2px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
             <span className={styles.vertCenterIcons} onClick={() => dispatch({ type: 'TOGGLE_FILES_SECTION_OPEN' })}>{filesSectionOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
             <p className={`${styles.marginSpacing} ${styles.classTwo}`} style={{ color: 'var(--dim-text)' }}>
               <Text fw={700} size="lg">
@@ -630,7 +667,7 @@ const FileList = (props) => {
             )}
             {selectedItem && (
                 <div>
-                    {isContentSaved ? (
+                    {isFileSaved[activeTabIndex] ? (
                         <h3>Saved</h3>
                     ) : (
                         <h3>Not Saved</h3>
@@ -656,7 +693,7 @@ const FileList = (props) => {
                     setHoveredFile(null); 
                   }}
                 >
-                  <div style={{ marginLeft: (depth + 1) * 20, color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)' }} className={styles.vertCenterIcons}>
+                  <div style={{ marginLeft: (depth + 1) * 20 + 2, color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)' }} className={styles.vertCenterIcons}>
                     {node.droppable && (
                       <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
                     )}
@@ -672,7 +709,7 @@ const FileList = (props) => {
             />
           </DndProvider> 
         }   
-        <div style={{ marginTop: '4px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
+        <div style={{ marginTop: '4px', paddingLeft: '2px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
             <span className={styles.vertCenterIcons} onClick={() => dispatch({ type: 'TOGGLE_TEMPLATES_SECTION_OPEN' })}>{templatesSectionOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
             <p className={`${styles.marginSpacing} ${styles.classTwo}`} style={{ color: 'var(--dim-text)' }}>
               <Text fw={700} size="lg">
@@ -691,7 +728,7 @@ const FileList = (props) => {
               <CopyToClipboard text={node.data && node.data.language ? TEMPLATE_CODE[node.text][node.data.language] : ''}>
                 <div 
                   style={{ 
-                    marginLeft: (depth + 1) * 20,
+                    marginLeft: (depth + 1) * 20 + 2,
                     backgroundColor: openFile && openFile.text === node.text ? 'var(--selected-item)' : hoveredFile === node ? 'var(--hover)' : 'transparent',
                     color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)'
                   }}

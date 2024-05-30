@@ -20,7 +20,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css'; // don't forget to import katex styles
-import { Button, Overlay, AspectRatio, Group, Container } from '@mantine/core';
+import { Button, Overlay, AspectRatio, Group, Container, Loader, LoadingOverlay } from '@mantine/core';
 import { getCategory, getDifficultyLevel } from '../../../../public/CATEGORY_NAMES.js';
 import {
   IconNotebook,
@@ -29,6 +29,7 @@ import {
   IconPlayerPlay
 } from '@tabler/icons-react'
 import { CodeHighlight } from '@mantine/code-highlight';
+import { useSelector } from 'react-redux';
 
 const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displayCases, results, solutions, selectedTab }) => {
   // Example usage of getCategory// prints "String Algorithms"
@@ -75,6 +76,13 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
         .join('')
       return newText;
     }
+
+  const runningAllCases = useSelector(state => state.runningAllCases);
+  const [runningCase, setRunningCase] = useState(null);
+
+  useEffect(() => {
+    setRunningCase(null);
+  }, [results]);
 
   return (
     <Container>
@@ -211,53 +219,58 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
       )}
 
       { selectedTab === 'tests' && ( 
-        testCasesVisible ?
-          <div className={styles.testCases}>
-            {displayCases ? displayCases.map((testCase, index) => {
-              const status = results[index]?.status?.description;
-                const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
+        <>
+          <div style={{ position: 'relative', height: !testCasesVisible ? 'calc(100vh - 150px)' : '100%', overflow: !testCasesVisible ? 'hidden' : 'auto' }}>
+            <LoadingOverlay mt={16} visible={!testCasesVisible} zIndex={1000} overlayProps={{ radius: "sm", blur: 2, color: 'var(--site-bg)' }} loaderProps={{ children: <Button variant='outline' size="md" onClick={() => setTestCasesVisible(true)}>Show test cases</Button> }}/>      
+              <div className={styles.testCases}>
+                {displayCases ? displayCases.map((testCase, index) => {
+                  const status = results[index]?.status?.description;
+                    const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
-              return (
-                <div key={testCase.key}>
-                  <br />
-                  <h3 className={className}>
-                    Case {testCase.key}
-                    {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
-                    {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
-                    {results[index] && results[index].status.description === 'Time Limit Exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
-                  </h3>
-                  {results[index] && (
-                      <>
-                        <h5 className={className}>[ {results[index].time}s ]</h5>
-                      </>
-                    )}
-                  <br />
-                  <h4 className={className}>Input:</h4>
-                  <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.input).replace(/\\r\\n/g, '\n')} language="txt" />
-                  <br />
-                  <h4 className={className}>Expected Output:</h4>
-                  <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.output).replace(/\\r\\n/g, '\n')} language="txt" />
-                  {results[index] && results[index].status.description === 'Wrong Answer' && (
-                    <>
+                  return (
+                    <div key={testCase.key}>
                       <br />
-                      <h4 className={className}>Actual Output:</h4>
-                      <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"} language="txt" />
-                    </>
-                  )}
-                  <br />
-                  <Button onClick={() => {console.log(testCases); submitCode([testCases[testCase.key - 1]], 1);}} variant="light" leftSection={<IconPlayerPlay size={14} />} >Run</Button>
-                </div>
-              );                
-            }): (
-              <div>
-                <h2>Test cases for this problem are coming soon!</h2>
-                <br />
+                      <h3 className={className}>
+                        Case {testCase.key}
+                        {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
+                        {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
+                        {results[index] && results[index].status.description === 'Time Limit Exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
+                      </h3>
+                      {results[index] && (
+                          <>
+                            <h5 className={className}>[ {results[index].time}s ]</h5>
+                          </>
+                        )}
+                      <br />
+                      <h4 className={className}>Input:</h4>
+                      <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.input).replace(/\\r\\n/g, '\n')} language="txt" />
+                      <br />
+                      <h4 className={className}>Expected Output:</h4>
+                      <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.output).replace(/\\r\\n/g, '\n')} language="txt" />
+                      {results[index] && results[index].status.description === 'Wrong Answer' && (
+                        <>
+                          <br />
+                          <h4 className={className}>Actual Output:</h4>
+                          <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"} language="txt" />
+                        </>
+                      )}
+                      <br />
+                      { (runningCase && runningCase === testCase.key) || runningAllCases ? 
+                        <Loader color="blue" type="dots" ml={4}/>
+                        :
+                        <Button onClick={() => {setRunningCase(testCase.key); submitCode([testCases[testCase.key - 1]], 1);}} variant="light" leftSection={<IconPlayerPlay size={14} />} >Run</Button>
+                      }
+                    </div>
+                  );                
+                }): (
+                  <div>
+                    <h2>Test cases for this problem are coming soon!</h2>
+                    <br />
+                  </div>
+                )}
               </div>
-            )}
-          </div> :
-          <div>
-            <Button onClick={() => setTestCasesVisible(true)}>Show test cases</Button>
-          </div>
+            </div>
+          </>
         )}
 
         {selectedTab === 'solution' && (
