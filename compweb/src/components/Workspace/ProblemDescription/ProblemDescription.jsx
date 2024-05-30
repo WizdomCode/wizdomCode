@@ -20,7 +20,7 @@ import remarkGfm from 'remark-gfm';
 import SolutionDisplay from './SolutionDisplay';
 import { Container } from '@mantine/core';
 import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
+import rehypeKatex from 'rehype-katex'; 
 import 'katex/dist/katex.min.css'; // don't forget to import katex styles
 import { getCategory, getDifficultyLevel } from '../../../../public/CATEGORY_NAMES.js';
 import {
@@ -47,7 +47,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
     const regex = /^(- |\d+\. )/;
     return regex.test(str);
   }
-  
+  //
   function parseText(str) {
     return str
       .split('\n')
