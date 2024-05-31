@@ -7,7 +7,7 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-console.log("test log");
+console.log("test commit");
 console.log("API Key: ", import.meta.env.VITE_APP_FIREBASE_API_KEY);
 console.log("Auth Domain: ", import.meta.env.VITE_APP_FIREBASE_AUTH_DOMAIN);
 console.log("Project ID: ", import.meta.env.VITE_APP_FIREBASE_PROJECT_ID);
