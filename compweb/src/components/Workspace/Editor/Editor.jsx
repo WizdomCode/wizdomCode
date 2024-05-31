@@ -56,7 +56,11 @@ import {
   Code,
   LoadingOverlay,
   Loader,
-  Kbd
+  Kbd,
+  Container,
+  Title,
+  ScrollArea,
+  CloseButton
 } from '@mantine/core';
 import {
   Tree,
@@ -697,17 +701,18 @@ const CodeEditor = (props) => {
         <Panel style={{ width: '100%' }} defaultSize={66}>
         {openTemplate ? 
         (
-          <div>
-            <Typography variant="h6">{openTemplate.name}</Typography>
-            <div style={{position: 'relative'}}>
-              <SyntaxHighlighter language={openTemplate.language} style={solarizedlight}>
-                {TEMPLATE_CODE[openTemplate.name][openTemplate.language]}
-              </SyntaxHighlighter>
-              <CopyToClipboard text={TEMPLATE_CODE[openTemplate.name][openTemplate.language]}>
-                <button style={{position: 'absolute', top: 2, right: 2}}><ContentCopyIcon /></button>
-              </CopyToClipboard>
-              </div>
-          </div>
+          <ScrollArea style={{ height:'100%'}}>
+            <Container>
+              <Group justify="space-between">
+                <Title order={3}>{openTemplate.name}</Title>
+                <CloseButton size="xl" onClick={() => {
+                  dispatch({ type: 'SET_OPEN_TEMPLATE', payload: null });
+                }}/>
+              </Group>
+              <br />
+              <CodeHighlight styles={{pre: { backgroundColor: 'var(--site-bg)' }, code: { fontSize: '18px' }}} code={TEMPLATE_CODE[openTemplate.name][openTemplate.language]} language={openTemplate.language}/>
+            </Container>
+          </ScrollArea>
         ) :
         (fileTabs.length > 0 ?
           <div className={styles.codeEditor}>

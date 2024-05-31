@@ -215,7 +215,7 @@ const SignUp = () => {
           </Anchor>
         </Text>
 
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md" style={{ backgroundColor: 'var(--code-bg)' }}>
+        <Paper withBorder shadow="md" p={30} mt={30} radius="md" style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' }}>
           <Text size="lg" fw={500}>
             Sign up with
           </Text>
@@ -340,98 +340,6 @@ const SignUp = () => {
           </Button>
         </Paper>
       </Container>
-      <div className="container-signin">
-        <section className="wrapper">
-          <div className="heading">
-            <h1 className="text text-large">
-              <strong>Sign Up</strong>
-            </h1>
-            <p className="text text-normal">
-              Already a user?
-              <span>
-                <a href="/login" className="text text-links">
-                  Log In
-                </a>
-              </span>
-            </p>
-          </div>
-          <form onSubmit={signUp}>
-            <div className="input-control">
-              <input
-                type="text"
-                placeholder="Enter username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <div className="input-control">
-              <input
-                type="text"
-                placeholder="Enter your first name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <div className="input-control">
-              <input
-                type="text"
-                placeholder="Enter your last name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <div className="input-control">
-              <input
-                type="text"
-                placeholder="Enter your country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <div className="input-control">
-              <input
-                type="text"
-                placeholder="Enter your city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <div className="input-control">
-              <input
-                type="number" // Change the input type for age
-                placeholder="Enter your age"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <div className="input-control">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <div className="input-control">
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field"
-              />
-            </div>
-            <button type="submit" name="submit" className="input-submit" value="Sign In">Submit</button>
-          </form>
-        </section>
-      </div>
     </>
   );
 };

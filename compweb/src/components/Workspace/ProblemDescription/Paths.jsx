@@ -827,7 +827,6 @@ const Paths = (props) => {
                     <>
                         { true && (
                     <>
-                        <ProblemDescription userData={userData} currentTab={lessonProblemData[tabIndex]} submitCode={submitCode} displayCases={lessonProblemData[tabIndex].data.testCases} results={results} solutions={solutions} selectedTab={selectedTab}/>
                         <div className={styles.wrapper}>
                             <br />
                                 <div className={styles.problemTitleRow}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navigation from "../components/Navigation/Navigation";
 import { db } from "../firebase";
-import { collection, getDocs, doc, setDoc } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc, updateDoc } from "firebase/firestore";
 import "./Add.css";
 import axios from "axios";
 import { uploadString } from "firebase/storage";
@@ -112,8 +112,31 @@ const AddProblem = () => {
                 topics
             });
     
-
+            console.log("Question document updated successfully.");
         } catch (error) {
+          console.error("Error updating question document: ", error);
+        }
+
+        try {
+          const allDataDocRef = doc(db, "ProblemMetadata", "AllData");
+
+          const updateData = {
+            contest: contest,
+            folder: folder,
+            points: Number(points),
+            specificContest: specificContest,
+            title: title,
+            topics: topics,
+          };
+  
+          // Update the All Data document with the new field
+          await updateDoc(allDataDocRef, {
+            [title]: updateData,
+          });
+
+          console.log("AllData document updated successfully.");
+        } catch (error) {
+          console.error("Error updating AllData document: ", error);
         }
 
         const fetchTestCasesData = async () => {

@@ -1,80 +1,85 @@
-import { Title, SimpleGrid, Text, Button, ThemeIcon, Grid, rem } from '@mantine/core';
+import { Title, SimpleGrid, Text, Button, ThemeIcon, Grid, rem, Stack, Center, Group, Paper, Image } from '@mantine/core';
 import { IconReceiptOff, IconFlame, IconCircleDotted, IconFileCode } from '@tabler/icons-react';
 import classes from './FeaturesTitle.module.css';
+import { Link } from 'react-router-dom';
 
 const features = [
   {
-    icon: IconReceiptOff,
-    title: 'Free and open source',
-    description: 'All packages are published under MIT license, you can use Mantine in any project',
+    imgPath: '/codeeditor.png',
+    title: 'Browser-based editor',
+    description: 'Skip the hassle of needing to write code on another IDE with our built-in code editor.',
   },
   {
-    icon: IconFileCode,
-    title: 'TypeScript based',
-    description: 'Build type safe applications, all components and hooks export types',
+    imgPath: '/filesystem.png',
+    title: 'Complete file system',
+    description: 'Add, modify, delete, or save your code files online, and continue just where you left off!',
   },
   {
-    icon: IconCircleDotted,
-    title: 'No annoying focus ring',
+    imgPath: '/inputoutput.png',
+    title: 'Custom input/output',
     description:
-      'With new :focus-visible selector focus ring will appear only when user navigates with keyboard',
+      'Easily debug your code with custom inputs. Create test cases to diagnose problems in your code.',
   },
   {
-    icon: IconFlame,
-    title: 'Flexible',
+    imgPath: '/templates.png',
+    title: 'Templates',
     description:
-      'Customize colors, spacing, shadows, fonts and many other settings with global theme object',
+      'Access algorithm and data structure templates in Python, Java, and C++.',
   },
 ];
 
 export function FeaturesTitle() {
   const items = features.map((feature) => (
     <div key={feature.title}>
-      <ThemeIcon
-        size={44}
-        radius="md"
-        variant="gradient"
-        gradient={{ deg: 133, from: 'blue', to: 'cyan' }}
-      >
-        <feature.icon style={{ width: rem(26), height: rem(26) }} stroke={1.5} />
-      </ThemeIcon>
-      <Text fz="lg" mt="sm" fw={500}>
-        {feature.title}
-      </Text>
-      <Text c="dimmed" fz="sm">
-        {feature.description}
-      </Text>
+      <Image src={feature.imgPath} maw={380} style={{ border: '1px solid var(--border)' }}/>
+      <Center>
+        <Text fz="lg" mt="sm" fw={500} style={{ zoom: '110%' }}>
+          {feature.title}
+        </Text>
+      </Center>
+      <Center>
+        <Text c="dimmed" fz="sm" maw={320} style={{ zoom: '110%' }}>
+          {feature.description}
+        </Text>
+      </Center>
     </div>
   ));
 
   return (
     <div className={classes.wrapper}>
-      <Grid gutter={80}>
-        <Grid.Col span={{ base: 12, md: 5 }}>
-          <Title className={classes.title} order={2}>
-            A fully featured React components library for your next project
-          </Title>
-          <Text c="dimmed">
-            Build fully functional accessible web applications faster than ever – Mantine includes
-            more than 120 customizable components and hooks to cover you in any situation
-          </Text>
+      <Center>
+        <Paper withBorder p="xl" radius="md" bg={'var(--code-bg)'} style={{ border: '1px solid var(--border)' }}>
+          <Group w={900} justify="space-between">
+            <Stack>
+              <Title className={classes.title} order={2} ta={'left'}>
+                The best browser-based IDE
+              </Title>
+              <Text c="dimmed" maw={350} ta={'left'}>
+                All in one online IDE which will make sure you never have to use another online IDE again!
+              </Text>
+            </Stack>
 
-          <Button
-            variant="gradient"
-            gradient={{ deg: 133, from: 'blue', to: 'cyan' }}
-            size="lg"
-            radius="md"
-            mt="xl"
-          >
-            Get started
-          </Button>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 7 }}>
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={30}>
+            <Link to={'/problems'}>
+              <Button
+                variant="gradient"
+                gradient={{ deg: 133, from: 'blue', to: 'cyan' }}
+                size="lg"
+                radius="md"
+                mt="md"
+              >
+                Check it out
+              </Button>
+            </Link>
+          </Group>
+        </Paper>
+      </Center>
+      <Center>  
+        <Grid gutter={80} mt={160} mb={80}>
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={80}>
             {items}
           </SimpleGrid>
-        </Grid.Col>
-      </Grid>
+        </Grid>
+      </Center>
     </div>
   );
 }

@@ -17,32 +17,32 @@ import {
   
   const mockdata = [
     {
-      title: 'Extreme performance',
+      title: 'Miscellaneous problems',
       description:
-        'This dust is actually a powerful poison that will even make a pro wrestler sick, Regice cloaks itself with frigid air of -328 degrees Fahrenheit',
+        'Filter through our ultimate collection of practice problems from your favourite contests and learn the topics of your choice at the difficulties of your choice.',
       icon: IconGauge,
-      path: '/performance', // Add path for each feature
+      path: '/problems', // Add path for each feature
     },
     {
-      title: 'Privacy focused',
+      title: 'Canadian Computing Competition',
       description:
-        'People say it can run at the same speed as lightning striking, Its icy body is so cold, it will not melt even if it is immersed in magma',
+        'The CCC is an annual programming competition for secondary school students in Canada, organized by the CEMC at the University of Waterloo.',
       icon: IconUser,
-      path: '/privacy', // Add path for each feature
+      path: '/ccc', // Add path for each feature
     },
     {
-      title: 'No third parties',
+      title: 'USA Computing Olympiad',
       description:
-        'They’re popular, but they’re rare. Trainers who show them off recklessly may be targeted by thieves',
+        'The USACO supports computing education in the USA and worldwide by identifying, motivating, and training high-school computing students at all levels.',
       icon: IconCookie,
-      path: '/third-parties', // Add path for each feature
+      path: '/usaco', // Add path for each feature
     },
   ];
   
   export function FeaturesCards() {
     const theme = useMantineTheme();
     const features = mockdata.map((feature) => (
-      <Card key={feature.title} shadow="md" radius="md" className={classes.card} padding="xl">
+      <Card key={feature.title} shadow="md" radius="md" className={classes.card} padding="xl" bg={'var(--code-bg)'} style={{ border: '1px solid var(--border)' }}>
         <feature.icon
           style={{ width: rem(50), height: rem(50) }}
           stroke={2}
@@ -64,20 +64,13 @@ import {
   
     return (
       <Container size="lg" py="xl">
-        <Group justify="center">
-          <Badge variant="filled" size="lg">
-            Best company ever
-          </Badge>
-        </Group>
-  
         <Title order={2} className={classes.title} ta="center" mt="sm">
-          Integrate effortlessly with any technology stack
+          Master your contest of choice
         </Title>
       
         <Center>
         <Text c="dimmed" className={classes.description} ta="center" mt="md">
-          Every once in a while, you’ll see a Golbat that’s missing some fangs. This happens when
-          hunger drives it to try biting a Steel-type Pokémon.
+          Practice from curated sets of problems pulled directly from your favourite programming contests. Prepare for all possible topics in a logical progression.
         </Text>      
         </Center>
   

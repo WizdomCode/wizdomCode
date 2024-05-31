@@ -8,8 +8,12 @@ import { getDoc, doc, setDoc } from "firebase/firestore";
 import Divider from '@mui/material/Divider';
 import { useLocation } from "react-router-dom";
 import { 
+  ActionIcon,
+  CopyButton,
   NativeSelect,
+  rem,
   Text,
+  Tooltip,
 } from '@mantine/core';
 import {
   Tree,
@@ -27,6 +31,8 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import {
+  IconCheck,
+  IconCopy,
   IconTrash
 } from '@tabler/icons-react';
 
@@ -725,22 +731,21 @@ const FileList = (props) => {
               tree={TEMPLATES}
               rootId={0}
               render={(node, { depth, isOpen, onToggle }) => (
-              <CopyToClipboard text={node.data && node.data.language ? TEMPLATE_CODE[node.text][node.data.language] : ''}>
                 <div 
                   style={{ 
                     marginLeft: (depth + 1) * 20 + 2,
                     backgroundColor: openFile && openFile.text === node.text ? 'var(--selected-item)' : hoveredFile === node ? 'var(--hover)' : 'transparent',
                     color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)'
                   }}
-                  onClick={() => {}}
+                  onClick={() => {
+                    setHoveredFile(node); 
+                    if (!node.droppable)
+                    dispatch({ type: 'SET_OPEN_TEMPLATE', payload: { name: node.text, language: node.data.language }})
+                  }}
                   onMouseEnter={() => {
-                      setHoveredFile(node); 
-                      if (!node.droppable)
-                      dispatch({ type: 'SET_OPEN_TEMPLATE', payload: { name: node.text, language: node.data.language }})}}
+}}
                   onMouseLeave={() => {
-                      setHoveredFile(null); 
-                      if (!node.droppable && !templateIsClicked)
-                      dispatch({ type: 'SET_OPEN_TEMPLATE', payload: null });}}          
+}}          
                   className={styles.vertCenterIcons}
                 >
                   {node.droppable && (
@@ -748,8 +753,22 @@ const FileList = (props) => {
                   )}
                   <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
                   {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
+                  {!node.droppable && (
+                    <CopyButton value={node.data && node.data.language ? TEMPLATE_CODE[node.text][node.data.language] : ''} timeout={2000}>
+                    {({ copied, copy }) => (
+                      <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
+                        <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
+                          {copied ? (
+                            <IconCheck style={{ width: rem(18) }} />
+                          ) : (
+                            <IconCopy style={{ width: rem(18) }} />
+                          )}
+                        </ActionIcon>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                  )}
                 </div>
-                </CopyToClipboard>
               )}
               dragPreviewRender={(monitorProps) => (
                 <div>{monitorProps.item.text}</div>

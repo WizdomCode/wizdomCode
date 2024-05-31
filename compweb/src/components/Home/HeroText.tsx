@@ -1,6 +1,7 @@
-import { Title, Text, Button, Container } from '@mantine/core';
+import { Title, Text, Button, Container, Group } from '@mantine/core';
 import { Dots } from './Dots';
 import classes from './HeroText.module.css';
+import { Link } from 'react-router-dom';
 
 export function HeroText() {
   return (
@@ -12,27 +13,32 @@ export function HeroText() {
 
       <div className={classes.inner}>
         <Title className={classes.title}>
-          The Top Solver{' '}
+          The{' '}
           <Text component="span" className={classes.highlight} inherit>
-            competitive programming
+            fastest
           </Text>{' '}
-          
+          way to learn competitive programming
         </Title>
 
         <Container p={0} size={600}>
           <Text size="lg" c="dimmed" className={classes.description}>
-            Build more reliable software with AI companion. AI is also trained to detect lazy
-            developers who do nothing and just complain on Twitter.
+            All in one platform which will streamline your path to acing all of your competitive programing endeavors
           </Text>
         </Container>
 
         <div className={classes.controls}>
-          <Button className={classes.control} size="lg" variant="default" color="gray">
-            Book a demo
-          </Button>
-          <Button className={classes.control} size="lg">
-            Purchase a license
-          </Button>
+          <Group>
+            <Link to={'/login'}>
+              <Button className={classes.control} size="lg" variant="default" color="gray">
+                LOG IN
+              </Button>
+            </Link>
+            <Link to={'/signup'}>
+              <Button className={classes.control} size="lg">
+                GET STARTED
+              </Button>
+            </Link>
+          </Group>
         </div>
       </div>
     </Container>

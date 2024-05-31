@@ -34,7 +34,8 @@ import {
   Avatar,
   Menu,
   Popover,
-  ActionIcon
+  ActionIcon,
+  Image
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -241,7 +242,7 @@ const Navigation = () => {
         <header className={classes.header}>
           <Group justify="space-between" h="100%">
             <Link to="/">
-              <IconNotification size={30} style={{ marginLeft: '10px' }}/>
+              <Image src={'/templogo.png'} w={60} h={'50px'} style={{ marginLeft: '10px' }}/>
             </Link>
 
             <Group h="100%" gap={0} visibleFrom="sm" ml="200">

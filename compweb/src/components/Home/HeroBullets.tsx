@@ -8,11 +8,10 @@ export function HeroBullets() {
       <div className={classes.inner}>
         <div className={classes.content}>
           <Title className={classes.title}>
-            The best <span className={classes.highlight}>all-in-one</span> platform to learn Competitve Programming <br />
+            Free. <span className={classes.highlight}>Fun.</span> Effective.<br />
           </Title>
           <Text c="dimmed" mt="md">
-            Build fully functional accessible web applications faster than ever – Mantine includes
-            more than 120 customizable components and hooks to cover you in any situation
+            Our comprehensive website promises to provide an efficient and effective learning experience for all
           </Text>
 
           <List
@@ -35,16 +34,8 @@ export function HeroBullets() {
               <b>Linear progression</b> – Build your skills from the ground up by learning topics in a carefully designed progression
             </List.Item>
           </List>
-
-          <Group mt={30}>
-            <Button radius="xl" size="md" className={classes.control}>
-              Get started
-            </Button>
-            <Button variant="default" radius="xl" size="md" className={classes.control}>
-              Source code
-            </Button>
-          </Group>
         </div>
+        <Image src={'/herobullets.svg'} className={classes.image} />
       </div>
     </Container>
   );

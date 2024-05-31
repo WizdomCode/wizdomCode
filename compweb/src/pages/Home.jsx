@@ -50,7 +50,7 @@ const Home = () => {
               <Box sx={{ textAlign: 'center', width: '100%' }}>
                 <FeaturesTitle />
               </Box>
-              <Box sx={{ textAlign: 'center', width: '100%', marginBottom: '60px'  }}>
+              <Box sx={{ textAlign: 'center', width: '100%', marginBottom: '160px'  }}>
                 <FeaturesCards />
               </Box>
             </Box>
