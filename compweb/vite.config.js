@@ -1,22 +1,28 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import reactRefresh from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  // This changes the out put dir from dist to build
-  // comment this out if that isn't relevant for your project
-  build: {
-    outDir: "build",
-  },
-  publicDir: './public',
-  plugins: [
-    reactRefresh(),
-    svgrPlugin({
-      svgrOptions: {
-        icon: true,
-        // ...svgr options (https://react-svgr.com/docs/options/)
-      },
-    }),
-  ],
+export default defineConfig(({ mode }) => {
+  // Load env file based on `mode`
+  // Set the third parameter to '' to load all env variables from .env, .env.local, .env.[mode], .env.[mode].local
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+    build: {
+      outDir: "build",
+    },
+    publicDir: './public',
+    plugins: [
+      reactRefresh(),
+      svgrPlugin({
+        svgrOptions: {
+          icon: true,
+        },
+      }),
+    ],
+    // Define global constants based on the environment variables
+    define: {
+      'process.env': env,
+    },
+  };
 });
