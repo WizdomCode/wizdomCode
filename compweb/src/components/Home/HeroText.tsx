@@ -11,20 +11,21 @@ export function HeroText() {
       <Dots className={classes.dots} style={{ right: 0, top: 60 }} />
 
       <div className={classes.inner}>
-        <Title className={classes.title}>
-          The Top Solver{' '}
-          <Text component="span" className={classes.highlight} inherit>
-            competitive programming
-          </Text>{' '}
-          
-        </Title>
-
+          <Title className={classes.title}>
+            Wizdom Code,{' '}
+            <span className={classes.break}>the fastest way to learn</span>{' '}
+            <Text component="span" className={classes.highlight} inherit>
+              competitive programming
+            </Text>
+          </Title>
+        {/*
         <Container p={0} size={600}>
           <Text size="lg" c="dimmed" className={classes.description}>
             Build more reliable software with AI companion. AI is also trained to detect lazy
             developers who do nothing and just complain on Twitter.
           </Text>
         </Container>
+         Hello World */}
 
         <div className={classes.controls}>
           <Button className={classes.control} size="lg" variant="default" color="gray">

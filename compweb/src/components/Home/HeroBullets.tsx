@@ -1,11 +1,13 @@
 import { Image, Container, Title, Button, Group, Text, List, ThemeIcon, rem } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import classes from './HeroBullets.module.css';
+import sideImage from './sideimage.png'; // Make sure the path is correct
 
 export function HeroBullets() {
   return (
     <Container size="md">
       <div className={classes.inner}>
+        <Image src={sideImage} className={classes.image} alt="Side image" />
         <div className={classes.content}>
           <Title className={classes.title}>
             The best <span className={classes.highlight}>all-in-one</span> platform to learn Competitve Programming <br />
