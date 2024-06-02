@@ -91,6 +91,19 @@ const AddProblem = () => {
     const [specificContest, setSpecificContest] = useState("");
     const [topics, setTopics] = useState([]);
 
+    async function getFileContent(fileName) {
+      try {
+          const response = await fetch(`/TestCaseData/bessiesSnowCowPlat/${fileName}`);
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const content = await response.text();
+          return content;
+      } catch (error) {
+          console.error('There has been a problem with your fetch operation:', error);
+      }
+    }  
+
     const addProblem = async (e) => {
         e.preventDefault();
     
@@ -140,49 +153,58 @@ const AddProblem = () => {
         }
 
         const fetchTestCasesData = async () => {
-            try {
-                const storage = getStorage();
-        
-                let uploadPromises = [];
-        
-                const testCaseFolder = folder;
-        
-                if (testCaseFolder) {
-                    const fileListResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}`);
-                    const fileList = fileListResponse.data;
+          try {
+              const storage = getStorage();
+      
+              let uploadPromises = [];
+      
+              const testCaseFolder = folder;
+      
+              if (testCaseFolder) {
+                  let i = 1;
+                  let fileCount = 1;
+                  while (i < 20) {
+                      const inputFileName = `${i}.in`;
+                      const outputFileName = `${i}.out`;
+      
+                      try {
+                          const inputResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
+                          const outputResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
+      
+                          if (inputResponse.data.startsWith("<!DOCTYPE html>")) {
+                            break;
+                          } else {
+                            console.log(i);
+                          }
 
-                   
-                    fileList.sort();
-        
-                    for (let i = 0; i < fileList.length; i += 2) {
-                        const inputFileName = fileList[i];
-                        const outputFileName = fileList[i + 1];
-        
-                        try {
-                            const inputResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}/${inputFileName}`);
-                            const outputResponse = await axios.get(`${import.meta.env.VITE_PUBLIC_URL}/TestCaseData/${testCaseFolder}/${outputFileName}`);
-        
-        
-                            let inputRef = ref(storage, `/TestCaseData/${testCaseFolder}/${String(i + 1).padStart(4, '0')}.txt`);
-                            let inputUploadPromise = uploadString(inputRef, String(inputResponse.data)).then((snapshot) => {
-                    
-                            });
-        
-                            let outputRef = ref(storage, `/TestCaseData/${testCaseFolder}/${String(i + 2).padStart(4, '0')}.txt`);
-                            let outputUploadPromise = uploadString(outputRef, String(outputResponse.data)).then((snapshot) => {
-                         
-                            });
-        
-                            uploadPromises.push(inputUploadPromise, outputUploadPromise);
-                        } catch (error) {
-                        }
-                    }
+                          let inputRef = ref(storage, `/TestCaseData/${testCaseFolder}/${String(fileCount).padStart(4, '0')}.txt`);
+                          let inputUploadPromise = uploadString(inputRef, String(inputResponse.data)).then((snapshot) => {
+                            console.log(`/TestCaseData/${testCaseFolder}/${inputFileName} uploaded`);
+                          });
 
-                    await Promise.all(uploadPromises);
-                }
-            } catch (error) {
-            }
-        };        
+                          fileCount++;
+      
+                          let outputRef = ref(storage, `/TestCaseData/${testCaseFolder}/${String(fileCount).padStart(4, '0')}.txt`);
+                          let outputUploadPromise = uploadString(outputRef, String(outputResponse.data)).then((snapshot) => {
+                            console.log(`/TestCaseData/${testCaseFolder}/${outputFileName} uploaded`);
+                          });
+
+                          fileCount++;
+      
+                          uploadPromises.push(inputUploadPromise, outputUploadPromise);
+                      } catch (error) {
+                          console.log("Error uploading test cases", error);
+                      }
+                      i++;
+                  }
+      
+                  await Promise.all(uploadPromises);
+                  console.log("All test cases uploaded successfully.");
+              }
+          } catch (error) {
+              console.log("Error uploading test cases", error);
+          }
+        };              
     
         fetchTestCasesData();
     }

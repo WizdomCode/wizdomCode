@@ -187,11 +187,22 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
     const activeCategoryId = useSelector(state => state.activeCategoryId);
 
     useEffect(() => {
-        if (questions && activeCategoryId) {
-            const categoryIsActive = activeCategoryId.unitTitle === props.categoryId.unitTitle && activeCategoryId.lessonIndex === props.categoryId.lessonIndex && activeCategoryId.rowIndex === props.categoryId.rowIndex;
-            if (categoryIsActive) dispatch({ type: 'SET_LESSON_QUESTION_LIST', payload: questions });
-        }
-    }, [activeCategoryId]);
+        const fetchData = async () => {
+            if (questions && activeCategoryId) {
+                const categoryIsActive = activeCategoryId.unitTitle === props.categoryId.unitTitle && activeCategoryId.lessonIndex === props.categoryId.lessonIndex && activeCategoryId.rowIndex === props.categoryId.rowIndex;
+                if (categoryIsActive) {
+                    console.log("SET_LESSON_QUESTION_LIST", questions);
+                    console.log("props.problemIds", props.problemIds);
+    
+                    // .problemIds is always right but questions is not
+                    const data = await addGroup(props.problemIds);
+                    setQuestions(data);
+                    dispatch({ type: 'SET_LESSON_QUESTION_LIST', payload: data });
+                }
+            }
+        };
+        fetchData();
+    }, [activeCategoryId]);    
 
     return (
         <div className="universal" style={{ position: 'relative' }}>
