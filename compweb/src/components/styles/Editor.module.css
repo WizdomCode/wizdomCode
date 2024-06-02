@@ -121,7 +121,7 @@
   align-items: center;
   justify-content: flex-start;
   border: none;
-  width: 156px;
+  min-width: 156px;
   height: 48.848px;
   flex-shrink: 0;
   font-size: medium;

@@ -671,16 +671,6 @@ const FileList = (props) => {
                     <button type="submit">Submit</button>
                 </form>
             )}
-            {selectedItem && (
-                <div>
-                    {isFileSaved[activeTabIndex] ? (
-                        <h3>Saved</h3>
-                    ) : (
-                        <h3>Not Saved</h3>
-                    )}
-                    <button onClick={handleSave}>Save</button>
-                </div>
-            )}
             </div>
         { filesSectionOpen &&
           <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>

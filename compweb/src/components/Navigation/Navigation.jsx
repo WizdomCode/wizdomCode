@@ -236,6 +236,10 @@ const Navigation = () => {
 
   const location = useLocation();
 
+  function goToDiscord() {
+    window.open("https://discord.gg/UGe9vhW585", "_blank", "noopener");
+  }  
+
   return (
     <>
       <Box style={{ backgroundColor: 'var(--site-bg)' }}>
@@ -250,7 +254,7 @@ const Navigation = () => {
                 <HoverCard.Target>
                   <div style={{ position: 'relative', height: '100%' }}>
                     <Link to='/problems'>
-                      <a href="#" className={classes.link}>
+                      <a href="#" className={classes.link} style={{ paddingLeft: '25px', borderBottom: (location.pathname === '/problems' || location.pathname === '/ccc' || location.pathname === '/usaco') ? '2px solid var(--accent)' : 'none' }}>
                         <Center inline>
                           <Box component="span" mr={5}>
                             <Text c={(location.pathname === '/problems' || location.pathname === '/ccc' || location.pathname === '/usaco') ? 'white' : 'var(--dim-text)'}>
@@ -264,8 +268,6 @@ const Navigation = () => {
                         </Center>
                       </a>
                     </Link>
-                    { (location.pathname === '/problems' || location.pathname === '/ccc' || location.pathname === '/usaco') && 
-                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
                   </div>
                 </HoverCard.Target>
 
@@ -285,8 +287,8 @@ const Navigation = () => {
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
                   <div style={{ position: 'relative', height: '100%' }}>
-                    <Link to='/problems'>
-                      <a href="#" className={classes.link}>
+                    <Link to='/userprofile'>
+                      <a href="#" className={classes.link} style={{ paddingLeft: '25px', borderBottom: (location.pathname === '/userprofile' || location.pathname === '/leaderboard') ? '2px solid var(--accent)' : 'none' }}>
                         <Center inline>
                           <Box component="span" mr={5}>
                             <Text c={(location.pathname === '/userprofile' || location.pathname === '/leaderboard') ? 'white' : 'var(--dim-text)'}>
@@ -300,8 +302,6 @@ const Navigation = () => {
                         </Center>
                       </a>
                     </Link>
-                    { (location.pathname === '/userprofile' || location.pathname === '/leaderboard') && 
-                      <div style={{ marginLeft: '-10px', position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
                   </div>
                 </HoverCard.Target>
 
@@ -319,7 +319,7 @@ const Navigation = () => {
               </HoverCard>
             </Group>
 
-            <Group visibleFrom="sm" gap={8}>
+            <Group visibleFrom="sm" gap={0}>
 
               { authenticatedUser ? <Menu
                 width={260}
@@ -330,7 +330,10 @@ const Navigation = () => {
                 withinPortal
               >
                 <Menu.Target>
-                  <UnstyledButton
+                  <Button 
+                    variant="subtle"
+                    size="lg"
+                    style={{ borderRadius: '0px', margin: '0px', padding: '10px' }}
                     className={cx(classes.user, { [classes.userActive]: userMenuOpened })}
                   >
                     <Group gap={7}>
@@ -340,9 +343,9 @@ const Navigation = () => {
                       </Text>
                       <IconChevronDown style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
                     </Group>
-                  </UnstyledButton>
+                  </Button>
                 </Menu.Target>
-                <Menu.Dropdown>
+                <Menu.Dropdown style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' }}>
                   <Link to="/userprofile">
                     <Menu.Item
                       leftSection={
@@ -398,7 +401,7 @@ const Navigation = () => {
                     </Menu.Item>
                   </Link>
 
-                  <Menu.Divider />
+                  <Divider my="sm" color='var(--border)'/>
 
                   <Menu.Label>Danger zone</Menu.Label>
                   <Menu.Item
@@ -419,52 +422,54 @@ const Navigation = () => {
                   </Link>
                 </>
               )}
-              <Popover 
-                width={400}
-                position="bottom-end"
-                withArrow
-                shadow="md"
-                offset={4}          
-              >
-                <Popover.Target>
-                  <ActionIcon variant="light" aria-label="Notifications" size="lg" ml={8}>
-                    <NotificationsNoneIcon />
-                  </ActionIcon>
-                </Popover.Target>
-                <Popover.Dropdown>
-                  <Text size="xs">Your notifs</Text>
-                </Popover.Dropdown>
-              </Popover>
-              <ActionIcon variant="filled" size="lg" aria-label="Settings">
-                <IconBrandDiscord />
-              </ActionIcon>
-              <Menu
-                width={260}
-                position="bottom-end"
-                transitionProps={{ transition: 'pop-top-right' }}
-                onClose={() => setUserMenuOpened(false)}
-                onOpen={() => setUserMenuOpened(true)}
-                withinPortal
-              >
-                <Menu.Target>
-                  <ActionIcon variant="light" aria-label="Share" size="lg">
-                    <ShareIcon />
-                  </ActionIcon>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Item
-                    leftSection={
-                      <IconBrandX
-                        style={{ width: rem(16), height: rem(16) }}
-                        color={theme.colors.blue[6]}
-                        stroke={1.5}
-                      />
-                    }
-                  >
-                    Share to Twitter
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
+              <Group gap={8}>
+                <Popover 
+                  width={400}
+                  position="bottom-end"
+                  shadow="md"
+                  offset={4}
+                >
+                  <Popover.Target>
+                    <ActionIcon variant="light" aria-label="Notifications" size="lg" ml={8}>
+                      <NotificationsNoneIcon />
+                    </ActionIcon>
+                  </Popover.Target>
+                  <Popover.Dropdown style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' }}>
+                    <Text size="xs">Your notifs</Text>
+                  </Popover.Dropdown>
+                </Popover>
+                <ActionIcon variant="filled" size="lg" aria-label="Settings" onClick={goToDiscord}>
+                  <IconBrandDiscord />
+                </ActionIcon>
+                <Menu
+                  width={260}
+                  position="bottom-end"
+                  transitionProps={{ transition: 'pop-top-right' }}
+                  onClose={() => setUserMenuOpened(false)}
+                  onOpen={() => setUserMenuOpened(true)}
+                  withinPortal
+                  offset={4}
+                >
+                  <Menu.Target>
+                    <ActionIcon variant="light" aria-label="Share" size="lg">
+                      <ShareIcon />
+                    </ActionIcon>
+                  </Menu.Target>
+                  <Menu.Dropdown style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' }}>
+                    <Menu.Item
+                      leftSection={
+                        <IconBrandX
+                          style={{ width: rem(16), height: rem(16) }}
+                          color={theme.colors.blue[6]}
+                          stroke={1.5}
+                        />
+                      }
+                    >
+                      Share to Twitter
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </Group>
             </Group>
 
             <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />

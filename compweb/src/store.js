@@ -347,11 +347,16 @@ function reducer(state = initialState, action) {
       }
     }
     case 'UPDATE_IS_FILE_SAVED':
+      console.log('UPDATE_IS_FILE_SAVED');
+      console.log({
+        ...state.isFileSaved,
+        [action.key]: action.payload,
+      });
       return {
         ...state, 
         isFileSaved: {
           ...state.isFileSaved,
-          [state.activeFileTab]: action.payload,
+          [action.key]: action.payload,
         }
       }
     case 'DELETE_IS_FILE_SAVED':

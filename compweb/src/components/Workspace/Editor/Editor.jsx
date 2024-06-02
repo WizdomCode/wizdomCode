@@ -60,7 +60,8 @@ import {
   Container,
   Title,
   ScrollArea,
-  CloseButton
+  CloseButton,
+  ActionIcon
 } from '@mantine/core';
 import {
   Tree,
@@ -71,7 +72,12 @@ import { DndProvider } from "react-dnd";
 import CodeSpace from './CodeSpace.jsx';
 import { CodeHighlight } from '@mantine/code-highlight';
 import {
-  IconFolderOpen
+  IconArrowsDiagonal,
+  IconDeviceFloppy,
+  IconFolderOpen,
+  IconMaximize,
+  IconMinimize,
+  IconPointFilled
 } from '@tabler/icons-react';
 import { InlineCodeHighlight } from '@mantine/code-highlight';
 
@@ -613,6 +619,48 @@ const CodeEditor = (props) => {
     }
   }, [updateFileCodeSignal]);
 
+  const isFileSaved = useSelector(state => state.isFileSaved);
+
+  const handleSave = async () => {
+    console.log('fileTabs[activeTabIndex]', fileTabs[activeTabIndex]);
+    
+    try {
+        const uid = auth.currentUser.uid;
+        const ideRef = doc(db, "IDE", uid);
+        const ideSnapshot = await getDoc(ideRef);
+        if (ideSnapshot.exists()) {
+            const existingIdeMap = ideSnapshot.data().ide || {};
+            const updatedIdeMap = {
+                ...existingIdeMap,
+                [fileTabs[activeTabIndex].name]: code // Update the content of the selected item
+            };
+            await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
+            setIsContentSaved(true);
+
+            const updateFileCode = async (key, newFileCode) => {
+              try {
+                let doc = await getDoc(ideRef);
+                if (doc.exists()) {
+                  let data = doc.data();
+                  if (data.code) {
+                    data.code[key] = newFileCode[key];
+                    await setDoc(ideRef, { code: data.code }, { merge: true });
+                  }
+                }
+              } catch (error) {
+                console.error("Error updating document: ", error);
+              }
+            };
+                    
+            updateFileCode(fileTabs[activeTabIndex].id, fileCode);
+
+            dispatch({ type: 'UPDATE_IS_FILE_SAVED', key: fileTabs[activeTabIndex].id, payload: true });
+        } else {
+        }
+    } catch (error) {
+    }
+  };
+
   return (
     <>
       <Main open={filesOpen} style={{ width: '100%' }}>
@@ -630,6 +678,7 @@ const CodeEditor = (props) => {
             {fileTabs.map((tab, index) => (
               <button className={styles.button} style={{ height: '50px', background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
                 <p style={{ color: index === activeTabIndex ? 'white' : 'var(--dim-text)' }} className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
+                { !isFileSaved[tab.id] && <IconPointFilled style={{ margin: '0 5px' }}/>}
                 {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
               </button>          
             ))
@@ -674,12 +723,6 @@ const CodeEditor = (props) => {
                   ))}
                 </div>
                 <div>
-                  <IconButton
-                    className={styles.buttonIcon}
-                    onClick={() => {
-                  }}>
-                    <SaveIcon style={{color: 'white'}} onClick={() => { saveCode() }}/>
-                  </IconButton>
                 </div>
                 <IconButton
                   color="inherit"
@@ -691,7 +734,16 @@ const CodeEditor = (props) => {
                   <MenuIcon style={{color: "white"}}/>
                 </IconButton>
               </ThemeProvider>
-              <Button onClick={getEditorModels}>fjdslkajf</Button>
+              <ActionIcon variant="subtle" aria-label="Settings">
+                <IconDeviceFloppy onClick={handleSave}/>
+              </ActionIcon>
+              <ActionIcon variant="subtle" aria-label="Settings">
+                  { true ?
+                    <IconMaximize />
+                  :
+                    <IconMinimize />
+                  }
+              </ActionIcon>
             </Group>
           </div>
         </div>
@@ -722,11 +774,9 @@ const CodeEditor = (props) => {
               language={fileTabs[activeTabIndex].language}
               value={fileCode[fileTabs[activeTabIndex].id]}
               onValueChange={(value) => {
-                console.log("Somehting is happening");
-                console.log("fileTabs[activeTabIndex]", fileTabs[activeTabIndex]);
                 dispatch({ type: 'UPDATE_FILE_CODE', key: fileTabs[activeTabIndex].id, value: value })
                 setCode(value);
-                dispatch({ type: 'UPDATE_IS_FILE_SAVED', payload: false });
+                dispatch({ type: 'UPDATE_IS_FILE_SAVED', key: fileTabs[activeTabIndex].id, payload: false });
               }}
               fileTabs={fileTabs}
               fileCode={fileCode}
