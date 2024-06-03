@@ -73,3 +73,9 @@ input {
 input:focus {
   outline: none;
 }
+
+.mantine-Select-option {
+  &:hover {
+    background-color: var(--hover) !important;
+  }
+}

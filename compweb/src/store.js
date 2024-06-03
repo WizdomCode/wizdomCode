@@ -34,16 +34,7 @@ const initialState = {
   authenticatedUser: null,
   fileTabs: [],
   activeFileTab: 0,
-  fileCode: {
-  2: "print('File 1-1')",
-  3: `#include <iostream>
-
-int main() {
-    std::cout << "Hello World!";
-    return 0;
-}`,
-  6: "print('File 2-1-1')",
-},
+  fileCode: undefined,
   treeData: null,
   openFile: null,
   openTemplate: null,
@@ -60,7 +51,8 @@ int main() {
   getCurrentCodeSignal: false,
   updateFileCodeSignal: false,
   loadedFirestoreCode: false,
-  isFileSaved: undefined
+  isFileSaved: undefined,
+  loadedTreeData: false
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -371,7 +363,12 @@ function reducer(state = initialState, action) {
         ...state,
         isFileSaved: action.payload
       }
-
+    case 'LOADED_TREE_DATA':
+      console.log('LOADED_TREE_DATA');
+      return {
+        ...state,
+        loadedTreeData: true
+      }
     default:
       return state;
   }

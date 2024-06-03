@@ -629,14 +629,6 @@ const CodeEditor = (props) => {
         const ideRef = doc(db, "IDE", uid);
         const ideSnapshot = await getDoc(ideRef);
         if (ideSnapshot.exists()) {
-            const existingIdeMap = ideSnapshot.data().ide || {};
-            const updatedIdeMap = {
-                ...existingIdeMap,
-                [fileTabs[activeTabIndex].name]: code // Update the content of the selected item
-            };
-            await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-            setIsContentSaved(true);
-
             const updateFileCode = async (key, newFileCode) => {
               try {
                 let doc = await getDoc(ideRef);
@@ -678,6 +670,7 @@ const CodeEditor = (props) => {
             {fileTabs.map((tab, index) => (
               <button className={styles.button} style={{ height: '50px', background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
                 <p style={{ color: index === activeTabIndex ? 'white' : 'var(--dim-text)' }} className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
+                {console.log(isFileSaved)}
                 { !isFileSaved[tab.id] && <IconPointFilled style={{ margin: '0 5px' }}/>}
                 {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
               </button>          

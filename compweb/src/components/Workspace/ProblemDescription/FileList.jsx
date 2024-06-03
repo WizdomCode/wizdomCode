@@ -9,10 +9,14 @@ import Divider from '@mui/material/Divider';
 import { useLocation } from "react-router-dom";
 import { 
   ActionIcon,
+  Container,
   CopyButton,
+  Group,
   NativeSelect,
   rem,
+  Select,
   Text,
+  TextInput,
   Tooltip,
 } from '@mantine/core';
 import {
@@ -33,6 +37,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import {
   IconCheck,
   IconCopy,
+  IconPlus,
   IconTrash
 } from '@tabler/icons-react';
 
@@ -286,15 +291,17 @@ const FileList = (props) => {
 
         const parentId = openFile ? (openFile.droppable ? openFile.id : openFile.parent) : 0;
         const newFile = { 
-            id: treeData[treeData.length - 1].id + 1, 
+            id: treeData[treeData.length - 1] ? treeData[treeData.length - 1].id + 1 : 1, 
             parent: parentId, 
             text: inputValue, 
             data: { language: fileTypeInputValue } 
         };
     
-        dispatch({ type: 'ADD_FILE_TAB', payload: { id: treeData[treeData.length - 1].id + 1, language: fileTypeInputValue, name: inputValue, code: "" } });
+        dispatch({ type: 'ADD_FILE_TAB', payload: { id: treeData[treeData.length - 1] ? treeData[treeData.length - 1].id + 1 : 1, language: fileTypeInputValue, name: inputValue, code: "" } });
 
-        dispatch({ type: 'UPDATE_FILE_CODE', key: treeData[treeData.length - 1].id + 1, value: "" });
+        dispatch({ type: 'UPDATE_FILE_CODE', key: treeData[treeData.length - 1] ? treeData[treeData.length - 1].id + 1 : 1, value: "" });
+
+        dispatch({ type: 'UPDATE_IS_FILE_SAVED', key: treeData[treeData.length - 1] ? treeData[treeData.length - 1].id + 1 : 1, payload: true });
 
         const newTreeData = [...treeData, newFile];
         dispatch({ type: 'SET_TREE_DATA', payload: newTreeData });
@@ -477,6 +484,8 @@ const FileList = (props) => {
     setTreeData(newTreeData);
   }; 
 
+  const loadedTreeData = useSelector(state => state.loadedTreeData);
+
   useEffect(() => {
     const updateTree = async (newTreeData) => {
       if (auth.currentUser && auth.currentUser.uid) {
@@ -491,7 +500,7 @@ const FileList = (props) => {
       }
     }; 
 
-    updateTree(treeData);
+    if (loadedTreeData) updateTree(treeData);
   }, [treeData]);
   
   const loadedFirestoreCode = useSelector(state => state.loadedFirestoreCode);
@@ -504,27 +513,23 @@ const FileList = (props) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
 
-        console.log("docSnap.exists()", data);
-
-        console.log("data.files", data.files || initialData);
-
         setTreeData(data.files || initialData);
 
-        console.log("data.code", data.code);
-
         if (data.code) {
-          console.log("data.code", data.code);
           dispatch({type: 'REPLACE_FILE_CODE', newState: data.code});
+
+          const initialSaveStates = {};
+          for (let key in data.code) {
+            initialSaveStates[key] = true;
+          }
+
+          dispatch({ type: 'REPLACE_IS_FILE_SAVED', payload: initialSaveStates });
         } else {
           console.log("data.code is undefined, retrying...");
           fetchData(userId);
         }  
       } else {
-        console.log("docSnap does not exist");
-
         setTreeData(initialData);
-
-        console.log("docSnap.data().code", docSnap.data().code);
 
         dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
       }
@@ -533,13 +538,7 @@ const FileList = (props) => {
     if (userId && !loadedFirestoreCode) {
       fetchData(userId);
       dispatch({ type: 'LOADED_FIRESTORE_CODE' });
-
-      const initialSaveStates = {};
-      for (let key in fileCode) {
-        initialSaveStates[key] = true;
-      }
-
-      dispatch({ type: 'REPLACE_IS_FILE_SAVED', payload: initialSaveStates });
+      dispatch({ type: 'LOADED_TREE_DATA' });
     }
   }, [userId]);
 
@@ -568,15 +567,26 @@ const FileList = (props) => {
     }
   }, [openFile]);
 
-  const handleFileDelete = () => {
+  const handleFileDelete = (openFile) => {
     if (openFile && openFile.id) {
-      console.log("openFile", openFile);
+
+      if (openFile.droppable) {
+        for (let file of treeData) {
+          if (file.parent === openFile.id) {
+            handleFileDelete(file);
+          }
+        }
+        setTreeData(prevArray => prevArray.filter(object => object.id !== openFile.id));
+        return;
+      }
       
       const id = openFile.id;
       const removeIndex = fileTabs.findIndex(object => object.id === id);
       dispatch({ type: 'REMOVE_FILE_TAB_BY_ID', payload: id });
       setTreeData(prevArray => prevArray.filter(object => object.id !== id));
+      deleteFirestoreCode(id, fileCode);
       dispatch({ type: 'DELETE_FILE_CODE', key: id });
+      dispatch({ type: 'DELETE_IS_FILE_SAVED', key: id });
 
       if (fileTabs.length > 1) {
 
@@ -600,8 +610,20 @@ const FileList = (props) => {
     }
   }
 
+  const deleteFirestoreCode = async (key, fileCode) => {
+    try {
+      const uid = auth.currentUser.uid;
+      const ideRef = doc(db, "IDE", uid);
+
+      const {[key]: _, ...newFileCode} = fileCode;
+      await setDoc(ideRef, { code: newFileCode }, { merge: true });
+    } catch (error) {
+      console.log("Error deleting firestore filecode", error)
+    }
+  }
+
   useEffect(() => {
-    dispatch({ type: 'SET_TREE_DATA', payload: treeData });
+    if (loadedTreeData) dispatch({ type: 'SET_TREE_DATA', payload: treeData });
   }, [treeData]);
   
   useEffect(() => {
@@ -632,45 +654,18 @@ const FileList = (props) => {
               </Text>
             </p>
             <div className={`${styles.rightAlign} ${styles.vertCenterIcons}`}>
-                <NoteAddOutlinedIcon style={{ color: 'var(--dim-text)' }} className={`${styles.languageIcon}`} onClick={() => setShowFileForm(!showFileForm)}/>
-                <CreateNewFolderOutlinedIcon style={{ color: 'var(--dim-text)' }} className={`${styles.languageIcon}`} onClick={() => setShowFolderForm(!showFolderForm)}/>
-                <IconTrash style={{ color: 'var(--dim-text)' }} className={`${styles.languageIcon}`} onClick={() => handleFileDelete()}/>
+              <ActionIcon variant="subtle"> 
+                <NoteAddOutlinedIcon style={{ color: 'var(--dim-text)' }} onClick={() => setShowFileForm(!showFileForm)}/>
+              </ActionIcon>
+              <ActionIcon variant="subtle">
+                <CreateNewFolderOutlinedIcon style={{ color: 'var(--dim-text)' }} onClick={() => setShowFolderForm(!showFolderForm)}/>
+              </ActionIcon>
+              <ActionIcon variant="subtle">
+                <IconTrash style={{ color: 'var(--dim-text)' }} onClick={() => handleFileDelete(openFile)}/>
+              </ActionIcon>
             </div>
         </div>
             <div className={styles.marginSpacing}>
-            {showFileForm && (
-                <div>
-                  <form onSubmit={handleFileSubmit}>
-                      <input
-                          type="text"
-                          value={inputValue}
-                          onChange={(e) => setInputValue(e.target.value)}
-                          autoFocus
-                          style={{color: "white"}}
-                          placeholder="File Name"
-                      />
-                      <NativeSelect 
-                        label="Language" 
-                        data={['cpp', 'python', 'java']} 
-                        onChange={(e) => setFileTypeInputValue(e.target.value)}
-                      />
-                      <button type="submit">Submit</button>
-                  </form>
-                </div>
-            )}
-            {showFolderForm && (
-                <form onSubmit={handleFolderSubmit}>
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        autoFocus
-                        style={{color: "white"}}
-                        placeholder="Folder Name"
-                    />
-                    <button type="submit">Submit</button>
-                </form>
-            )}
             </div>
         { filesSectionOpen &&
           <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
@@ -704,7 +699,54 @@ const FileList = (props) => {
               style={{ height: "100%" }}
             />
           </DndProvider> 
-        }   
+        }
+        {showFileForm && (
+          <Container>
+            <form onSubmit={handleFileSubmit} style={{ margin: '10px 0' }}>
+                <Select 
+                  label="Language" 
+                  data={['cpp', 'python', 'java']}
+                  value={fileTypeInputValue}
+                  onChange={(_value, option) => setFileTypeInputValue(_value)}
+                  styles={{ 
+                    input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+                    dropdown: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'} 
+                  }}
+                  allowDeselect={false}
+                />
+                <TextInput
+                    label="File name"
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.currentTarget.value)}
+                    autoFocus
+                    styles={{ 
+                      input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+                    }}  
+                    placeholder="File Name"
+                    rightSection={<ActionIcon variant="light" type="submit" radius="xl"><IconPlus /></ActionIcon>}
+                />
+            </form>
+          </Container>
+      )}
+      {showFolderForm && (
+        <Container>
+          <form onSubmit={handleFolderSubmit}>
+              <TextInput
+                  label="Folder name"
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.currentTarget.value)}
+                  autoFocus
+                  styles={{ 
+                    input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+                  }}  
+                  placeholder="Folder Name"
+                  rightSection={<ActionIcon variant="light" type="submit" radius="xl"><IconPlus /></ActionIcon>}
+              />
+          </form>
+        </Container>
+      )}   
         <div style={{ marginTop: '4px', paddingLeft: '2px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
             <span className={styles.vertCenterIcons} onClick={() => dispatch({ type: 'TOGGLE_TEMPLATES_SECTION_OPEN' })}>{templatesSectionOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
             <p className={`${styles.marginSpacing} ${styles.classTwo}`} style={{ color: 'var(--dim-text)' }}>
