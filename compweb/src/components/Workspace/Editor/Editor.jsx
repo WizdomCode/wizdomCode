@@ -192,6 +192,9 @@ const CodeEditor = (props) => {
   
           // Fetch user data from Firestore
           const userSnapshot = await getDoc(userDocRef);
+
+          setReadCount(prevReadCount => prevReadCount + 1);
+
           if (userSnapshot.exists()) {
             // Extract required user information from the snapshot
             const userData = userSnapshot.data();
@@ -285,12 +288,18 @@ const CodeEditor = (props) => {
 
   const codeState = useSelector(state => state.codeState); 
 
-  const submitCode = async () => {
+  const [readCount, setReadCount] = useState(0);
+  
+  useEffect(() => {
+    console.log("Editor reads:", readCount);
+  }, [readCount]);
+  
+  const submitCode = async (tests, numTests, isCustomCase) => {
 
     console.log("Submitted data", JSON.stringify({
       language: fileTabs[activeTabIndex].language,
       code: getEditorModels(),
-      test_cases: [{ key: 1, input: localInputData, output: ''}]
+      test_cases: tests
     }));
 
     // Start the timer
@@ -304,14 +313,9 @@ const CodeEditor = (props) => {
       body: JSON.stringify({
         language: fileTabs[activeTabIndex].language,
         code: getEditorModels(),
-        test_cases: [{ key: 1, input: localInputData, output: ''}]
+        test_cases: tests
       })
     });
-
-    // End the timer and calculate the elapsed time
-    const endTime = performance.now();
-    const elapsedTime = endTime - startTime;
-    console.log("elapsedTime", elapsedTime);
 
     // Extract request_id from response
     const { request_id } = await response.json();
@@ -322,18 +326,45 @@ const CodeEditor = (props) => {
       // Fetch data from Firestore using request_id
       const docRef = doc(db, "Results", request_id);
       const rdata = await getDoc(docRef);
+      
+      setReadCount(prevReadCount => prevReadCount + 1);
+
       if (rdata.exists) {
         const ndata = rdata.data();
         
         console.log(ndata);
       
-        // Check if results array exists in ndata
+        // At least 1 result is received
         if (ndata && ndata.results && Array.isArray(ndata.results)) {
           console.log("ndata.results", ndata.results);
-          setLocalOutputData(ndata.results[0].stdout);
-          dispatch({ type: 'TOGGLE_RUNNING_CUSTOM_CASE' });
-          stopFetching = true;
-          break;
+          
+          if (numTests === 1) {
+
+            if (isCustomCase) setLocalOutputData(ndata.results[0].stdout);
+            else {
+              const results = new Array(ndata.results[0].key - 1).fill(null);
+              results.push(ndata.results[0]);
+              dispatch({ type: 'SET_RESULTS', payload: results });
+            }
+
+            // End the timer and calculate the elapsed time
+            const endTime = performance.now();
+            const elapsedTime = endTime - startTime;
+            console.log("elapsedTime", elapsedTime);
+            
+            stopFetching = true;
+            break;
+          } 
+          
+          else {
+            dispatch({ type: 'SET_RESULTS', payload: ndata.results });
+          }
+
+          // All test cases have been received
+          if (ndata.results.length >= numTests) {
+            stopFetching = true;
+            break;
+          }
         }
       
         if (!stopFetching) {
@@ -352,6 +383,28 @@ const CodeEditor = (props) => {
     }
   };  
 
+  const submitCodeSignal = useSelector(state => state.submitCodeSignal);
+
+  useEffect(() => {
+    if (submitCodeSignal) {
+      const runTests = async () => {
+        
+        await submitCode(
+          submitCodeSignal.tests, 
+          submitCodeSignal.numTests,
+          submitCodeSignal.isCustomCase
+        );
+
+        // Update appropriate loading states
+        if (submitCodeSignal.tests.length !== 1) dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' });
+        else if (submitCodeSignal.isCustomCase) dispatch({ type: 'TOGGLE_RUNNING_CUSTOM_CASE' });
+        
+        dispatch({ type: 'SET_SUBMIT_CODE_REQUEST', payload: null });
+      }
+
+      runTests();
+    }
+  }, [submitCodeSignal]);
 
   const location = useLocation();
   const currentTab = useSelector(state => state.currentTab);
@@ -384,6 +437,9 @@ const CodeEditor = (props) => {
   
           // Fetch user data from Firestore
           const userSnapshot = await getDoc(userDocRef);
+
+          setReadCount(prevReadCount => prevReadCount + 1);
+
           if (userSnapshot.exists()) {
             const userData = userSnapshot.data();
             const savedCode = userData.questionsIDE?.[questionName]; // Get saved code if it exists
@@ -402,45 +458,6 @@ const CodeEditor = (props) => {
   
     fetchCode();
   }, [currentTab, lessonProblemData, tabIndex, props.boilerPlate]);
-  
-  
-  const saveCode = async () => {
-    let questionName = "";
-  
-    // Determine the question name based on the location and Redux state
-    if (location.pathname === '/problems' && currentTab && currentTab.data) {
-      questionName = currentTab.data.title;
-    } else if (lessonProblemData && lessonProblemData[tabIndex]) {
-      questionName = lessonProblemData[tabIndex].data.title;
-    } else {
-      return; // Exit the function if there's no active question
-    }
-  
-    // Check if the user is authenticated
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      return;
-    }
-  
-    // Check if the question name exists
-    if (questionName) {
-      try {
-        // Get the document reference for the current user from Firestore
-        const userDocRef = doc(db, "Users", currentUser.uid);
-  
-        // Fetch user data from Firestore
-        const userSnapshot = await getDoc(userDocRef);
-        if (userSnapshot.exists()) {
-          // Update the questionsIDE map with the word "amongus" inside the key corresponding to the question name
-          await updateDoc(userDocRef, {
-            [`questionsIDE.${questionName}`]: code
-          });
-        } else {
-        }
-      } catch (error) {
-      }
-    }
-  }
   
     const [showFileForm, setShowFileForm] = useState(false);
     const [fileTypeInputValue, setFileTypeInputValue] = useState("cpp");
@@ -505,6 +522,9 @@ const CodeEditor = (props) => {
                 setUserId(currentUser.uid);
                 const userDocRef = doc(db, "IDE", currentUser.uid);
                 const userSnapshot = await getDoc(userDocRef);
+
+                setReadCount(prevReadCount => prevReadCount + 1);
+
                 if (userSnapshot.exists()) {
                     const userData = userSnapshot.data();
                     setUserData(userData);
@@ -628,10 +648,14 @@ const CodeEditor = (props) => {
         const uid = auth.currentUser.uid;
         const ideRef = doc(db, "IDE", uid);
         const ideSnapshot = await getDoc(ideRef);
+        setReadCount(prevReadCount => prevReadCount + 1);
+
         if (ideSnapshot.exists()) {
             const updateFileCode = async (key, newFileCode) => {
               try {
                 let doc = await getDoc(ideRef);
+                setReadCount(prevReadCount => prevReadCount + 1);
+
                 if (doc.exists()) {
                   let data = doc.data();
                   if (data.code) {
@@ -670,7 +694,6 @@ const CodeEditor = (props) => {
             {fileTabs.map((tab, index) => (
               <button className={styles.button} style={{ height: '50px', background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
                 <p style={{ color: index === activeTabIndex ? 'white' : 'var(--dim-text)' }} className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
-                {console.log(isFileSaved)}
                 { !isFileSaved[tab.id] && <IconPointFilled style={{ margin: '0 5px' }}/>}
                 {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
               </button>          
@@ -845,7 +868,7 @@ const CodeEditor = (props) => {
                         variant="light"
                         onClick={() => {
                           dispatch({ type: 'TOGGLE_RUNNING_CUSTOM_CASE' });
-                          submitCode();
+                          dispatch({ type: 'SET_SUBMIT_CODE_REQUEST', payload: { tests: [{ key: 1, input: localInputData, output: ''}], numTests: 1, isCustomCase: true } });
                           dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
                       }}>
                         RUN

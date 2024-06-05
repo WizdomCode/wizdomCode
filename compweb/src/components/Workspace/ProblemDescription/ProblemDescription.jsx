@@ -21,18 +21,23 @@ import SolutionDisplay from './SolutionDisplay';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex'; 
 import 'katex/dist/katex.min.css'; // don't forget to import katex styles
-import { Button, Overlay, AspectRatio, Group, Container, Loader, LoadingOverlay } from '@mantine/core';
+import { Button, Overlay, AspectRatio, Group, Container, Loader, LoadingOverlay, Switch } from '@mantine/core';
 import { getCategory, getDifficultyLevel } from '../../../../public/CATEGORY_NAMES.js';
 import {
   IconNotebook,
   IconCircleDashedCheck,
   IconBook,
-  IconPlayerPlay
+  IconPlayerPlay,
+  IconChevronDown
 } from '@tabler/icons-react'
 import { CodeHighlight } from '@mantine/code-highlight';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
 
-const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displayCases, results, solutions, selectedTab }) => {
+const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displayCases, solutions, selectedTab, setSelectedTab }) => {
   // Example usage of getCategory// prints "String Algorithms"
   
   // Example usage of getDifficultyLevel // prints { level: 'Intermediate', number: 1 }
@@ -81,9 +86,15 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
   const runningAllCases = useSelector(state => state.runningAllCases);
   const [runningCase, setRunningCase] = useState(null);
 
+  const results = useSelector(state => state.results);
+  
   useEffect(() => {
     setRunningCase(null);
   }, [results]);
+
+  const dispatch = useDispatch();
+
+  const [expandAllCases, setExpandAllCases] = useState(new Array(testCases.length).fill(false));
 
   return (
     <Container>
@@ -214,7 +225,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
           </div>
           <br />
           <br />
-          <button className={styles.runAll} onClick={() => submitCode()} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
+          <button className={styles.runAll} onClick={() => { dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' }); setSelectedTab('tests'); dispatch({ type: 'SET_SUBMIT_CODE_REQUEST', payload: { tests: testCases, numTests: testCases.length, isCustomCase: false } }); }} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
           <br />
         </div> 
       )}
@@ -223,45 +234,69 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
         <>
           <div style={{ position: 'relative', height: !testCasesVisible ? 'calc(100vh - 150px)' : '100%', overflow: !testCasesVisible ? 'hidden' : 'auto' }}>
             <LoadingOverlay mt={16} visible={!testCasesVisible} zIndex={1000} overlayProps={{ radius: "sm", blur: 2, color: 'var(--site-bg)' }} loaderProps={{ children: <Button variant='outline' size="md" onClick={() => setTestCasesVisible(true)}>Show test cases</Button> }}/>      
-              <div className={styles.testCases}>
+
+              <div className={styles.testCases} style={{ marginTop: '20px' }}>
                 {displayCases ? displayCases.map((testCase, index) => {
                   const status = results[index]?.status?.description;
-                    const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
+                  const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 
                   return (
-                    <div key={testCase.key}>
-                      <br />
-                      <h3 className={className}>
-                        Case {testCase.key}
-                        {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
-                        {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
-                        {results[index] && results[index].status.description === 'Time Limit Exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
-                      </h3>
-                      {results[index] && (
+                    <Accordion 
+                      key={testCase.key}
+                      sx={{
+                        bgcolor: 'var(--site-bg)',
+                        border: 1
+                      }}
+                      expanded={expandAllCases[index] || false}
+                      onChange={(event, expanded) => {
+                        setExpandAllCases(prevArray => {
+                          let newArray = [...prevArray];
+                          newArray[index] = !prevArray[index];
+                          return newArray;
+                        });
+                      }}
+                    >
+                      <AccordionSummary>
+                        <Group justify="space-between" style={{ width: '100%' }}>
+                          <div>
+                            <br />
+                            <h3 className={className}>
+                              Case {testCase.key}
+                              {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
+                              {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
+                              {results[index] && results[index].status.description === 'Time Limit Exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
+                              {results[index] && results[index].status.description === 'Memory Limit Exceeded' && <span className={styles.failIcon}> (Memory limit exceeded)</span>}
+                            </h3>
+                            {results[index] && (
+                                <>
+                                  <h5 className={className}>[ {results[index].time}s, {results[index].memory} MB ]</h5>
+                                </>
+                              )}
+                            <br />
+                          </div>
+                          { (runningCase && runningCase === testCase.key) || runningAllCases ? 
+                            <Loader color="blue" type="dots" ml={4}/>
+                            :
+                            <Button onClick={() => {setRunningCase(testCase.key); dispatch({ type: 'SET_SUBMIT_CODE_REQUEST', payload: { tests: [testCases[testCase.key - 1]], numTests: 1, isCustomCase: false } }); }} variant="light" leftSection={<IconPlayerPlay size={14} />} >Run</Button>
+                          }
+                        </Group>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <h4 className={className}>Input:</h4>
+                        <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.input).replace(/\\r\\n/g, '\n')} language="txt" />
+                        <br />
+                        <h4 className={className}>Expected Output:</h4>
+                        <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.output).replace(/\\r\\n/g, '\n')} language="txt" />
+                        {results[index] && results[index].status.description === 'Wrong Answer' && (
                           <>
-                            <h5 className={className}>[ {results[index].time}s ]</h5>
+                            <br />
+                            <h4 className={className}>Actual Output:</h4>
+                            <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"} language="txt" />
                           </>
                         )}
-                      <br />
-                      <h4 className={className}>Input:</h4>
-                      <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.input).replace(/\\r\\n/g, '\n')} language="txt" />
-                      <br />
-                      <h4 className={className}>Expected Output:</h4>
-                      <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={String(testCase.output).replace(/\\r\\n/g, '\n')} language="txt" />
-                      {results[index] && results[index].status.description === 'Wrong Answer' && (
-                        <>
-                          <br />
-                          <h4 className={className}>Actual Output:</h4>
-                          <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"} language="txt" />
-                        </>
-                      )}
-                      <br />
-                      { (runningCase && runningCase === testCase.key) || runningAllCases ? 
-                        <Loader color="blue" type="dots" ml={4}/>
-                        :
-                        <Button onClick={() => {setRunningCase(testCase.key); submitCode([testCases[testCase.key - 1]], 1);}} variant="light" leftSection={<IconPlayerPlay size={14} />} >Run</Button>
-                      }
-                    </div>
+                        <br />
+                      </AccordionDetails>
+                    </Accordion>
                   );                
                 }): (
                   <div>
@@ -270,6 +305,12 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
                   </div>
                 )}
               </div>
+
+              <Group style={{ margin: '20px 0' }}>
+                <Button variant="subtle" onClick={() => setExpandAllCases(new Array(testCases.length).fill(true))}>Expand all</Button>
+                <Button variant="subtle" onClick={() => setExpandAllCases(new Array(testCases.length).fill(false))}>Collapse all</Button>
+              </Group>
+              
             </div>
           </>
         )}

@@ -52,7 +52,9 @@ const initialState = {
   updateFileCodeSignal: false,
   loadedFirestoreCode: false,
   isFileSaved: undefined,
-  loadedTreeData: false
+  loadedTreeData: false,
+  submitCodeSignal: undefined,
+  results: []
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -368,6 +370,16 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         loadedTreeData: true
+      }
+    case 'SET_SUBMIT_CODE_REQUEST':
+      return {
+        ...state,
+        submitCodeSignal: action.payload
+      }
+    case 'SET_RESULTS':
+      return {
+        ...state,
+        results: action.payload
       }
     default:
       return state;

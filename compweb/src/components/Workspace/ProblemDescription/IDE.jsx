@@ -937,7 +937,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
                 <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
               </>
             ) : currentTab.type === 'problem' ? (
-                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} testCases={testCases} displayCases={displayCases} results={results} solutions={solutions} selectedTab={selectedTab}/>
+                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} testCases={testCases} displayCases={displayCases} results={results} solutions={solutions} selectedTab={selectedTab} setSelectedTab={setSelectedTab}/>
             ) : currentTab.type === 'newTab' ? (
               <Container>
                 <div className='hero'> 
