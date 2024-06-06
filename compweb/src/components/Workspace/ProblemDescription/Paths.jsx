@@ -58,41 +58,15 @@ const HtmlTooltip = styled(({ className, ...props }) => (
     },
   }));  
 
-const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
-    const [userData, setUserData] = useState(null);
+const LessonBackgroundRect = ({ onButtonClick, isFocused, userData, allMetaData, ...props }) => {
+    const [readCount, setReadCount] = useState(0);
+  
+    useEffect(() => {
+      console.log("LessonBackgroundRect reads:", readCount);
+    }, [readCount]);  
+
     const [numProblems, setNumProblems] = useState(0);
     const [problemsCompleted, setProblemsCompleted] = useState(0);
-
-    const allMetaData = useSelector(state => state.allMetaData);
-                
-    useEffect(() => {
-      const fetchUserData = async () => {
-        try {
-          // Get the current user
-          const currentUser = auth.currentUser;
-  
-          if (currentUser) { // Check if currentUser is not null
-  
-            // Get the document reference for the current user from Firestore
-            const userDocRef = doc(db, "Users", currentUser.uid);
-  
-            // Fetch user data from Firestore
-            const userSnapshot = await getDoc(userDocRef);
-            if (userSnapshot.exists()) {
-              // Extract required user information from the snapshot
-              const userData = userSnapshot.data();
-              setUserData(userData); // Set the user data in the state
-            } else {
-            }
-          }
-          else {
-          }
-        } catch (error) {
-        }
-      };
-  
-      fetchUserData();
-    }, [auth.currentUser]); // Empty dependency array ensures the effect runs only once when the component mounts  
 
     const [open, setOpen] = React.useState(false);
     const [questions, setQuestions] = useState([]);
@@ -128,10 +102,8 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
             try {
                 // Get a reference to the user's document
                 const userDocRef = doc(db, "Users", userUid);
-                
-                // Check if the question is already solved by the user
-                const userDocSnapshot = await getDoc(userDocRef);
-                const solvedCategories = userDocSnapshot.data().solvedCategories || [];
+
+                const solvedCategories = userData.solvedCategories || [];
 
                 const stringId = `${props.categoryId.unitTitle}${props.categoryId.rowIndex}${props.categoryId.lessonIndex}`;
         
@@ -139,8 +111,8 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                 // Update the user's document to add the solved question and increment points
                 await updateDoc(userDocRef, {
                     solvedCategories: arrayUnion(stringId), // Add the question name to the solved array
-                    points: 10 + (userDocSnapshot.data().points || 0), // Increment points
-                    coins: 100 + (userDocSnapshot.data().points || 0),
+                    points: 10 + (userData.points || 0), // Increment points
+                    coins: 100 + (userData.coins || 0),
                 });
                 } else {
                 }
@@ -159,30 +131,25 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
                 }
                 numProblems++;
             }
+            
             setProblemsCompleted(count);
             setNumProblems(numProblems);
             setQuestions(data);
 
             const problemPassed = () => {
                 return count === numProblems;
-                };
+            };
             
-        
-                // If the problem is solved, update the user's document
-                if (problemPassed() && auth.currentUser) {
+            // If the problem is solved, update the user's document
+            if (problemPassed() && auth.currentUser) {
                 const userUid = auth.currentUser.uid; // Get the current user's UID
             
                 updateUserSolvedCategories(userUid);
-                }
+            }
         };
         
-        fetchData();
-    }, [userData]);
-
-    useEffect(() => {
-        // Define a function to update the user's document
-        
-      }, [problemsCompleted, numProblems, db, auth]);
+        if (allMetaData && userData) fetchData();
+    }, [allMetaData, userData]);
 
     const activeCategoryId = useSelector(state => state.activeCategoryId);
 
@@ -236,7 +203,13 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, ...props }) => {
     );
 };
 
-const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
+const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, allMetaData }) => {
+
+    const [readCount, setReadCount] = useState(0);
+  
+    useEffect(() => {
+        console.log("ScrollRow reads:", readCount);
+    }, [readCount]);
 
     const scrollContainer = useRef(null);
     const scrollDistance = 200;
@@ -246,8 +219,6 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
     const [questions, setQuestions] = useState([]);
     const [lastPressed, setLastPressed] = useState(null);
     const [isQuestionListOpen, setIsQuestionListOpen] = useState(false); // Add this line
-
-    const [userData, setUserData] = useState(null);
 
     const tabIndex = useSelector(state => state.lessonTabIndex);
     
@@ -299,8 +270,6 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
         }
     };
 
-    const allMetaData = useSelector(state => state.allMetaData);
-
     useEffect(() => {
     
         if (lessons && lessons[lastPressed] && allMetaData) {
@@ -308,35 +277,6 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
             setQuestions(rowMetaData);
         }
     }, [lastPressed]);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-          try {
-            // Get the current user
-            const currentUser = auth.currentUser;
-    
-            if (currentUser) { // Check if currentUser is not null
-    
-              // Get the document reference for the current user from Firestore
-              const userDocRef = doc(db, "Users", currentUser.uid);
-    
-              // Fetch user data from Firestore
-              const userSnapshot = await getDoc(userDocRef);
-              if (userSnapshot.exists()) {
-                // Extract required user information from the snapshot
-                const userData = userSnapshot.data();
-                setUserData(userData); // Set the user data in the state
-              } else {
-              }
-            }
-            else {
-            }
-          } catch (error) {
-          }
-        };
-    
-        fetchUserData();
-      }, [auth.currentUser]); // Empty dependency array ensures the effect runs only once when the component mounts 
       
     const [isProblemListOpen, setIsProblemListOpen] = useState(false);
     const ref = useClickOutside(() => {
@@ -372,7 +312,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
                                 <div className='lesson-row'>
                                     {row.map((lesson, lessonIndex) => {
                                         return (
-                                            <LessonBackgroundRect key={lessonIndex} {...lesson} onButtonClick={() => {
+                                            <LessonBackgroundRect key={lessonIndex} userData={userData} allMetaData={allMetaData} {...lesson} onButtonClick={() => {
                                                 handleButtonClick(lessonIndex);
                                                 dispatch({ type: 'SET_ACTIVE_CATEGORY_ID', payload: { unitTitle: unitTitle, rowIndex: rowIndex, lessonIndex: lessonIndex }});
                                             }} isFocused={lessonIndex === lastPressed && isQuestionListOpen} division={division} categoryId={{ unitTitle: unitTitle, rowIndex: rowIndex, lessonIndex: lessonIndex }}/>
@@ -441,6 +381,13 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division }) => {
 };
 
 const Paths = (props) => {
+
+    const [readCount, setReadCount] = useState(0);
+  
+    useEffect(() => {
+      console.log("Paths reads:", readCount);
+    }, [readCount]);
+
     const allMetaData = useSelector(state => state.allMetaData);
 
     useEffect(() => {
@@ -449,6 +396,8 @@ const Paths = (props) => {
         const fetchData = async () => {
             try {
                 const docSnap = await getDoc(docRef);
+                setReadCount(prevReadCount => prevReadCount + 1);
+
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     dispatch({ type: 'SET_ALL_META_DATA', payload: data });
@@ -491,7 +440,9 @@ const Paths = (props) => {
         { type: 'division', data: 'Platinum'}
     ];
 
-    const tabIndex = useSelector(state => state.lessonTabIndex);
+    const activePathTab = useSelector(state => state.activePathTab);
+    const cccTabIndex = useSelector(state => state.cccTabIndex);
+    const usacoTabIndex = useSelector(state => state.usacoTabIndex);
 
     const dispatch = useDispatch();
 
@@ -541,6 +492,8 @@ const Paths = (props) => {
         if (questionID) {
           try {
             const docRef = await getDoc(doc(db, "Questions", questionID));
+            setReadCount(prevReadCount => prevReadCount + 1);
+
             if (docRef.exists()) {
               let problemData = docRef.data();
               return problemData;
@@ -558,10 +511,10 @@ const Paths = (props) => {
       
       useEffect(() => {
         const fetchData = async () => {
-          const data = await addGroup(lessonMetaData[tabIndex].problem_id);
+          const data = await addGroup(lessonMetaData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].problem_id);
           dispatch({
             type: 'SET_LESSON_PROBLEM_DATA',
-            index: tabIndex,
+            index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
               data: data
             }
@@ -574,10 +527,10 @@ const Paths = (props) => {
     const state = useSelector(state => state); // Access the state
 
     useEffect(() => {
-        if (lessonProblemData && lessonProblemData[tabIndex] && lessonProblemData[tabIndex].data && lessonProblemData[tabIndex].data.testCases) {
-            setTestCases(lessonProblemData[tabIndex].data.testCases);
+        if (lessonProblemData && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex] && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases) {
+            setTestCases(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases);
         }
-    }, [tabIndex]); // Add state as a dependency to useEffect
+    }, [usacoTabIndex, cccTabIndex]); // Add state as a dependency to useEffect
 
     const submitCode = async () => {
     
@@ -614,6 +567,8 @@ const Paths = (props) => {
                 
                 // Check if the question is already solved by the user
                 const userDocSnapshot = await getDoc(userDocRef);
+                setReadCount(prevReadCount => prevReadCount + 1);
+
                 const solvedQuestions = userDocSnapshot.data().solved || [];
     
                 if (!solvedQuestions.includes(questionName)) {
@@ -645,19 +600,19 @@ const Paths = (props) => {
         };
 
         // If the problem is solved, update the user's document
-        if (problemPassed() && lessonProblemData[tabIndex]) {
-            const questionName = lessonProblemData[tabIndex].data.title; // Assuming the question name is stored here
-            const pointsEarned = lessonProblemData[tabIndex].data.points; // Assuming the points earned for solving the question are stored here
+        if (problemPassed() && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex]) {
+            const questionName = lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title; // Assuming the question name is stored here
+            const pointsEarned = lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.points; // Assuming the points earned for solving the question are stored here
             const userUid = auth.currentUser.uid; // Get the current user's UID
     
             updateUserSolvedQuestions(userUid, questionName, pointsEarned);
         }
-    }, [results, lessonProblemData, tabIndex, db, auth]);
+    }, [results]);
 
       function findProblem(currentProblemId, direction) {
 
         let data;
-        switch (defaultTabs[tabIndex].data) {
+        switch (defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data) {
             case 'Junior':
                 data = JUNIOR_UNIT_LESSONS;
                 break;
@@ -703,9 +658,9 @@ const Paths = (props) => {
     const scrollLeft = () => {
         dispatch({
             type: 'SET_LESSON_META_DATA',
-            index: tabIndex,
+            index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
-                problem_id: findProblem(lessonMetaData[tabIndex].problem_id, "previous")
+                problem_id: findProblem(lessonMetaData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].problem_id, "previous")
             }
         });
     };
@@ -713,9 +668,9 @@ const Paths = (props) => {
     const scrollRight = () => {
         dispatch({
             type: 'SET_LESSON_META_DATA',
-            index: tabIndex,
+            index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
-                problem_id: findProblem(lessonMetaData[tabIndex].problem_id, "next")
+                problem_id: findProblem(lessonMetaData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].problem_id, "next")
             }
         });
     };
@@ -737,6 +692,8 @@ const Paths = (props) => {
 
             // Fetch user data from Firestore
             const userSnapshot = await getDoc(userDocRef);
+            setReadCount(prevReadCount => prevReadCount + 1);
+            
             if (userSnapshot.exists()) {
                 // Extract required user information from the snapshot
                 const userData = userSnapshot.data();
@@ -749,7 +706,7 @@ const Paths = (props) => {
         };
 
         fetchUserData();
-    }, []);
+    }, [auth.currentUser]);
 
     const [solutions, setSolutions] = useState([]);
     const [selectedTab, setSelectedTab] = useState('question');
@@ -758,8 +715,9 @@ const Paths = (props) => {
         const fetchSolutions = async () => {
           try {
             // Get a reference to the question document
-            const questionDocRef = doc(db, "Questions", lessonProblemData[tabIndex].data.title);
+            const questionDocRef = doc(db, "Questions", lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title);
             const questionDocSnapshot = await getDoc(questionDocRef);
+            setReadCount(prevReadCount => prevReadCount + 1);
     
             if (questionDocSnapshot.exists()) {
               const questionData = questionDocSnapshot.data();
@@ -772,54 +730,54 @@ const Paths = (props) => {
         };
     
         fetchSolutions();
-      }, [tabIndex]);
+      }, [usacoTabIndex, cccTabIndex]);
 
     return (
         <div className="universal">
             <div className={styles.paths}>
-                {!lessonProblemData[tabIndex].data ? (
-                    defaultTabs[tabIndex].data === 'Junior' ? (
+                {!lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data ? (
+                    defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Junior' ? (
                         <>
                             {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index]} division='Junior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index]} division='Junior' userData={userData} allMetaData={allMetaData}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
-                    ) : defaultTabs[tabIndex].data === 'Senior' ? (
+                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Senior' ? (
                         <>
                             {SENIOR_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior'/>
+                                    <ScrollRow lessons={lessons} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior' userData={userData} allMetaData={allMetaData}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
                     
-                    ) : defaultTabs[tabIndex].data === 'Bronze' ? (
+                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Bronze' ? (
                         <>
                             {BRONZE_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={BRONZE_UNIT_TITLES[index]} unitDescription={BRONZE_UNIT_DESCRIPTIONS[index] } division='Bronze'/>
+                                    <ScrollRow lessons={lessons} unitTitle={BRONZE_UNIT_TITLES[index]} unitDescription={BRONZE_UNIT_DESCRIPTIONS[index] } division='Bronze' userData={userData} allMetaData={allMetaData}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
-                    ) : defaultTabs[tabIndex].data === 'Silver' ? (
+                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Silver' ? (
                         <>
                             {SILVER_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={SILVER_UNIT_TITLES[index]} unitDescription={SILVER_UNIT_DESCRIPTIONS[index] } division='Silver'/>
+                                    <ScrollRow lessons={lessons} unitTitle={SILVER_UNIT_TITLES[index]} unitDescription={SILVER_UNIT_DESCRIPTIONS[index] } division='Silver' userData={userData} allMetaData={allMetaData}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
-                    ) : defaultTabs[tabIndex].data === 'Gold' ? (
+                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Gold' ? (
                         <>
                             {GOLD_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={GOLD_UNIT_TITLES[index]} unitDescription={GOLD_UNIT_DESCRIPTIONS[index] } division='Gold'/>
+                                    <ScrollRow lessons={lessons} unitTitle={GOLD_UNIT_TITLES[index]} unitDescription={GOLD_UNIT_DESCRIPTIONS[index] } division='Gold' userData={userData} allMetaData={allMetaData}/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -828,7 +786,7 @@ const Paths = (props) => {
                     <>
                             {PLAT_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={PLAT_UNIT_TITLES[index]} unitDescription={PLAT_UNIT_DESCRIPTIONS[index] } division='Platinum'/>
+                                    <ScrollRow lessons={lessons} unitTitle={PLAT_UNIT_TITLES[index]} unitDescription={PLAT_UNIT_DESCRIPTIONS[index] } division='Platinum' userData={userData} allMetaData={allMetaData}/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -844,35 +802,35 @@ const Paths = (props) => {
                                     <button onClick={scrollLeft} className="scroll-button left">
                                         <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
                                     </button>
-                                    <h1 className={styles.title}>{lessonProblemData[tabIndex].data.title}</h1>
-                                    { userData && userData.solved && userData.solved.includes(lessonProblemData[tabIndex].data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
+                                    <h1 className={styles.title}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title}</h1>
+                                    { userData && userData.solved && userData.solved.includes(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
                                     <button onClick={scrollRight} className="scroll-button right">
                                         <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
                                     </button>
                                 </div>
                             <br />
                             <div className={styles.description}>
-                                {lessonProblemData[tabIndex].data.description && (
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.description && (
                                     <>
-                                    {lessonProblemData[tabIndex].data.specificContest && <h3>{lessonProblemData[tabIndex].data.specificContest}</h3>}
-                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.description.replace(/\\n/g, '\n'))} />
+                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.specificContest && <h3>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.specificContest}</h3>}
+                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.description.replace(/\\n/g, '\n'))} />
                                     <div className={styles.divider}></div>
                                     <br />
                                     </>
                                 )}
-                                {lessonProblemData[tabIndex].data.inputFormat && (
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.inputFormat && (
                                     <>
                                     <h3>Input Format</h3>
-                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.inputFormat.replace(/\\n/g, '\n'))} />
+                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.inputFormat.replace(/\\n/g, '\n'))} />
                                     <div className={styles.divider}></div>
                                     <br />
                                     </>
                                 )}
-                                {false && lessonProblemData[tabIndex].data.constraints && (
+                                {false && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.constraints && (
                                     <>
                                     <h3>Constraints</h3>
                                     <ul>
-                                        {Object.entries(lessonProblemData[tabIndex].data.constraints).map(([key, value]) => (
+                                        {Object.entries(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.constraints).map(([key, value]) => (
                                         <li key={key}>
                                             <strong>{key}:</strong> {value}
                                         </li>
@@ -882,63 +840,63 @@ const Paths = (props) => {
                                     <br />
                                     </>
                                 )}
-                                {lessonProblemData[tabIndex].data.outputFormat && (
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.outputFormat && (
                                     <>
                                     <h3>Output Format</h3>
-                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.outputFormat.replace(/\\n/g, '\n'))} />
+                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.outputFormat.replace(/\\n/g, '\n'))} />
                                     <div className={styles.divider}></div>
                                     <br />
                                     </>
                                 )}
-                                {lessonProblemData[tabIndex].data.sample1 && lessonProblemData[tabIndex].data.sample1.input && (
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1 && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.input && (
                                     <>
                                     <h3>Sample Input 1</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample1.input.replace(/\\n/g, '\n')}</pre>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.input.replace(/\\n/g, '\n')}</pre>
                                     <br />
                                     <h3>Output for Sample Input 1</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample1.output.replace(/\\n/g, '\n')}</pre>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.output.replace(/\\n/g, '\n')}</pre>
                                     <br />
                                     <h3>Explanation for Sample 1</h3>
-                                    {lessonProblemData[tabIndex].data.sample1.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.sample1.explanation.replace(/\\n/g, '\n'))} />}
+                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.explanation.replace(/\\n/g, '\n'))} />}
                                     <br />
                                     <div className={styles.divider}></div>
                                     <br />
                                     </>
                                 )}
-                                {lessonProblemData[tabIndex].data.sample2 && lessonProblemData[tabIndex].data.sample2.input && (
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2 && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.input && (
                                     <>
                                     <h3>Sample Input 2</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample2.input.replace(/\\n/g, '\n')}</pre>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.input.replace(/\\n/g, '\n')}</pre>
                                     <br />
                                     <h3>Output for Sample Input 2</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample2.output.replace(/\\n/g, '\n')}</pre>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.output.replace(/\\n/g, '\n')}</pre>
                                     <br />
                                     <h3>Explanation for Sample 2</h3>
-                                    {lessonProblemData[tabIndex].data.sample2.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.sample2.explanation.replace(/\\n/g, '\n'))} />}
+                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.explanation.replace(/\\n/g, '\n'))} />}
                                     <br />
                                     <div className={styles.divider}></div>
                                     <br />
                                     </>
                                 )}
-                                {lessonProblemData[tabIndex].data.sample3 && lessonProblemData[tabIndex].data.sample3.input && (
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3 && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.input && (
                                     <>
                                     <h3>Sample Input 3</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample3.input.replace(/\\n/g, '\n')}</pre>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.input.replace(/\\n/g, '\n')}</pre>
                                     <br />
                                     <h3>Output for Sample Input 3</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[tabIndex].data.sample3.output.replace(/\\n/g, '\n')}</pre>
+                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.output.replace(/\\n/g, '\n')}</pre>
                                     <br />
                                     <h3>Explanation for Sample 3</h3>
-                                    {lessonProblemData[tabIndex].data.sample3.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[tabIndex].data.sample3.explanation.replace(/\\n/g, '\n'))} />}
+                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.explanation.replace(/\\n/g, '\n'))} />}
                                     <br />
                                     <div className={styles.divider}></div>
                                     <br />
                                     </>
                                 )}
-                                {lessonProblemData[tabIndex].data.points && (
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.points && (
                                     <>
                                     <h3>Points</h3>
-                                    <p>{lessonProblemData[tabIndex].data.points}</p>
+                                    <p>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.points}</p>
                                     </>
                                 )}
                                 </div>
@@ -947,7 +905,7 @@ const Paths = (props) => {
                                 <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
                                 <br />
                                 <div className={styles.testCases}>
-                                {lessonProblemData[tabIndex].data.testCases ? lessonProblemData[tabIndex].data.testCases.map((testCase, index) => {
+                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases ? lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases.map((testCase, index) => {
                                     const status = results[index]?.status?.description;
                                     const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
 

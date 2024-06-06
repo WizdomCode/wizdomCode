@@ -177,37 +177,6 @@ const CodeEditor = (props) => {
     bottom: false,
     right: false,
   });
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        // Get the current user
-        const currentUser = auth.currentUser;
-  
-        if (currentUser) { // Check if currentUser is not null
-          setUserId(currentUser.uid); // Set the user ID
-  
-          // Get the document reference for the current user from Firestore
-          const userDocRef = doc(db, "Users", currentUser.uid);
-  
-          // Fetch user data from Firestore
-          const userSnapshot = await getDoc(userDocRef);
-
-          setReadCount(prevReadCount => prevReadCount + 1);
-
-          if (userSnapshot.exists()) {
-            // Extract required user information from the snapshot
-            const userData = userSnapshot.data();
-            setUserData(userData); // Set the user data in the state
-          } else {
-          }
-        }
-      } catch (error) {
-      }
-    };
-  
-    fetchUserData();
-  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
   
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -225,16 +194,9 @@ const CodeEditor = (props) => {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const [code, setCode] = useState(null);
   const [output, setOutput] = useState([]);
   const [language, setLanguage] = useState("cpp");
   const languageRef = useRef(language); // Create a ref for the language
-
-  useEffect(() => {
-    if (fileTabs[activeTabIndex]) {
-      setCode(fileTabs[activeTabIndex].code);
-    }
-  }, [activeTabIndex]);
 
   // Update the ref whenever the language changes
   useEffect(() => {
@@ -279,12 +241,6 @@ const CodeEditor = (props) => {
           });
       }
   }, [editorRef.current]);  
-
-  useEffect(() => {
-    props.getCode(code, language);
-
-    if (fileTabs && fileTabs[activeTabIndex] && fileTabs[activeTabIndex].language);
-  }, [code]);
 
   const codeState = useSelector(state => state.codeState); 
 
@@ -410,54 +366,6 @@ const CodeEditor = (props) => {
   const currentTab = useSelector(state => state.currentTab);
   const lessonProblemData = useSelector(state => state.lessonProblemData);
   const tabIndex = useSelector(state => state.lessonTabIndex);
-  useEffect(() => {
-    const fetchCode = async () => {
-      let questionName = "";
-  
-      // Determine the question name based on the location and Redux state
-      if (location.pathname === '/problems' && currentTab && currentTab.data) {
-        questionName = currentTab.data.title;
-      } else if (lessonProblemData && lessonProblemData[tabIndex]) {
-        if (lessonProblemData[tabIndex].data && lessonProblemData[tabIndex].data.title) {
-          questionName = lessonProblemData[tabIndex].data.title;
-        }
-      }
-  
-      // Check if the user is authenticated
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        return;
-      }
-  
-      // Check if the question name exists
-      if (questionName) {
-        try {
-          // Get the document reference for the current user from Firestore
-          const userDocRef = doc(db, "Users", currentUser.uid);
-  
-          // Fetch user data from Firestore
-          const userSnapshot = await getDoc(userDocRef);
-
-          setReadCount(prevReadCount => prevReadCount + 1);
-
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            const savedCode = userData.questionsIDE?.[questionName]; // Get saved code if it exists
-  
-            if (savedCode) {
-              setCode(savedCode); // Set the code to the saved code
-            } else {
-              setCode(props.boilerPlate); // Use default boilerplate code
-            }
-          } else {
-          }
-        } catch (error) {
-        }
-      }
-    };
-  
-    fetchCode();
-  }, [currentTab, lessonProblemData, tabIndex, props.boilerPlate]);
   
     const [showFileForm, setShowFileForm] = useState(false);
     const [fileTypeInputValue, setFileTypeInputValue] = useState("cpp");
@@ -478,19 +386,15 @@ const CodeEditor = (props) => {
       if (fileTabs.length > 1) {
 
         if (activeTabIndex === fileTabs.length - 1) {
-          setCode(fileTabs[activeTabIndex - 1].code);
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
           return;
         } else if (index < activeTabIndex) {
-          setCode(fileTabs[activeTabIndex - 1].code);
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
           return;
         }
-        setCode(fileTabs[activeTabIndex].code);
         dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex });
         return;
       } else {
-        setCode(null);
         dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: 0 });
         return;
       }
@@ -501,39 +405,6 @@ const CodeEditor = (props) => {
     
     useEffect(() => {
     }, [fileTabs]);
-
-    useEffect(() => {
-        fetchUserData(); // Call fetchUserData on component mount
-    }, []);
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                fetchUserData(); // Call fetchUserData when auth state changes
-            }
-        });
-        return unsubscribe;
-    }, []);
-
-    const fetchUserData = async () => {
-        try {
-            const currentUser = auth.currentUser;
-            if (currentUser) {
-                setUserId(currentUser.uid);
-                const userDocRef = doc(db, "IDE", currentUser.uid);
-                const userSnapshot = await getDoc(userDocRef);
-
-                setReadCount(prevReadCount => prevReadCount + 1);
-
-                if (userSnapshot.exists()) {
-                    const userData = userSnapshot.data();
-                    setUserData(userData);
-                } else {
-                }
-            }
-        } catch (error) {
-        }
-    };
 
   const treeData = useSelector(state => state.treeData);
   const fileCode = useSelector(state => state.fileCode);
@@ -547,7 +418,6 @@ const CodeEditor = (props) => {
     const handleFileClick = async () => {
       setSelectedItem(openFile.text);
       setEditedContent(fileCode[openFile.id]);
-      setCode(fileCode[openFile.id]);
 
       // Check if file with same name already exists
       const existingTabIndex = fileTabs.findIndex(tab => tab.id === openFile.id);
@@ -647,32 +517,27 @@ const CodeEditor = (props) => {
     try {
         const uid = auth.currentUser.uid;
         const ideRef = doc(db, "IDE", uid);
-        const ideSnapshot = await getDoc(ideRef);
-        setReadCount(prevReadCount => prevReadCount + 1);
 
-        if (ideSnapshot.exists()) {
-            const updateFileCode = async (key, newFileCode) => {
-              try {
-                let doc = await getDoc(ideRef);
-                setReadCount(prevReadCount => prevReadCount + 1);
+        const updateFileCode = async (key, newFileCode) => {
+          try {
+            let doc = await getDoc(ideRef);
+            setReadCount(prevReadCount => prevReadCount + 1);
 
-                if (doc.exists()) {
-                  let data = doc.data();
-                  if (data.code) {
-                    data.code[key] = newFileCode[key];
-                    await setDoc(ideRef, { code: data.code }, { merge: true });
-                  }
-                }
-              } catch (error) {
-                console.error("Error updating document: ", error);
+            if (doc.exists()) {
+              let data = doc.data();
+              if (data.code) {
+                data.code[key] = newFileCode[key];
+                await setDoc(ideRef, { code: data.code }, { merge: true });
               }
-            };
-                    
-            updateFileCode(fileTabs[activeTabIndex].id, fileCode);
+            }
+          } catch (error) {
+            console.error("Error updating document: ", error);
+          }
+        };
+                
+        updateFileCode(fileTabs[activeTabIndex].id, fileCode);
 
-            dispatch({ type: 'UPDATE_IS_FILE_SAVED', key: fileTabs[activeTabIndex].id, payload: true });
-        } else {
-        }
+        dispatch({ type: 'UPDATE_IS_FILE_SAVED', key: fileTabs[activeTabIndex].id, payload: true });
     } catch (error) {
     }
   };
@@ -791,7 +656,6 @@ const CodeEditor = (props) => {
               value={fileCode[fileTabs[activeTabIndex].id]}
               onValueChange={(value) => {
                 dispatch({ type: 'UPDATE_FILE_CODE', key: fileTabs[activeTabIndex].id, value: value })
-                setCode(value);
                 dispatch({ type: 'UPDATE_IS_FILE_SAVED', key: fileTabs[activeTabIndex].id, payload: false });
               }}
               fileTabs={fileTabs}

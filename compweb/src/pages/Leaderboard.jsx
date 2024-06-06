@@ -20,7 +20,10 @@ import {
   useCombobox,
   Box,
   TextInput,
-  Paper
+  Paper,
+  Pagination,
+  Center,
+  Container
 } from '@mantine/core';
 import { 
   IconPencil, 
@@ -42,6 +45,16 @@ import {
 } from '@mantine/core';
 
 const Leaderboard = () => {
+
+  const [readCount, setReadCount] = useState(0);
+  
+  useEffect(() => {
+    console.log("Leaderboard reads:", readCount);
+  }, [readCount]);
+
+  const [activePage, setPage] = useState(1);
+  const [numRows, setNumRows] = useState(10);
+
   const [search, setSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const combobox = useCombobox({
@@ -71,6 +84,8 @@ const Leaderboard = () => {
         const usersCollectionRef = collection(db, "Users");
         const usersQuery = query(usersCollectionRef, orderBy("points", "desc"));
         const querySnapshot = await getDocs(usersQuery);
+        setReadCount(prevReadCount => prevReadCount + usersQuery.length);
+
         const userData = querySnapshot.docs.map(doc => doc.data());
         const rankedUsers = assignRanks(userData);
         setUsers(rankedUsers);
@@ -121,7 +136,7 @@ const Leaderboard = () => {
     setSelectedUser(null);
   };
 
-  const rows = filteredUsers.map((item) => (
+  const rows = filteredUsers.slice((activePage - 1) * numRows, (activePage - 1) * numRows + numRows).map((item) => (
     <Table.Tr key={item.username} onClick={() => handleUserClick(item)}>
       <Table.Td>
         <Badge color={'blue'} variant="light">
@@ -150,10 +165,10 @@ const Leaderboard = () => {
 
       <Table.Td>
         <Group gap={0} justify="flex-end">
-          <ActionIcon variant="subtle" color="gray">
+          <ActionIcon variant="subtle" color="gray" display={'none'}>
             <IconPencil style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
           </ActionIcon>
-          <ActionIcon variant="subtle" color="red">
+          <ActionIcon variant="subtle" color="red" display={'none'}>
             <IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
           </ActionIcon>
         </Group>
@@ -174,7 +189,7 @@ const Leaderboard = () => {
       <div style={{display: 'flex', direction: 'row'}}>
         <div style={{ width: '100%' }}>
           <Group justify="center" grow preventGrowOverflow={false}>
-            <div style={{ backgroundColor: 'var(--navbar)', borderRadius: '8px' }}>
+            <div style={{ backgroundColor: 'var(--site-bg)', borderRadius: '8px', border: '1px solid var(--border)', padding: '10px' }}>
               <div style={{ backgroundColor: 'var(--light-bg)', padding: '1px' }}>
                 <div className={styles.marginSpacing}>  
                   <h1 className={styles.leaderboardHeader}>Leaderboard</h1>
@@ -187,6 +202,7 @@ const Leaderboard = () => {
                       onChange={handleSearchChange}
                       classNames={{ label: styles.searchLabel }}
                       style={{ width: '100%' }}
+                      styles={{ input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' } }}
                     />
                     <div>
                       <Box mb="xs">
@@ -210,7 +226,7 @@ const Leaderboard = () => {
                         }}
                       >
                         <Combobox.Target withAriaAttributes={false}>
-                          <Button onClick={() => combobox.toggleDropdown()} style={{ width: '200px' }}>Select region</Button>
+                          <Button variant="light" onClick={() => combobox.toggleDropdown()} style={{ width: '200px' }}>Select region</Button>
                         </Combobox.Target>
 
                         <Combobox.Dropdown>
@@ -249,9 +265,14 @@ const Leaderboard = () => {
                   </Table.ScrollContainer>
                 </>    
               )}
+                <Center>
+                  <Container m={10}>
+                    <Pagination value={activePage} onChange={setPage} total={Math.ceil(filteredUsers.length / numRows)}/>
+                  </Container>
+                </Center>
             </div>
             { currentUserRankData &&
-              <Card withBorder padding="xl" radius="md" className={styles.card}>
+              <Card withBorder padding="xl" radius="md" style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' }}>
                 <Card.Section
                   h={100}
                 />
@@ -295,7 +316,7 @@ const Leaderboard = () => {
                   </Text>
                 </div>
                 </Group>
-                <Button fullWidth radius="md" mt="xl" size="md" variant="default">
+                <Button fullWidth radius="md" mt="xl" size="md" variant="default" style={{ backgroundColor: 'var(--site-bg)', border: '1px solid var(--border)' }}>
                   View profile
                 </Button>
               </Card>

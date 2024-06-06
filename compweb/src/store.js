@@ -54,7 +54,10 @@ const initialState = {
   isFileSaved: undefined,
   loadedTreeData: false,
   submitCodeSignal: undefined,
-  results: []
+  results: [],
+  usacoTabIndex: 0,
+  cccTabIndex: 0,
+  activePathTab: undefined
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -380,6 +383,21 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         results: action.payload
+      }
+    case 'SET_USACO_INDEX':
+      return {
+        ...state,
+        usacoTabIndex: action.payload
+      }
+    case 'SET_CCC_INDEX':
+      return {
+        ...state,
+        cccTabIndex: action.payload
+      }
+    case 'SET_ACTIVE_PATH_TAB':
+      return {
+        ...state,
+        activePathTab: action.payload
       }
     default:
       return state;

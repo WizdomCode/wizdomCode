@@ -37,7 +37,7 @@ import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 
-const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displayCases, solutions, selectedTab, setSelectedTab }) => {
+const ProblemDescription = ({ userData, currentTab, testCases, displayCases, selectedTab, setSelectedTab }) => {
   // Example usage of getCategory// prints "String Algorithms"
   
   // Example usage of getDifficultyLevel // prints { level: 'Intermediate', number: 1 }
@@ -320,7 +320,7 @@ const ProblemDescription = ({ userData, currentTab, submitCode, testCases, displ
             {/* Content for the solution tab */}
             <h1>Solution</h1>
             <div>
-            {solutions.map((solution, index) => (
+            {currentTab.data.solutions && currentTab.data.solutions.map((solution, index) => (
           <SolutionDisplay
             key={index}
             solution={solution}

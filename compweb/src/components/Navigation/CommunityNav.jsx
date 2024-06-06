@@ -17,10 +17,7 @@ import {
 
 const data = [
   { link: '/userprofile', label: 'Profile', icon: IconBellRinging },
-  { link: '/leaderboard', label: 'Leaderboard', icon: IconReceipt2 },
-  { link: '', label: 'Quests', icon: IconFingerprint },
-  { link: '', label: 'Saved problems', icon: IconKey },
-  { link: '', label: 'Your submissions', icon: IconDatabaseImport },
+  { link: '/leaderboard', label: 'Leaderboard', icon: IconReceipt2 }
 ];
 
 const CommunityNav = () => {
@@ -47,7 +44,7 @@ const CommunityNav = () => {
   ));
 
   return (
-    <nav className={styles.navbar}>
+    <nav className={styles.navbar} style={{ backgroundColor: 'var(--site-bg)', borderRight: '1px solid var(--border)'}}>
         <div className={styles.navbarMain}>
         <Group className={styles.header} justify="space-between">
             <IconSwitchHorizontal size={28} inverted style={{ color: 'white' }} stroke={1.5} />
@@ -59,15 +56,10 @@ const CommunityNav = () => {
         </div>
 
         <div className={styles.footer}>
-        <a href="#" className={styles.link} onClick={(event) => event.preventDefault()}>
-            <IconSwitchHorizontal className={styles.linkIcon} stroke={1.5} />
-            <span>Change account</span>
-        </a>
-
-        <a href="#" className={styles.link} onClick={(event) => event.preventDefault()}>
-            <IconLogout className={styles.linkIcon} stroke={1.5} />
-            <span>Logout</span>
-        </a>
+          <a href="#" className={styles.link} onClick={(event) => event.preventDefault()}>
+              <IconLogout className={styles.linkIcon} stroke={1.5} />
+              <span>Logout</span>
+          </a>
         </div>
     </nav>
   )

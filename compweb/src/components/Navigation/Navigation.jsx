@@ -56,7 +56,9 @@ import {
   IconSwitchHorizontal,
   IconBrandDiscord,
   IconUserCircle,
-  IconBrandX
+  IconBrandX,
+  IconChartBar,
+  IconBinaryTree2
 } from '@tabler/icons-react';
 
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -68,43 +70,54 @@ import Share from '@mui/icons-material/Share';
 
 import { useDispatch, useSelector } from 'react-redux';
 
+import { TwitterShareButton } from "react-share";
+
+const UsacoIcon = () => <img src='/usaco.png' alt="Usaco Paths" style={{width: rem(20), height: rem(20)}}/>;
+const CCCIcon = () => <img src='/ccc.png' alt="CCC Paths" style={{width: rem(20), height: rem(20)}}/>;
+
 const mockdata = [
   {
     icon: IconCode,
     title: 'Problems',
-    description: '250+ problems from the most popular competitive programming contests',
+    description: '250+ problems from the most popular contests',
     link: '/problems'
   },
   {
-    icon: IconCoin,
-    title: 'Canadian Computing Competition',
-    description: 'Canada\'s largest competitive programming competition',
+    icon: CCCIcon,
+    title: 'CCC',
+    description: 'Canadian Computing Competition',
     link: '/ccc'
   },
   {
-    icon: IconBook,
-    title: 'Usaco',
-    description: 'Yanma is capable of seeing 360 degrees without',
+    icon: IconBinaryTree2,
+    title: 'USACO',
+    description: 'USA Computing Olympiad',
     link: '/usaco'
   },
 ];
 
 const communityData = [
   {
-    icon: IconCode,
+    icon: IconUserCircle,
     title: 'Profile',
-    description: '250+ problems from the most popular competitive programming contests',
+    description: 'Stats, settings, and more',
     link: '/userprofile'
   },
   {
-    icon: IconCoin,
+    icon: IconChartBar,
     title: 'Leaderboard',
-    description: 'Canada\'s largest competitive programming competition',
+    description: 'Global and regional leaderboards',
     link: '/leaderboard'
   },
 ];
 
 const Navigation = () => {
+  const [readCount, setReadCount] = useState(0);
+  
+  useEffect(() => {
+    console.log("Navigation reads:", readCount);
+  }, [readCount]);
+
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
 
@@ -124,6 +137,8 @@ const Navigation = () => {
 
           // Fetch user data from Firestore
           const userSnapshot = await getDoc(userDocRef);
+          setReadCount(prevReadCount => prevReadCount + 1);
+
           if (userSnapshot.exists()) {
             // Extract required user information from the snapshot
             const userData = userSnapshot.data();
@@ -456,17 +471,23 @@ const Navigation = () => {
                     </ActionIcon>
                   </Menu.Target>
                   <Menu.Dropdown style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' }}>
-                    <Menu.Item
-                      leftSection={
-                        <IconBrandX
-                          style={{ width: rem(16), height: rem(16) }}
-                          color={theme.colors.blue[6]}
-                          stroke={1.5}
-                        />
-                      }
+                    <TwitterShareButton
+                      url={"https://www.wizdomcode.com"}
+                      title={"WizdomCode - The fastest way to learn competitive programming"}
+                      style={{ width: '100%' }}
                     >
-                      Share to Twitter
-                    </Menu.Item>
+                      <Menu.Item
+                        leftSection={
+                          <IconBrandX
+                            style={{ width: rem(16), height: rem(16) }}
+                            color={theme.colors.blue[6]}
+                            stroke={1.5}
+                          />
+                        }
+                      >
+                        Share to Twitter
+                      </Menu.Item>
+                    </TwitterShareButton>
                   </Menu.Dropdown>
                 </Menu>
               </Group>

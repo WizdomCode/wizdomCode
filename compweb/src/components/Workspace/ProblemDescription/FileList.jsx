@@ -113,6 +113,12 @@ const LANGUAGE_ICON = {
 
 
 const FileList = (props) => {
+  const [readCount, setReadCount] = useState(0);
+  
+  useEffect(() => {
+    console.log("Filelist reads:", readCount);
+  }, [readCount]);
+
   const fileTabs = useSelector(state => state.fileTabs);
   const activeTabIndex = useSelector(state => state.activeFileTab);
 
@@ -127,34 +133,6 @@ const FileList = (props) => {
     right: false,
   });
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        // Get the current user
-        const currentUser = auth.currentUser;
-  
-        if (currentUser) { // Check if currentUser is not null
-          setUserId(currentUser.uid); // Set the user ID
-  
-          // Get the document reference for the current user from Firestore
-          const userDocRef = doc(db, "Users", currentUser.uid);
-  
-          // Fetch user data from Firestore
-          const userSnapshot = await getDoc(userDocRef);
-          if (userSnapshot.exists()) {
-            // Extract required user information from the snapshot
-            const userData = userSnapshot.data();
-            setUserData(userData); // Set the user data in the state
-          } else {
-          }
-        }
-      } catch (error) {
-      }
-    };
-  
-    fetchUserData();
-  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
-  
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
@@ -226,61 +204,12 @@ const FileList = (props) => {
   const currentTab = useSelector(state => state.currentTab);
   const lessonProblemData = useSelector(state => state.lessonProblemData);
   const tabIndex = useSelector(state => state.lessonTabIndex);
-  useEffect(() => {
-    const fetchCode = async () => {
-      let questionName = "";
-  
-      // Determine the question name based on the location and Redux state
-      if (location.pathname === '/problems' && currentTab && currentTab.data) {
-        questionName = currentTab.data.title;
-      } else if (lessonProblemData && lessonProblemData[tabIndex]) {
-        if (lessonProblemData[tabIndex].data && lessonProblemData[tabIndex].data.title) {
-          questionName = lessonProblemData[tabIndex].data.title;
-        }
-      }
-  
-      // Check if the user is authenticated
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        return;
-      }
-  
-      // Check if the question name exists
-      if (questionName) {
-        try {
-          // Get the document reference for the current user from Firestore
-          const userDocRef = doc(db, "Users", currentUser.uid);
-  
-          // Fetch user data from Firestore
-          const userSnapshot = await getDoc(userDocRef);
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            const savedCode = userData.questionsIDE?.[questionName]; // Get saved code if it exists
-  
-            if (savedCode) {
-              setCode(savedCode); // Set the code to the saved code
-            } else {
-              setCode(props.boilerPlate); // Use default boilerplate code
-            }
-          } else {
-          }
-        } catch (error) {
-        }
-      }
-    };
-  
-    fetchCode();
-  }, [currentTab, lessonProblemData, tabIndex, props.boilerPlate]);
-  
-  
   
     const [showFileForm, setShowFileForm] = useState(false);
     const [fileTypeInputValue, setFileTypeInputValue] = useState("cpp");
     const [showFolderForm, setShowFolderForm] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [inputValue, setInputValue] = useState("");
-    const [userData, setUserData] = useState(null);
-    const [userId, setUserId] = useState(null);
     const [isContentSaved, setIsContentSaved] = useState(true);
     const [selectedItem, setSelectedItem] = useState(null); 
     const [editedContent, setEditedContent] = useState("");
@@ -323,30 +252,6 @@ const FileList = (props) => {
     
         const newTreeData = [...treeData, newFile];
         setTreeData(newTreeData);    
-
-        if (false) {
-          const uid = auth.currentUser.uid;
-          const ideRef = doc(db, "IDE", uid);
-          try {
-              const ideSnapshot = await getDoc(ideRef);
-              if (ideSnapshot.exists()) {
-                  const existingIdeMap = ideSnapshot.data().ide || {};
-                  const folderPath = currentFolder !== "ide" ? `${currentFolder}.` : ""; // Add folder path if it's not the root folder
-                  if (inputValue.trim() !== "") { // Check if inputValue is not empty
-                      const updatedIdeMap = {
-                          ...existingIdeMap,
-                          [`${folderPath}${inputValue}`]: {} // Create an empty object for the folder
-                      };
-                      await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-                  }
-              } else {
-              }
-              setInputValue("");
-              setShowFolderForm(false);
-              fetchUserData(); // Call fetchUserData to update the file list
-          } catch (error) {
-          }
-        }
     };
 
 
@@ -361,6 +266,8 @@ const FileList = (props) => {
             const uid = auth.currentUser.uid;
             const ideRef = doc(db, "IDE", uid);
             const ideSnapshot = await getDoc(ideRef);
+            setReadCount(prevReadCount => prevReadCount + 1);
+
             if (ideSnapshot.exists()) {
                 const itemData = ideSnapshot.data().ide[itemName];
                 const itemType = ideSnapshot.data().fileTypes[itemName];
@@ -416,64 +323,6 @@ const FileList = (props) => {
         }
     };
 
-    useEffect(() => {
-        fetchUserData(); // Call fetchUserData on component mount
-    }, []);
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                fetchUserData(); // Call fetchUserData when auth state changes
-            }
-        });
-        return unsubscribe;
-    }, []);
-
-    const fetchUserData = async () => {
-        try {
-            const currentUser = auth.currentUser;
-            if (currentUser) {
-                setUserId(currentUser.uid);
-                const userDocRef = doc(db, "IDE", currentUser.uid);
-                const userSnapshot = await getDoc(userDocRef);
-                if (userSnapshot.exists()) {
-                    const userData = userSnapshot.data();
-                    setUserData(userData);
-                } else {
-                }
-            }
-        } catch (error) {
-        }
-    };
-    const renderFileOrFolder = (itemName, isFolder) => {
-        if (isFolder) {
-            return (
-                <li key={itemName} onClick={() => handleItemClick(itemName)}>
-                    <strong>Folder:</strong> {itemName}
-                    <ul>
-                        {userData && userData.ide && Object.keys(userData.ide).map((itemName) => (
-                            renderFileOrFolder(itemName, userData.ide[itemName].__isFolder)
-                        ))}
-                    </ul>
-                </li>
-            );
-        } else {
-            return (
-                <li key={itemName} onClick={() => handleItemClick(itemName)}>
-                    {itemName}
-                </li>
-            );
-        }
-    };
-    useEffect(() => {
-        // Compare edited content with content saved in Firebase
-        const checkContentSaved = async () => {
-        };
-
-        checkContentSaved(); // Call the function on component mount and whenever editedContent or selectedItem changes
-    }, [code, selectedItem]);
-
-
   const [treeData, setTreeData] = useState(initialData);
   const fileCode = useSelector(state => state.fileCode);
 
@@ -509,6 +358,7 @@ const FileList = (props) => {
     const fetchData = async (userId) => {
       const docRef = doc(db, "IDE", userId);
       const docSnap = await getDoc(docRef);
+      setReadCount(prevReadCount => prevReadCount + 1);
   
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -535,12 +385,12 @@ const FileList = (props) => {
       }
     };  
 
-    if (userId && !loadedFirestoreCode) {
-      fetchData(userId);
+    if (auth.currentUser && auth.currentUser.uid && !loadedFirestoreCode) {
+      fetchData(auth.currentUser.uid);
       dispatch({ type: 'LOADED_FIRESTORE_CODE' });
       dispatch({ type: 'LOADED_TREE_DATA' });
     }
-  }, [userId]);
+  }, [auth.currentUser]);
 
   const [openFile, setOpenFile] = useState(null);
 

@@ -28,6 +28,7 @@ import classes from './NavbarMinimal.module.css';
 
 import LeaderboardRoundedIcon from '@mui/icons-material/LeaderboardRounded';
 import Settings from '../Settings/Settings';
+import { useDispatch } from 'react-redux';
 
 function NavbarLink({ icon: Icon, label, active, onClick, path }) {
   return (
@@ -49,14 +50,16 @@ const mockdata = [
 ];
 
 const contestdata = [
-    { icon: UsacoIcon, label: 'USACO', path: '/usaco' },
-    { icon: CCCIcon, label: 'CCC', path: '/ccc' },
+    { icon: UsacoIcon, label: 'USACO', path: '/usaco', dispatch: { type: 'SET_ACTIVE_PATH_TAB', payload: 'usaco' } },
+    { icon: CCCIcon, label: 'CCC', path: '/ccc', dispatch: { type: 'SET_ACTIVE_PATH_TAB', payload: 'ccc' } },
 ];
 
 export function SideNav() {
   const location = useLocation();
 
   const [active, setActive] = useState(2);
+
+  const dispatch = useDispatch();
 
   const links = mockdata.map((link, index) => (
     <NavbarLink
@@ -72,7 +75,10 @@ export function SideNav() {
       {...link}
       key={link.label}
       active={link.path === location.pathname}
-      onClick={() => setActive(index)}
+      onClick={() => {
+        setActive(index);
+        dispatch(link.dispatch);
+      }}
     />
   ));
 

@@ -127,6 +127,12 @@ function valuetext(value) {
 }
 
 const IDE = (props) => {
+  const [readCount, setReadCount] = useState(0);
+  
+  useEffect(() => {
+    console.log("IDE reads:", readCount);
+  }, [readCount]);
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -196,13 +202,11 @@ const IDE = (props) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOption, setFilterOption] = useState('');
 
-  const [results, setResults] = useState([]);
   const codeState = useSelector(state => state.codeState); 
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
   const [executionTime, setExecutionTime] = useState(0);
   const [currentCode, setCurrentCode] = useState("");
-  const [solutions, setSolutions] = useState([]);
   const [questionName, setQuestionName] = useState();
 
   const [editorSize, setEditorSize] = useState();
@@ -221,6 +225,8 @@ const IDE = (props) => {
 
           // Fetch user data from Firestore
           const userSnapshot = await getDoc(userDocRef);
+          setReadCount(prevReadCount => prevReadCount + 1);
+
           if (userSnapshot.exists()) {
             // Extract required user information from the snapshot
             const userData = userSnapshot.data();
@@ -388,6 +394,8 @@ const IDE = (props) => {
       const fetchData = async () => {
           try {
               const docSnap = await getDoc(docRef);
+              setReadCount(prevReadCount => prevReadCount + 1);
+
               if (docSnap.exists()) {
                   const data = docSnap.data();
                   dispatch({ type: 'SET_ALL_META_DATA', payload: data });
@@ -446,6 +454,8 @@ const IDE = (props) => {
       if (questionID) {
         try {
           const docRef = await getDoc(doc(db, "Questions", questionID));
+          setReadCount(prevReadCount => prevReadCount + 1);
+
           if (docRef.exists()) {
             const problemData = docRef.data();
             setQuestionName(problemData.title)
@@ -463,7 +473,7 @@ const IDE = (props) => {
     };
   
     fetchProblemData();
-  }, [questionID, dispatch]);
+  }, [questionID]);
 
   useEffect(() => {
     if (currentTab.data && currentTab.data.title) {
@@ -545,112 +555,7 @@ int main() {
   return 0;
 }`;
 
-  const getResults = (data) => {
-    setResults(data);
-  };
-
-  const getCode = (code, language) => {
-  }
-
-  const pollResults = async (requestId) => {
-    try {
-        const response = await fetch(`https://3702-147-124-72-82.ngrok-free.app/get_results/${requestId}`);
-        if (response.ok && response.headers.get('Content-Type') === 'application/json') {
-            const data = await response.json();
-            setResults(data);
-        } else if (response.ok && response.headers.get('Content-Type') === 'application/jsonl') {
-            // If response is in JSONL format, read each line and parse JSON
-            const text = await response.text();
-            const lines = text.split('\n').filter(line => line.trim() !== ''); // Split lines and remove empty lines
-            const results = lines.map(line => JSON.parse(line)); // Parse each line as JSON
-            setResults(results);
-        } else {
-        }
-    } catch (error) {
-    }
-};
-
-const submitCode = async (tests = testCases, numTests = testCases.length) => {
-    if (numTests !== 1) dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' });
-
-    dispatch({ type: 'TOGGLE_GET_CODE_SIGNAL' });
-
-    setCurrentCode(codeState.code);
-    // Start the timer
-    const startTime = performance.now();
-  
-    const response = await fetch(`${import.meta.env.VITE_APP_JUDGE_URL}execute`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        language: codeState.language,
-        code: codeState.code,
-        test_cases: tests
-      })
-    });
-  
-    // End the timer and calculate the elapsed time
-    const endTime = performance.now();
-    const elapsedTime = endTime - startTime
-  
-    // Extract request_id from response
-    const { request_id } = await response.json();
-  
-    // Continuously fetch data from Firestore until the condition is met
-    let stopFetching = false;
-    while (!stopFetching) {
-      // Fetch data from Firestore using request_id
-      const docRef = doc(db, "Results", request_id);
-      const rdata = await getDoc(docRef);
-      if (rdata.exists) {
-        const ndata = rdata.data();
-        
-        console.log(ndata);
-      
-        // Check if results array exists in ndata
-        if (ndata && ndata.results && Array.isArray(ndata.results)) {
-          if (numTests === 1) {
-            const results = new Array(ndata.results[0].key - 1).fill(null);
-            results.push(ndata.results[0]);
-            setResults(results);
-
-            stopFetching = true;
-            break;
-          }
-
-          setResults(ndata.results);
-          
-          console.log("ndata.results.length", ndata.results.length);
-          console.log("numTests", numTests)
-          if (ndata.results.length >= numTests) {
-            if (numTests !== 1) dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' });
-            stopFetching = true;
-            break;
-          }
-        }
-      
-        if (!stopFetching) {
-          // Delay before next fetch to avoid overwhelming the server
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      } else {
-        break;
-      }
-    }
-    // Once the condition is met, set results to the data received so far
-      const docRef = doc(db, "Results", request_id);
-      try {
-        await deleteDoc(docRef);
-      } catch (error) {
-      }
-
-  };
-  
-
-
-
+  const results = useSelector(state => state.results);
 
   useEffect(() => {
     // Define a function to update the user's document
@@ -674,6 +579,8 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
         
         // Check if the question is already solved by the user
         const userDocSnapshot = await getDoc(userDocRef);
+        setReadCount(prevReadCount => prevReadCount + 1);
+
         const solvedQuestions = userDocSnapshot.data().solved || [];
     
         if (!solvedQuestions.includes(questionName)) {
@@ -689,6 +596,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
     
           // Get the question document snapshot
           const questionDocSnapshot = await getDoc(questionDocRef);
+          setReadCount(prevReadCount => prevReadCount + 1);
           
           // Check if solutions array exists, if not, create it
     
@@ -696,6 +604,8 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
           // Check and update daily challenge progress
           const challengeDocRef = doc(db, "Challenges", "Daily");
           const challengeDocSnapshot = await getDoc(challengeDocRef);
+          setReadCount(prevReadCount => prevReadCount + 1);
+
           const dailyChallenges = challengeDocSnapshot.data().dailyChallenges || [];
     
           dailyChallenges.forEach(async (challenge, index) => {
@@ -743,7 +653,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
   
       updateUserSolvedQuestions(userUid, questionName, pointsEarned, currentCode, executionTime);
     }
-  }, [results, tabs, currentTab, db, auth]);
+  }, [results]);
 
   const state = useSelector(state => state); // Access the state
 
@@ -801,26 +711,6 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
     setLinePosition({ index: null, position: null });
   }
 
-  useEffect(() => {
-    const fetchSolutions = async () => {
-      try {
-        // Get a reference to the question document
-        const questionDocRef = doc(db, "Questions", currentTab.data.title);
-        const questionDocSnapshot = await getDoc(questionDocRef);
-
-        if (questionDocSnapshot.exists()) {
-          const questionData = questionDocSnapshot.data();
-          const solutions = questionData.solutions || [];
-          setSolutions(solutions);
-        } else {
-        }
-      } catch (error) {
-      }
-    };
-
-    fetchSolutions();
-  }, [currentTab]);
-
   const theme = useMantineTheme();
 
   const isFileListOpen = useSelector(state => state.isFileListOpen);
@@ -835,7 +725,10 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
         { type: 'division', data: 'Gold'},
         { type: 'division', data: 'Platinum'}
     ];
-  const tabIndex = useSelector(state => state.lessonTabIndex);
+  
+  const activePathTab = useSelector(state => state.activePathTab);
+  const cccTabIndex = useSelector(state => state.cccTabIndex);
+  const usacoTabIndex = useSelector(state => state.usacoTabIndex);
 
   function extractYear(text) {
     const regex = /\b\d{4}\b/;
@@ -887,6 +780,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
                           tab={tab}
                           isActive={currentTab === tab}
                           setDraggedTab={setDraggedTab}
+                          setQuestionID={setQuestionID}
                         />
                         {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
                       </>
@@ -907,7 +801,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
                                 key={index}
                                 index={index}
                                 tab={tab}
-                                isActive={tabIndex === index}
+                                isActive={(activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex) === index}
                                 type='lesson'
                             />
                         ))}
@@ -937,7 +831,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
                 <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
               </>
             ) : currentTab.type === 'problem' ? (
-                <ProblemDescription userData={userData} currentTab={currentTab} submitCode={submitCode} testCases={testCases} displayCases={displayCases} results={results} solutions={solutions} selectedTab={selectedTab} setSelectedTab={setSelectedTab}/>
+                <ProblemDescription userData={userData} currentTab={currentTab} testCases={testCases} displayCases={displayCases} selectedTab={selectedTab} setSelectedTab={setSelectedTab}/>
             ) : currentTab.type === 'newTab' ? (
               <Container>
                 <div className='hero'> 
@@ -1101,7 +995,7 @@ const submitCode = async (tests = testCases, numTests = testCases.length) => {
       <PanelResizeHandle className={styles.panelResizeHandle} />
       <Panel defaultSize={65} minSize={14} collapsible={true} collapsedSize={0} style={{display: 'grid', gridTemplateColumns: isFileListOpen ? '1fr 3fr' : '1fr' }}>
         { isFileListOpen && <FileList />}
-        <CodeEditor boilerPlate={boilerPlate} testCases={testCases} getResults={getResults} getCode={getCode}/>
+        <CodeEditor boilerPlate={boilerPlate} testCases={testCases} />
       </Panel>
       </PanelGroup>
       </div>

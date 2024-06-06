@@ -8,12 +8,19 @@ import { IconPhoto, IconMessageCircle, IconSettings, IconMapPin, IconCheck, Icon
 import styles from './UserProfile.module.css';
 
 const UserProfile = () => {
+  const [readCount, setReadCount] = useState(0);
+  
+  useEffect(() => {
+    console.log("UserProfile reads:", readCount);
+  }, [readCount]);
+
   const iconStyle = { width: rem(12), height: rem(12) };
 
-  const [userData, setUserData] = useState(null);
-  const [userId, setUserId] = useState(null);
+  const userData = useSelector(state => state.userInfo);
   const [editMode, setEditMode] = useState(false); // State to track edit mode
   const [editedUserData, setEditedUserData] = useState(null); // State to hold edited user data
+
+  useEffect(() => { if (userData) setEditedUserData(userData); }, [userData]);
 
   const authenticatedUser = useSelector(state => state.authenticatedUser);
   
@@ -27,6 +34,7 @@ const UserProfile = () => {
       async function getDocumentData(db, collectionName, docId) {
         const docRef = doc(db, collectionName, docId);
         const snapshot = await getDoc(docRef);
+        setReadCount(prevReadCount => prevReadCount + 1);
     
         if (snapshot.exists()) {
             return snapshot.data();
@@ -45,48 +53,21 @@ const UserProfile = () => {
       return documentsData;
     }
 
-    if (!problemData) getProblemData().then(data => { setProblemData(data); });
+    if (!problemData && userData) getProblemData().then(data => { setProblemData(data); });
   }, [userData]);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        // Get the current user
-        const currentUser = auth.currentUser;
-
-        if (currentUser) { // Check if currentUser is not null
-          setUserId(currentUser.uid); // Set the user ID
-
-          // Get the document reference for the current user from Firestore
-          const userDocRef = doc(db, "Users", currentUser.uid);
-
-          // Fetch user data from Firestore
-          const userSnapshot = await getDoc(userDocRef);
-          if (userSnapshot.exists()) {
-            // Extract required user information from the snapshot
-            const userData = userSnapshot.data();
-            setUserData(userData); // Set the user data in the state
-            setEditedUserData(userData); // Initialize editedUserData with user data
-          } else {
-          }
-        }
-      } catch (error) {
-      }
-    };
-
-    fetchUserData();
-  }, [auth.currentUser]); // Empty dependency array ensures the effect runs only once when the component mounts
 
   const handleEditClick = () => {
     setEditMode(true);
   };
 
+  const dispatch = useDispatch();
+
   const handleSaveClick = async () => {
     try {
       // Update user data in Firestore
-      const userDocRef = doc(db, "Users", userId);
+      const userDocRef = doc(db, "Users", auth.currentUser.uid);
       await updateDoc(userDocRef, editedUserData);
-      setUserData(editedUserData); // Update userData with edited data
+      dispatch({ type: 'SET_USER_INFO', payload: editedUserData }); // Update userData with edited data
       setEditMode(false); // Exit edit mode
     } catch (error) {
     }
@@ -117,10 +98,8 @@ const UserProfile = () => {
       return fullLvl.substring(0, fullLvl.length - 9) + 'P' + fullLvl.substring(fullLvl.length - 1);
     } else {
       const fullLvls = text.split(', ').slice(1);
-      console.log('fullLvls', fullLvls);
       let fullstr = '';
       for (let lvl of fullLvls) {
-        console.log(lvl);
         fullstr += lvl[0] + lvl[lvl.length - 1] + ', ';
       } 
       return fullstr.substring(0, fullstr.length - 2);
@@ -170,7 +149,7 @@ const UserProfile = () => {
               </Group>
             </div>
             <div>
-              <Button>hello</Button>
+              <Button display={'none'}>hello</Button>
             </div>
           </Group>
         </div>
@@ -252,10 +231,10 @@ const UserProfile = () => {
 
           <Tabs.Panel value="edit">
             { editedUserData && 
-              <Fieldset legend="Personal information">
-                <TextInput label="Username" placeholder="Username" name="username" value={editedUserData.username} onChange={handleInputChange}/>
-                <TextInput label="First name" placeholder="First name" mt="md" name="firstName" value={editedUserData.firstName} onChange={handleInputChange}/>
-                <TextInput label="Last name" placeholder="Last name" mt="md" name="lastName" value={editedUserData.lastName} onChange={handleInputChange}/>
+              <Fieldset legend="Personal information" style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}}>
+                <TextInput label="Username" placeholder="Username" name="username" value={editedUserData.username} onChange={handleInputChange} styles={{ input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' } }}/>
+                <TextInput label="First name" placeholder="First name" mt="md" name="firstName" value={editedUserData.firstName} onChange={handleInputChange} styles={{ input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' } }}/>
+                <TextInput label="Last name" placeholder="Last name" mt="md" name="lastName" value={editedUserData.lastName} onChange={handleInputChange} styles={{ input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' } }}/>
                 <Textarea
                   label="About me"
                   placeholder=""
@@ -263,8 +242,9 @@ const UserProfile = () => {
                   name="about" 
                   value={editedUserData.about} 
                   onChange={handleInputChange}
+                  styles={{ input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' } }}
                 />
-                <TextInput label="Country" placeholder="Country" mt="md" name="country" value={editedUserData.country} onChange={handleInputChange}/>
+                <TextInput label="Country" placeholder="Country" mt="md" name="country" value={editedUserData.country} onChange={handleInputChange} styles={{ input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' } }}/>
 
                 <Group justify="flex-end" mt="md">
                   <Button onClick={handleSaveClick}>Submit</Button>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from '../../styles/ProblemDescription.module.css';
 
-const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
+const Tab = ({ index, tab, isActive, type, setDraggedTab, setQuestionID }) => {
   const dispatch = useDispatch();
   const [isHovered, setIsHovered] = useState(false);
   
@@ -42,6 +42,8 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
     e.preventDefault();
   }
 
+  const activePathTab = useSelector(state => state.activePathTab);
+
   return (
     <div style={{ position: 'relative' }}>
       <button 
@@ -60,7 +62,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
           console.log("payload", tab);
           if (type === 'lesson') {
             dispatch({
-              type: 'SET_LESSON_TAB_INDEX',
+              type: activePathTab === 'usaco' ? 'SET_USACO_INDEX' : 'SET_CCC_INDEX',
               payload: index
             });
           }
@@ -76,6 +78,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab }) => {
           onClick={(e) => {
             e.stopPropagation();
             dispatch({ type: 'REMOVE_TAB', payload: tab });
+            setQuestionID(null);
           }}            
         />
         }
