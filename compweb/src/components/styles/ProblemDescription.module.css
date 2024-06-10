@@ -266,8 +266,12 @@ ul {
   align-items: center;
   flex-shrink: 0;
   width: 100%;
-  border: 3px solid #F5F6F7;
-  background: #3B3B4F;
+  border: 2px solid #F5F6F7;
+  background: var(--selected-item);
+}
+
+.runAll:hover {
+  background: var(--code-bg);
 }
 
 .testCaseContent {

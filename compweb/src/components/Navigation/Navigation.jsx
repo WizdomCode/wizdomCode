@@ -352,7 +352,7 @@ const Navigation = () => {
                     className={cx(classes.user, { [classes.userActive]: userMenuOpened })}
                   >
                     <Group gap={7}>
-                      <Avatar src={user.image} alt={userData && userData.username} radius="xl" size={20} />
+                      <Avatar src={undefined} alt={userData && userData.username} radius="xl" size={20} />
                       <Text fw={500} size="sm" lh={1} mr={3}>
                         {userData && userData.username}
                       </Text>

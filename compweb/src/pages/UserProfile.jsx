@@ -207,8 +207,6 @@ const UserProfile = () => {
                   <Table.Th>Points</Table.Th>
                   <Table.Th>Topics</Table.Th>
                   <Table.Th>Contest</Table.Th>
-                  <Table.Th><IconCheck /></Table.Th>
-                  <Table.Th><IconBook /></Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>

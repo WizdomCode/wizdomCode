@@ -73,6 +73,9 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, userData, allMetaData,
     const [questions, setQuestions] = useState([]);
     const tabIndex = useSelector(state => state.lessonTabIndex);
 
+    const cccTabIndex = useSelector(state => state.cccTabIndex);
+    const usacoTabIndex = useSelector(state => state.usacoTabIndex);
+
     const dispatch = useDispatch();
 
     const handleTooltipClose = () => {
@@ -125,6 +128,8 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, userData, allMetaData,
             let count = 0;
             let numProblems = 0;    
 
+            console.log('props.problemIds', props.problemIds);
+
             const data = await addGroup(props.problemIds);
             for (let question of data) {
                 if (question && question.title && userData && userData.solved && userData.solved.includes(question.title)) {
@@ -150,7 +155,7 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, userData, allMetaData,
         };
         
         if (allMetaData && userData) fetchData();
-    }, [allMetaData, userData]);
+    }, [cccTabIndex, usacoTabIndex, allMetaData, userData]);
 
     const activeCategoryId = useSelector(state => state.activeCategoryId);
 
@@ -204,7 +209,7 @@ const LessonBackgroundRect = ({ onButtonClick, isFocused, userData, allMetaData,
     );
 };
 
-const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, allMetaData }) => {
+const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, allMetaData, currentPage }) => {
 
     const [readCount, setReadCount] = useState(0);
   
@@ -221,7 +226,6 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
     const [lastPressed, setLastPressed] = useState(null);
     const [isQuestionListOpen, setIsQuestionListOpen] = useState(false); // Add this line
 
-    const activePathTab = useSelector(state => state.activePathTab);
     const cccTabIndex = useSelector(state => state.cccTabIndex);
     const usacoTabIndex = useSelector(state => state.usacoTabIndex);
     
@@ -300,7 +304,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
                                 <Title order={2}>{unitTitle}</Title>
                                 { unitDescription && <p>{unitDescription}</p>}
                             </Stack>
-                            {true && <Button color="var(--accent)" size="md">Start</Button>}
+                            {true && <Button color="var(--accent)" variant="white" size="md" display={'none'}>Start</Button>}
                         </Group>
                     </Card>
                 </Container>
@@ -354,8 +358,8 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
                                                             onClick={() => {
                                                                 window.scrollTo(0, 0); // This will scroll the page to the top
                                                                 dispatch({
-                                                                    type: activePathTab === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
-                                                                    index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
+                                                                    type: currentPage === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
+                                                                    index: currentPage === 'usaco' ? usacoTabIndex : cccTabIndex,
                                                                     payload: {
                                                                         division: division,
                                                                         lesson: lastPressed,
@@ -444,7 +448,6 @@ const Paths = (props) => {
         { type: 'division', data: 'Platinum'}
     ];
 
-    const activePathTab = useSelector(state => state.activePathTab);
     const cccTabIndex = useSelector(state => state.cccTabIndex);
     const usacoTabIndex = useSelector(state => state.usacoTabIndex);
 
@@ -515,10 +518,10 @@ const Paths = (props) => {
       
       useEffect(() => {
         const fetchData = async () => {
-          const data = await addGroup((activePathTab === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id);
+          const data = await addGroup((props.currentPage === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id);
           dispatch({
-            type: activePathTab === 'usaco' ? 'SET_USACO_PROBLEM_DATA' : 'SET_CCC_PROBLEM_DATA',
-            index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
+            type: props.currentPage === 'usaco' ? 'SET_USACO_PROBLEM_DATA' : 'SET_CCC_PROBLEM_DATA',
+            index: props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
               data: data
             }
@@ -598,9 +601,9 @@ const Paths = (props) => {
         };
 
         // If the problem is solved, update the user's document
-        if (problemPassed() && (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex])) {
-            const questionName = (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.title; // Assuming the question name is stored here
-            const pointsEarned = (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.points; // Assuming the points earned for solving the question are stored here
+        if (problemPassed() && (props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex])) {
+            const questionName = (props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.title; // Assuming the question name is stored here
+            const pointsEarned = (props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.points; // Assuming the points earned for solving the question are stored here
             const userUid = auth.currentUser.uid; // Get the current user's UID
     
             updateUserSolvedQuestions(userUid, questionName, pointsEarned);
@@ -610,7 +613,7 @@ const Paths = (props) => {
       function findProblem(currentProblemId, direction) {
 
         let data;
-        switch (defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data) {
+        switch (defaultTabs[props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex].data) {
             case 'Junior':
                 data = JUNIOR_UNIT_LESSONS;
                 break;
@@ -655,20 +658,20 @@ const Paths = (props) => {
 
     const scrollLeft = () => {
         dispatch({
-            type: activePathTab === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
-            index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
+            type: props.currentPage === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
+            index: props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
-                problem_id: findProblem((activePathTab === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id, "previous")
+                problem_id: findProblem((props.currentPage === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id, "previous")
             }
         });
     };
 
     const scrollRight = () => {
         dispatch({
-            type: activePathTab === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
-            index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
+            type: props.currentPage === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
+            index: props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
-                problem_id: findProblem((activePathTab === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id, "next")
+                problem_id: findProblem((props.currentPage === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id, "next")
             }
         });
     };
@@ -713,7 +716,7 @@ const Paths = (props) => {
         const fetchSolutions = async () => {
           try {
             // Get a reference to the question document
-            const questionDocRef = doc(db, "Questions", (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.title);
+            const questionDocRef = doc(db, "Questions", (props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.title);
             const questionDocSnapshot = await getDoc(questionDocRef);
             setReadCount(prevReadCount => prevReadCount + 1);
     
@@ -734,12 +737,12 @@ const Paths = (props) => {
       const [displayCases, setDisplayCases] = useState([]);
 
       useEffect(() => {
-        if ((activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data && (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.folder) {
+        if ((props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data && (props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.folder) {
           props.setIsLessonProblemActive(true);
             
           const testCaseObj = {};
           const storage = getStorage();
-          const listRef = ref(storage, `/TestCaseData/${(activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.folder}`);
+          const listRef = ref(storage, `/TestCaseData/${(props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.folder}`);
       
           listAll(listRef)
             .then((res) => {
@@ -812,54 +815,82 @@ const Paths = (props) => {
         } else {
             props.setIsLessonProblemActive(false);
         }
-      }, [(activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data]);
+      }, [(props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data]);
+
+      const onCloseProblem = () => {
+        dispatch({
+            type: props.currentPage === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
+            index: props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex,
+            payload: {
+                unit: NaN,
+                lesson: NaN,
+                problem_id: '',
+            },
+        });
+        dispatch({
+            type: props.currentPage === 'usaco' ? 'SET_USACO_PROBLEM_DATA' : 'SET_CCC_PROBLEM_DATA',
+            index: props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex,
+            payload: {
+              data: {
+                contest: '',
+                description: '',
+                folder: '',
+                inputFormat: '',
+                outputFormat: '',
+                points: NaN,
+                title: '',
+                topics: [],
+              }
+            }
+        });
+      };
 
     return (
         <div className="universal">
             <div className={styles.paths}>
-                {!(activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data ? (
-                    defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Junior' ? (
+                {!(props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data ? (
+                    defaultTabs[props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Junior' ? (
                         <>
                             {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index]} division='Junior' userData={userData} allMetaData={allMetaData}/>
+                                    <ScrollRow lessons={lessons} unitTitle={JUINOR_UNIT_TITLES[index]} unitDescription={JUINOR_UNIT_DESCRIPTIONS[index]} division='Junior' userData={userData} allMetaData={allMetaData} currentPage={props.currentPage}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
-                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Senior' ? (
+                    ) : defaultTabs[props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Senior' ? (
                         <>
                             {SENIOR_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior' userData={userData} allMetaData={allMetaData}/>
+                                    <ScrollRow lessons={lessons} unitTitle={SENIOR_UNIT_TITLES[index]} unitDescription={SENIOR_UNIT_DESCRIPTIONS[index] } division='Senior' userData={userData} allMetaData={allMetaData} currentPage={props.currentPage}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
                     
-                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Bronze' ? (
+                    ) : defaultTabs[props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Bronze' ? (
                         <>
                             {BRONZE_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={BRONZE_UNIT_TITLES[index]} unitDescription={BRONZE_UNIT_DESCRIPTIONS[index] } division='Bronze' userData={userData} allMetaData={allMetaData}/>
+                                    <ScrollRow lessons={lessons} unitTitle={BRONZE_UNIT_TITLES[index]} unitDescription={BRONZE_UNIT_DESCRIPTIONS[index] } division='Bronze' userData={userData} allMetaData={allMetaData} currentPage={props.currentPage}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
-                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Silver' ? (
+                    ) : defaultTabs[props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Silver' ? (
                         <>
                             {SILVER_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={SILVER_UNIT_TITLES[index]} unitDescription={SILVER_UNIT_DESCRIPTIONS[index] } division='Silver' userData={userData} allMetaData={allMetaData}/>
+                                    <ScrollRow lessons={lessons} unitTitle={SILVER_UNIT_TITLES[index]} unitDescription={SILVER_UNIT_DESCRIPTIONS[index] } division='Silver' userData={userData} allMetaData={allMetaData} currentPage={props.currentPage}/>
                                     <br />
                                 </React.Fragment>
                             ))}
                         </>
-                    ) : defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Gold' ? (
+                    ) : defaultTabs[props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Gold' ? (
                         <>
                             {GOLD_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={GOLD_UNIT_TITLES[index]} unitDescription={GOLD_UNIT_DESCRIPTIONS[index] } division='Gold' userData={userData} allMetaData={allMetaData}/>
+                                    <ScrollRow lessons={lessons} unitTitle={GOLD_UNIT_TITLES[index]} unitDescription={GOLD_UNIT_DESCRIPTIONS[index] } division='Gold' userData={userData} allMetaData={allMetaData} currentPage={props.currentPage}/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -868,7 +899,7 @@ const Paths = (props) => {
                     <>
                             {PLAT_UNIT_LESSONS.map((lessons, index) => (
                                 <React.Fragment key={index}>
-                                    <ScrollRow lessons={lessons} unitTitle={PLAT_UNIT_TITLES[index]} unitDescription={PLAT_UNIT_DESCRIPTIONS[index] } division='Platinum' userData={userData} allMetaData={allMetaData}/>
+                                    <ScrollRow lessons={lessons} unitTitle={PLAT_UNIT_TITLES[index]} unitDescription={PLAT_UNIT_DESCRIPTIONS[index] } division='Platinum' userData={userData} allMetaData={allMetaData} currentPage={props.currentPage}/>
                                     <br />
                                 </React.Fragment>
                             ))}
@@ -879,13 +910,14 @@ const Paths = (props) => {
                         { testCases &&
                             <ProblemDescription 
                                 userData={userData}
-                                currentTab={activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]}
+                                currentTab={props.currentPage === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]}
                                 testCases={testCases}
                                 displayCases={displayCases}
                                 selectedTab={props.selectedTab}
                                 setSelectedTab={props.setSelectedTab}
                                 scrollLeft={scrollLeft}
                                 scrollRight={scrollRight}
+                                onCloseProblem={onCloseProblem}
                             />
                         } 
                     </>

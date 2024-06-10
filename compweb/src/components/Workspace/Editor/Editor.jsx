@@ -170,6 +170,7 @@ const CodeEditor = (props) => {
     setFilesOpen(true);
   };
 
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const [state, setState] = React.useState({
     top: false,
@@ -668,87 +669,42 @@ const CodeEditor = (props) => {
       <Main open={filesOpen} style={{ width: '100%' }}>
       <div className={styles.scrollableContent} style={{ backgroundColor: 'var(--code-bg)' }}>
         <div className={styles.tabWrapper} style={{ height: '54px', borderBottom: '1px solid var(--border)'}}>
-        <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', width: '100%', maxWidth: '100%', boxSizing: 'border-box', height: '50px' }}>
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            {!isFileListOpen && 
-              <IconFolderOpen 
-                className={styles.newTab}
-                onClick={() => dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true })}
-                style={{ ...(filesOpen && { display: 'none' }), paddingRight: '10px', borderRight: '1px solid var(--border)' }}            
-              />
-            }
-            {fileTabs.map((tab, index) => (
-              <button className={styles.button} style={{ height: '50px', background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
-                <p style={{ color: index === activeTabIndex ? 'white' : 'var(--dim-text)' }} className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
-                { !isFileSaved[tab.id] && <IconPointFilled style={{ margin: '0 5px' }}/>}
-                {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
-              </button>          
-            ))
-            }
-          </div>
-          <div className={styles.rightAlign}>
-            <Group gap={8}>
-              <ThemeProvider theme={darkTheme}>
-                <div>
-                  {['right'].map((anchor) => (
-                    <React.Fragment key={anchor}>
-                      <Button onClick={toggleDrawer(anchor, true)} display={'none'}>TEMPLATES</Button>
-                      <Drawer
-                        anchor={anchor}
-                        open={state[anchor]}
-                        onClose={toggleDrawer(anchor, false)}
-                      >
-                        {Object.entries(TEMPLATE_CODE).map(([templateName, languages], index) => (
-                          <Accordion expanded={expanded === `${index}`} onChange={handleChange(`${index}`)} key={`${index}`}>
-                            <AccordionSummary aria-controls={`${index}-content`} id={`${index}-header`}>
-                              <Typography>{`Insert ${templateName}`}</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                            {Object.entries(languages).map(([language, code]) => (
-                              <div key={language}>
-                                <Typography variant="h6">{language.toUpperCase()}</Typography>
-                                <div style={{position: 'relative'}}>
-                                  <SyntaxHighlighter language={language.toLowerCase()} style={solarizedlight}>
-                                    {code}
-                                  </SyntaxHighlighter>
-                                  <CopyToClipboard text={code}>
-                                    <button style={{position: 'absolute', top: 2, right: 2}}><ContentCopyIcon /></button>
-                                  </CopyToClipboard>
-                                  </div>
-                              </div>
-                            ))}
-                            </AccordionDetails>
-                          </Accordion>
-                        ))}
-                      </Drawer>
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div>
-                </div>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="end"
-                  onClick={handleDrawerOpen}
-                  sx={{ ...(true && { display: 'none' }) }}
-                >
-                  <MenuIcon style={{color: "white"}}/>
-                </IconButton>
-              </ThemeProvider>
-              <ActionIcon variant="subtle" aria-label="Settings">
-                <IconDeviceFloppy onClick={handleSave}/>
-              </ActionIcon>
-              <ActionIcon variant="subtle" aria-label="Settings">
-                  { true ?
-                    <IconMaximize />
-                  :
-                    <IconMinimize />
-                  }
-              </ActionIcon>
-            </Group>
-          </div>
-        </div>
+        <Group justify="space-between" bg={'var(--site-bg)'}>
+          <ScrollArea scrollbars="x" scrollHideDelay={0} style={{ width: 'calc(100% - 100px)' }} styles={{
+            scrollbar: { background: 'transparent', backgroundColor: 'transparent', height: '7px', opacity: '1' },
+            thumb: { backgroundColor: 'var(--selected-item)', borderRadius: '0' }
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              {!isFileListOpen && 
+                <IconFolderOpen 
+                  className={styles.newTab}
+                  onClick={() => dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true })}
+                  style={{ ...(filesOpen && { display: 'none' }), paddingRight: '10px', borderRight: '1px solid var(--border)' }}            
+                />
+              }
+              {fileTabs.map((tab, index) => (
+                <button className={styles.button} style={{ height: '50px', background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
+                  <p style={{ color: index === activeTabIndex ? 'white' : 'var(--dim-text)', marginRight: '16px' }} className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
+                  { !isFileSaved[tab.id] && <IconPointFilled style={{ margin: '0 5px' }}/>}
+                  {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
+                </button>          
+              ))
+              }
+            </div>
+          </ScrollArea>
+          <Group gap={8} pr={16} style={{ height: '50px' }}>
+            <ActionIcon variant="subtle" aria-label="Settings">
+              <IconDeviceFloppy onClick={handleSave}/>
+            </ActionIcon>
+            <ActionIcon variant="subtle" aria-label="Settings" onClick={() => { if (!document.fullscreenElement) document.body.requestFullscreen(); else document.exitFullscreen(); }}>
+                { !document.fullscreenElement ?
+                  <IconMaximize />
+                :
+                  <IconMinimize />
+                }
+            </ActionIcon>
+          </Group>
+        </Group>
         </div>
         <br />
         <PanelGroup direction="vertical" style={{ width: '100%' }}>

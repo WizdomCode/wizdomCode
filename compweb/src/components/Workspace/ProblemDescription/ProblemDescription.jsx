@@ -30,7 +30,8 @@ import {
   IconPlayerPlay,
   IconChevronDown,
   IconChevronLeft,
-  IconChevronRight
+  IconChevronRight,
+  IconX
 } from '@tabler/icons-react'
 import { CodeHighlight } from '@mantine/code-highlight';
 import { useDispatch, useSelector } from 'react-redux';
@@ -39,7 +40,7 @@ import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 
-const ProblemDescription = ({ userData, currentTab, testCases, displayCases, selectedTab, setSelectedTab, scrollLeft, scrollRight }) => {
+const ProblemDescription = ({ userData, currentTab, testCases, displayCases, selectedTab, setSelectedTab, scrollLeft, scrollRight, onCloseProblem }) => {
   // Example usage of getCategory// prints "String Algorithms"
   
   // Example usage of getDifficultyLevel // prints { level: 'Intermediate', number: 1 }
@@ -115,6 +116,11 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                 <h1 className={styles.title}>{currentTab.data.title}</h1>
                 { userData && userData.solved && userData.solved.includes(currentTab.data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
               </div>
+              {onCloseProblem && 
+                <ActionIcon variant="subtle" onClick={onCloseProblem}>
+                  <IconX />
+                </ActionIcon>      
+              }
               {scrollRight &&     
                 <ActionIcon variant="subtle" onClick={scrollRight}>
                   <IconChevronRight />
@@ -242,7 +248,7 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
           </div>
           <br />
           <br />
-          <button className={styles.runAll} onClick={() => { dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' }); setSelectedTab('tests'); dispatch({ type: 'SET_SUBMIT_CODE_REQUEST', payload: { tests: testCases, numTests: testCases.length, isCustomCase: false, problemId: currentTab.data.title, points: currentTab.data.points } }); }} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
+          <button className={styles.runAll} onClick={() => { dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' }); setSelectedTab('tests'); dispatch({ type: 'SET_SUBMIT_CODE_REQUEST', payload: { tests: testCases, numTests: testCases.length, isCustomCase: false, problemId: currentTab.data.title, points: currentTab.data.points } }); }} style={{color: 'white'}}>Run all tests</button>
           <br />
         </div> 
       )}

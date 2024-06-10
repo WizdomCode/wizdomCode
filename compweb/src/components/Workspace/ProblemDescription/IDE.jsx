@@ -676,7 +676,6 @@ int main() {
         { type: 'division', data: 'Platinum'}
     ];
   
-  const activePathTab = useSelector(state => state.activePathTab);
   const cccTabIndex = useSelector(state => state.cccTabIndex);
   const usacoTabIndex = useSelector(state => state.usacoTabIndex);
 
@@ -753,7 +752,8 @@ int main() {
                                 key={index}
                                 index={index}
                                 tab={tab}
-                                isActive={(activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex) === index}
+                                isActive={(props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex) === index}
+                                currentPage={props.currentPage}
                                 type='lesson'
                             />
                         ))}

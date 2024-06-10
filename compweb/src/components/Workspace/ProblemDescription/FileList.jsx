@@ -481,6 +481,8 @@ const FileList = (props) => {
   }, [openFile]);
 
   const [hoveredFile, setHoveredFile] = useState(null);
+  const [clickedTemplate, setClickedTemplate] = useState(null);
+  const [hoveredTemplate, setHoveredTemplate] = useState(null);
   const openTemplate = useSelector(state => state.openTemplate);
   const templateIsClicked = useSelector(state => state.templateIsClicked);
   const filesSectionOpen = useSelector(state => state.filesSectionOpen);
@@ -490,7 +492,7 @@ const FileList = (props) => {
 
   return (
     <div style={{ minWidth: '240px', backgroundColor: 'var(--site-bg)', borderRight: '1px solid var(--border)' }}>
-        <div style={{ height: "49px", alignItems: "center", display: "flex", direction: "row", borderBottom: '1px solid var(--border)' }}>
+        <div style={{ height: "50px", alignItems: "center", display: "flex", direction: "row", borderBottom: '1px solid var(--border)' }}>
             <ChevronRightIcon 
                 style={{ marginLeft: '10px', height: "30px", width: "30px" }}
                 onClick={() => { dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: false }); }}    
@@ -525,7 +527,7 @@ const FileList = (props) => {
               onDrop={handleDrop}
               render={(node, { depth, isOpen, onToggle }) => (
                 <div 
-                  style={{ backgroundColor: openFile && openFile.text === node.text ? 'var(--selected-item)' : hoveredFile === node ? 'var(--hover)' : 'transparent' }}
+                  style={{ backgroundColor: openFile && openFile.id === node.id ? 'var(--selected-item)' : hoveredFile && hoveredFile.id === node.id ? 'var(--hover)' : 'transparent' }}
                   onClick={() => {setOpenFile(node);}}
                   onMouseEnter={() => {
                     setHoveredFile(node);
@@ -534,7 +536,7 @@ const FileList = (props) => {
                     setHoveredFile(null); 
                   }}
                 >
-                  <div style={{ marginLeft: (depth + 1) * 20 + 2, color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)' }} className={styles.vertCenterIcons}>
+                  <div style={{ marginLeft: (depth + 1) * 20 + 2, color: (hoveredFile && hoveredFile.id === node.id) || (openFile && openFile.id === node.id) ? 'white' : 'var(--dim-text)' }} className={styles.vertCenterIcons}>
                     {node.droppable && (
                       <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
                     )}
@@ -615,26 +617,28 @@ const FileList = (props) => {
               render={(node, { depth, isOpen, onToggle }) => (
                 <div 
                   style={{ 
-                    marginLeft: (depth + 1) * 20 + 2,
-                    backgroundColor: openFile && openFile.text === node.text ? 'var(--selected-item)' : hoveredFile === node ? 'var(--hover)' : 'transparent',
-                    color: (hoveredFile === node) || (openFile && openFile.text === node.text) ? 'white' : 'var(--dim-text)'
+                    backgroundColor: (openTemplate || node.droppable) && clickedTemplate && clickedTemplate.id === node.id ? 'var(--selected-item)' : hoveredTemplate && hoveredTemplate.id === node.id ? 'var(--hover)' : 'transparent'
                   }}
                   onClick={() => {
-                    setHoveredFile(node); 
+                    setClickedTemplate(node); 
                     if (!node.droppable)
                     dispatch({ type: 'SET_OPEN_TEMPLATE', payload: { name: node.text, language: node.data.language }})
                   }}
                   onMouseEnter={() => {
-}}
+                    setHoveredTemplate(node);
+                  }}
                   onMouseLeave={() => {
-}}          
+                    setHoveredTemplate(null);
+                  }}          
                   className={styles.vertCenterIcons}
                 >
-                  {node.droppable && (
-                    <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandMoreIcon />: <ChevronRightIcon />}</span>
-                  )}
-                  <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
-                  {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
+                  <div style={{ marginLeft: (depth + 1) * 20 + 2, color: (openTemplate || node.droppable) && ((hoveredTemplate && hoveredTemplate.id === node.id) || (clickedTemplate && clickedTemplate.id === node.id)) ? 'white' : 'var(--dim-text)' }} className={styles.vertCenterIcons}>
+                    {node.droppable && (
+                      <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandMoreIcon />: <ChevronRightIcon />}</span>
+                    )}
+                    <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
+                    {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
+                  </div>
                 </div>
               )}
               dragPreviewRender={(monitorProps) => (
