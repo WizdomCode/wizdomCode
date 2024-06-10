@@ -36,6 +36,7 @@ import ArrowDropUpRoundedIcon from '@mui/icons-material/ArrowDropUpRounded';
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 import { Card, Overlay, Button, Text, Container, Stack, Group, Title } from '@mantine/core';
 import ProblemDescription from './ProblemDescription.jsx';
+import { getDownloadURL, getStorage, listAll, ref } from "firebase/storage";
 
 const Item = styled(Paper)(({ theme }) => ({
   textAlign: 'center',
@@ -220,7 +221,9 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
     const [lastPressed, setLastPressed] = useState(null);
     const [isQuestionListOpen, setIsQuestionListOpen] = useState(false); // Add this line
 
-    const tabIndex = useSelector(state => state.lessonTabIndex);
+    const activePathTab = useSelector(state => state.activePathTab);
+    const cccTabIndex = useSelector(state => state.cccTabIndex);
+    const usacoTabIndex = useSelector(state => state.usacoTabIndex);
     
     const dispatch = useDispatch();
 
@@ -351,8 +354,8 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
                                                             onClick={() => {
                                                                 window.scrollTo(0, 0); // This will scroll the page to the top
                                                                 dispatch({
-                                                                    type: 'SET_LESSON_META_DATA',
-                                                                    index: tabIndex,
+                                                                    type: activePathTab === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
+                                                                    index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
                                                                     payload: {
                                                                         division: division,
                                                                         lesson: lastPressed,
@@ -422,12 +425,13 @@ const Paths = (props) => {
         return newText;
       }
 
-    const lessonMetaData = useSelector(state => state.lessonMetaData); // This is what is actually used to keep track of which problem is active, contains all problem data
+    const usacoMetaData = useSelector(state => state.usacoMetaData); // This is what is actually used to keep track of which problem is active, contains all problem data
+    const cccMetaData = useSelector(state => state.cccMetaData); // This is what is actually used to keep track of which problem is active, contains all problem data
     const code = useSelector(state => state.codeState);
     const currentlyClickedTab = useSelector(state => state.lessonActiveTab); // Something like this: {type: 'division', data: 'Junior'}, used to keep track of active tab
     const tabs = useSelector(state => state.lessonTabs); // Array of currentlyClickedTabs
-    const lessonProblemData = useSelector(state => state.lessonProblemData);
-    const [testCases, setTestCases] = useState([]);
+    const usacoProblemData = useSelector(state => state.usacoProblemData);
+    const cccProblemData = useSelector(state => state.cccProblemData);
     const [results, setResults] = useState([]);
     
     const defaultTabs = props.currentPage === 'ccc' ? [
@@ -511,9 +515,9 @@ const Paths = (props) => {
       
       useEffect(() => {
         const fetchData = async () => {
-          const data = await addGroup(lessonMetaData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].problem_id);
+          const data = await addGroup((activePathTab === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id);
           dispatch({
-            type: 'SET_LESSON_PROBLEM_DATA',
+            type: activePathTab === 'usaco' ? 'SET_USACO_PROBLEM_DATA' : 'SET_CCC_PROBLEM_DATA',
             index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
               data: data
@@ -522,15 +526,9 @@ const Paths = (props) => {
         };
       
         fetchData();
-      }, [lessonMetaData]);      
+      }, [cccMetaData, usacoMetaData]);      
 
     const state = useSelector(state => state); // Access the state
-
-    useEffect(() => {
-        if (lessonProblemData && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex] && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases) {
-            setTestCases(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases);
-        }
-    }, [usacoTabIndex, cccTabIndex]); // Add state as a dependency to useEffect
 
     const submitCode = async () => {
     
@@ -600,9 +598,9 @@ const Paths = (props) => {
         };
 
         // If the problem is solved, update the user's document
-        if (problemPassed() && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex]) {
-            const questionName = lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title; // Assuming the question name is stored here
-            const pointsEarned = lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.points; // Assuming the points earned for solving the question are stored here
+        if (problemPassed() && (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex])) {
+            const questionName = (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.title; // Assuming the question name is stored here
+            const pointsEarned = (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.points; // Assuming the points earned for solving the question are stored here
             const userUid = auth.currentUser.uid; // Get the current user's UID
     
             updateUserSolvedQuestions(userUid, questionName, pointsEarned);
@@ -657,20 +655,20 @@ const Paths = (props) => {
 
     const scrollLeft = () => {
         dispatch({
-            type: 'SET_LESSON_META_DATA',
+            type: activePathTab === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
             index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
-                problem_id: findProblem(lessonMetaData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].problem_id, "previous")
+                problem_id: findProblem((activePathTab === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id, "previous")
             }
         });
     };
 
     const scrollRight = () => {
         dispatch({
-            type: 'SET_LESSON_META_DATA',
+            type: activePathTab === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
             index: activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex,
             payload: {
-                problem_id: findProblem(lessonMetaData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].problem_id, "next")
+                problem_id: findProblem((activePathTab === 'usaco' ? usacoMetaData[usacoTabIndex] : cccMetaData[cccTabIndex]).problem_id, "next")
             }
         });
     };
@@ -715,7 +713,7 @@ const Paths = (props) => {
         const fetchSolutions = async () => {
           try {
             // Get a reference to the question document
-            const questionDocRef = doc(db, "Questions", lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title);
+            const questionDocRef = doc(db, "Questions", (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.title);
             const questionDocSnapshot = await getDoc(questionDocRef);
             setReadCount(prevReadCount => prevReadCount + 1);
     
@@ -732,10 +730,94 @@ const Paths = (props) => {
         fetchSolutions();
       }, [usacoTabIndex, cccTabIndex]);
 
+      const [testCases, setTestCases] = useState([]);
+      const [displayCases, setDisplayCases] = useState([]);
+
+      useEffect(() => {
+        if ((activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data && (activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.folder) {
+          props.setIsLessonProblemActive(true);
+            
+          const testCaseObj = {};
+          const storage = getStorage();
+          const listRef = ref(storage, `/TestCaseData/${(activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data.folder}`);
+      
+          listAll(listRef)
+            .then((res) => {
+              let promises = res.items.map((itemRef) => {
+                return getDownloadURL(ref(storage, itemRef))
+                  .then((url) => {
+                    return new Promise((resolve, reject) => {
+                      const xhr = new XMLHttpRequest();
+                      xhr.responseType = '';
+                      xhr.onload = (event) => {
+                        let data = xhr.response;
+                        let numPart = parseInt(itemRef._location.path_.match(/(\d+)\.txt$/)[1]);
+                        testCaseObj[numPart] = data;
+                        resolve();
+                      };
+                      xhr.onerror = reject;
+                      xhr.open('GET', url);
+                      xhr.send();
+                    });
+                  });
+              });
+      
+              Promise.all(promises)
+                .then(() => {
+                  let testCaseArray = [];
+                  let displayCaseArray = [];
+    
+                  let i = 1;
+                  while (testCaseObj.hasOwnProperty(String(i))) {
+                    testCaseArray.push({ key: (i + 1) / 2, input: testCaseObj[i], output: testCaseObj[i + 1] });
+    
+                    let inputLines, outputLines;
+    
+                    try {
+                      inputLines = testCaseObj[i].toString().split('\n', 106);
+                      outputLines = testCaseObj[i + 1].toString().split('\n', 106);
+                    } catch (error) {
+                      inputLines = String(testCaseObj[i]).split('\n', 106);
+                      outputLines = String(testCaseObj[i + 1]).split('\n', 106);
+                    }  
+    
+                    if (inputLines.length > 105) {
+                      inputLines = inputLines.slice(0, 105);
+                      inputLines.push('...(more lines)');
+                    }
+      
+                    if (outputLines.length > 105) {
+                      outputLines = outputLines.slice(0, 105);
+                      outputLines.push('...(more lines)');
+                    }  
+                    
+                    inputLines = inputLines.map(line => line.length > 60 ? line.substring(0, 60) + '...' : line);
+                    outputLines = outputLines.map(line => line.length > 60 ? line.substring(0, 60) + '...' : line);
+      
+                    displayCaseArray.push({ key: (i + 1) / 2, input: inputLines.join('\n'), output: outputLines.join('\n') });
+    
+                    i += 2;
+                  }
+    
+                  setTestCases(testCaseArray);
+                  setDisplayCases(displayCaseArray);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        } else {
+            props.setIsLessonProblemActive(false);
+        }
+      }, [(activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data]);
+
     return (
         <div className="universal">
             <div className={styles.paths}>
-                {!lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data ? (
+                {!(activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]).data ? (
                     defaultTabs[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data === 'Junior' ? (
                         <>
                             {JUNIOR_UNIT_LESSONS.map((lessons, index) => (
@@ -794,160 +876,18 @@ const Paths = (props) => {
                     )
                 ) : (
                     <>
-                        { true && (
-                    <>
-                        <div className={styles.wrapper}>
-                            <br />
-                                <div className={styles.problemTitleRow}>
-                                    <button onClick={scrollLeft} className="scroll-button left">
-                                        <img src='/leftarrow.png' alt='Left' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
-                                    </button>
-                                    <h1 className={styles.title}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title}</h1>
-                                    { userData && userData.solved && userData.solved.includes(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.title) && <CheckCircle style={{ color: 'white', marginLeft: '5px' }}/> }
-                                    <button onClick={scrollRight} className="scroll-button right">
-                                        <img src='/rightarrow.png' alt='Right' style={{maxWidth: "15px", maxHeight: "15px", background: "transparent"}}/>
-                                    </button>
-                                </div>
-                            <br />
-                            <div className={styles.description}>
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.description && (
-                                    <>
-                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.specificContest && <h3>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.specificContest}</h3>}
-                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.description.replace(/\\n/g, '\n'))} />
-                                    <div className={styles.divider}></div>
-                                    <br />
-                                    </>
-                                )}
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.inputFormat && (
-                                    <>
-                                    <h3>Input Format</h3>
-                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.inputFormat.replace(/\\n/g, '\n'))} />
-                                    <div className={styles.divider}></div>
-                                    <br />
-                                    </>
-                                )}
-                                {false && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.constraints && (
-                                    <>
-                                    <h3>Constraints</h3>
-                                    <ul>
-                                        {Object.entries(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.constraints).map(([key, value]) => (
-                                        <li key={key}>
-                                            <strong>{key}:</strong> {value}
-                                        </li>
-                                        ))}
-                                    </ul>
-                                    <div className={styles.divider}></div>
-                                    <br />
-                                    </>
-                                )}
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.outputFormat && (
-                                    <>
-                                    <h3>Output Format</h3>
-                                    <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.outputFormat.replace(/\\n/g, '\n'))} />
-                                    <div className={styles.divider}></div>
-                                    <br />
-                                    </>
-                                )}
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1 && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.input && (
-                                    <>
-                                    <h3>Sample Input 1</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.input.replace(/\\n/g, '\n')}</pre>
-                                    <br />
-                                    <h3>Output for Sample Input 1</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.output.replace(/\\n/g, '\n')}</pre>
-                                    <br />
-                                    <h3>Explanation for Sample 1</h3>
-                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample1.explanation.replace(/\\n/g, '\n'))} />}
-                                    <br />
-                                    <div className={styles.divider}></div>
-                                    <br />
-                                    </>
-                                )}
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2 && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.input && (
-                                    <>
-                                    <h3>Sample Input 2</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.input.replace(/\\n/g, '\n')}</pre>
-                                    <br />
-                                    <h3>Output for Sample Input 2</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.output.replace(/\\n/g, '\n')}</pre>
-                                    <br />
-                                    <h3>Explanation for Sample 2</h3>
-                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample2.explanation.replace(/\\n/g, '\n'))} />}
-                                    <br />
-                                    <div className={styles.divider}></div>
-                                    <br />
-                                    </>
-                                )}
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3 && lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.input && (
-                                    <>
-                                    <h3>Sample Input 3</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.input.replace(/\\n/g, '\n')}</pre>
-                                    <br />
-                                    <h3>Output for Sample Input 3</h3>
-                                    <pre className={styles.codeSnippet}>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.output.replace(/\\n/g, '\n')}</pre>
-                                    <br />
-                                    <h3>Explanation for Sample 3</h3>
-                                    {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.explanation && <ReactMarkdown className={styles.descriptionText} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={customParser(lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.sample3.explanation.replace(/\\n/g, '\n'))} />}
-                                    <br />
-                                    <div className={styles.divider}></div>
-                                    <br />
-                                    </>
-                                )}
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.points && (
-                                    <>
-                                    <h3>Points</h3>
-                                    <p>{lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.points}</p>
-                                    </>
-                                )}
-                                </div>
-                                <br />
-                                <br />
-                                <button className={styles.runAll} onClick={submitCode} style={{color: 'white'}}>Run All Tests (Ctrl + Enter)</button>
-                                <br />
-                                <div className={styles.testCases}>
-                                {lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases ? lessonProblemData[activePathTab === 'usaco' ? usacoTabIndex : cccTabIndex].data.testCases.map((testCase, index) => {
-                                    const status = results[index]?.status?.description;
-                                    const className = status === 'Accepted' ? styles.testCasePassed : (status === 'Wrong Answer' || status === 'Time limit exceeded') ? styles.testCaseFailed : index % 2 === 0 ? styles.testCaseEven : styles.testCaseOdd;
-
-                                    return (
-                                    <div key={testCase.key} className={className}>
-                                        <br />
-                                        <h3 className={className}>
-                                        Case {testCase.key}
-                                        {results[index] && results[index].status.description === 'Accepted' && <span className={styles.passIcon}> ✔️</span>}
-                                        {results[index] && results[index].status.description === 'Wrong Answer' && <span className={styles.failIcon}> ❌</span>}
-                                        {results[index] && results[index].status.description === 'Time limit exceeded' && <span className={styles.failIcon}> (Time limit exceeded)</span>}
-                                        </h3>
-                                        {results[index] && (
-                                            <>
-                                            <h5 className={className}>[ {results[index].time}s ]</h5>
-                                            </>
-                                        )}
-                                        <br />
-                                        <h4 className={className}>Input:</h4>
-                                        <pre className={styles.codeSnippet}>{String(testCase.input).replace(/\\r\\n/g, '\n')}</pre>
-                                        <br />
-                                        <h4 className={className}>Expected Output:</h4>
-                                        <pre className={styles.codeSnippet}>{String(testCase.output).replace(/\\r\\n/g, '\n')}</pre>
-                                        {results[index] && results[index].status.description === 'Wrong Answer' && (
-                                        <>
-                                            <br />
-                                            <h4 className={className}>Actual Output:</h4>
-                                            <pre className={styles.codeSnippet}>{results[index].stdout ? results[index].stdout.replace(/\\r\\n/g, '\n') : "No output"}</pre>
-                                        </>
-                                        )}
-                                    </div>
-                                    );                
-                                }) : (
-                                    <div>
-                                        <h2>Test cases for this problem are coming soon!</h2>
-                                        <br />
-                                    </div>              
-                                )}
-                            </div>
-                        </div>
-                    </>
-                        )} 
+                        { testCases &&
+                            <ProblemDescription 
+                                userData={userData}
+                                currentTab={activePathTab === 'usaco' ? usacoProblemData[usacoTabIndex] : cccProblemData[cccTabIndex]}
+                                testCases={testCases}
+                                displayCases={displayCases}
+                                selectedTab={props.selectedTab}
+                                setSelectedTab={props.setSelectedTab}
+                                scrollLeft={scrollLeft}
+                                scrollRight={scrollRight}
+                            />
+                        } 
                     </>
                 )}
             </div>

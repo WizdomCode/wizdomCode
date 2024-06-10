@@ -5,7 +5,7 @@ import classes from './Footer.module.css';
 
 export function Footer() {
   return (
-    <div className={classes.footer}>
+    <div className={classes.footer} style={{ backgroundColor: 'var(--site-bg)' }}>
       <Container className={classes.inner}>
         <MantineLogo size={28} />
         <Group gap={0} className={classes.links} justify="flex-end" wrap="nowrap">

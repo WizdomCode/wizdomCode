@@ -428,14 +428,14 @@ const Navigation = () => {
                 </Menu.Dropdown>
               </Menu>
               : (
-                <>
+                <Group gap={8}>
                   <Link to="/login">
-                    <Button variant="default">Log in</Button>
+                    <Button variant="light">Log in</Button>
                   </Link>
                   <Link to="/signup">
-                    <Button>Sign up</Button>
+                    <Button variant="outline">Sign up</Button>
                   </Link>
-                </>
+                </Group>
               )}
               <Group gap={8}>
                 <Popover 

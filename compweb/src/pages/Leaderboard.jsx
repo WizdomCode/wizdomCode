@@ -56,7 +56,7 @@ const Leaderboard = () => {
   const [numRows, setNumRows] = useState(10);
 
   const [search, setSearch] = useState('');
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState('None');
   const combobox = useCombobox({
     onDropdownClose: () => {
       combobox.resetSelectedOption();
@@ -115,8 +115,10 @@ const Leaderboard = () => {
       countries.add(usersData[i].country);
     }
 
-    setCountryList(Array.from(countries));
-
+    let countryArray = Array.from(countries);
+    countryArray.unshift('None');
+    setCountryList(countryArray);
+    
     return usersData;
   };
 
@@ -125,8 +127,8 @@ const Leaderboard = () => {
   };
 
   const filteredUsers = users.filter((user) =>
-  user.username?.toLowerCase().includes(searchQuery.toLowerCase())
-);
+    user.username?.toLowerCase().includes(searchQuery.toLowerCase()) && (selectedItem === 'None' || user.country === selectedItem)
+  );  
 
   const handleUserClick = (userData) => {
     setSelectedUser(userData);

@@ -50,24 +50,27 @@ const Login = () => {
 
     return (
         <>
-            <Container size={420} my={40}>
+            <Container size={420} my={40} w={800}>
                 <Title ta="center" className={classes.title}>
                     Welcome back!
                 </Title>
                 <Text c="dimmed" size="sm" ta="center" mt={5}>
-                    Do not have an account yet?{' '}
+                    Don't have an account?{' '}
                     <Anchor size="sm" component="button" onClick={() => navigate('/signup')}>
                         Create account
                     </Anchor>
                 </Text>
 
-                <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+                <Paper withBorder shadow="md" p={30} mt={30} radius="md" style={{ backgroundColor: 'var(--site-bg)', border: '1px solid var(--border)' }}>
                     <TextInput
                         label="Email"
                         placeholder="you@mantine.dev"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        styles={{ 
+                            input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+                        }}
                     />
                     <PasswordInput
                         label="Password"
@@ -76,14 +79,17 @@ const Login = () => {
                         mt="md"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        styles={{ 
+                            input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+                        }}
                     />
                     <Group justify="space-between" mt="lg">
-                        <Checkbox label="Remember me" />
+                        <Checkbox label="Remember me" display={'none'}/>
                         <Anchor component="button" size="sm" onClick={handlePasswordReset}>
                             Forgot password?
                         </Anchor>
                     </Group>
-                    <Button fullWidth mt="xl" onClick={signIn}>
+                    <Button fullWidth mt="xl" variant="light" onClick={signIn}>
                         Sign in
                     </Button>
                 </Paper>

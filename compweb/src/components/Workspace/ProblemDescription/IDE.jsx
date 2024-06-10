@@ -145,7 +145,7 @@ const IDE = (props) => {
     setPage(0);
   };
 
-  const [value, setValue] = React.useState([1, 10]);
+  const [value, setValue] = React.useState([1, 20]);
 
   const handleSliderChange = (event, newValue) => {
     setValue(newValue);
@@ -174,7 +174,54 @@ const IDE = (props) => {
   useEffect(() => {
   }, [currentTab]);
 
-  const TOPICS = ["sorting", "searching", "syntax"];
+  const TOPICS = [
+    "ad hoc",
+    "advanced dynamic programming",
+    "advanced tree techniques",
+    "arithmetic",
+    "arrays",
+    "bfs",
+    "binary search",
+    "combinatorics",
+    "complete search",
+    "computational geometry",
+    "conditions",
+    "custom comparators",
+    "data structures",
+    "depth-first search",
+    "dfs",
+    "dynamic programming",
+    "euler tour",
+    "flood fill",
+    "geometry",
+    "graph theory",
+    "greedy",
+    "hashing",
+    "implementation",
+    "loops",
+    "math",
+    "matrix exponentation",
+    "minimum spanning tree",
+    "nested loops",
+    "point update range sum",
+    "prefix sum",
+    "recursion",
+    "rectangle geometry",
+    "search",
+    "searching",
+    "segment tree",
+    "shortest path",
+    "simple math",
+    "simulation",
+    "sorting",
+    "strings",
+    "syntax",
+    "time complexity",
+    "topological sort",
+    "trees",
+    "two pointers",
+    "union find"
+  ];
   const CONTESTS = ["CCC", "USACO"];
   const CCC_DIVISIONS = ["Junior", "Senior"];
   const USACO_DIVISIONS = ["Bronze", "Silver", "Gold", "Platinum"];
@@ -530,7 +577,10 @@ const IDE = (props) => {
                   outputLines = outputLines.slice(0, 105);
                   outputLines.push('...(more lines)');
                 }  
-
+                
+                inputLines = inputLines.map(line => line.length > 60 ? line.substring(0, 60) + '...' : line);
+                outputLines = outputLines.map(line => line.length > 60 ? line.substring(0, 60) + '...' : line);
+  
                 displayCaseArray.push({ key: (i + 1) / 2, input: inputLines.join('\n'), output: outputLines.join('\n') });
 
                 i += 2;
@@ -554,106 +604,6 @@ int main() {
   std::cout << "Hello from C++!" << std::endl;
   return 0;
 }`;
-
-  const results = useSelector(state => state.results);
-
-  useEffect(() => {
-    // Define a function to update the user's document
-    const updateUserSolvedQuestions = async (userUid, questionName, points, code, executionTime) => {
-      try {
-        // Get a reference to the user's document
-        const userDocRef = doc(db, "Users", userUid);
-        if (!questionDocSnapshot.exists() || !questionDocSnapshot.data().solutions) {
-          await setDoc(questionDocRef, { solutions: [] }, { merge: true });
-        }
-  
-        // Update the solutions array in the question document
-        const solutionMap = {
-          userId: userDocRef.username,
-          solution: code,
-          executionTime: executionTime
-        };
-        await updateDoc(questionDocRef, {
-          solutions: arrayUnion(solutionMap)
-        });
-        
-        // Check if the question is already solved by the user
-        const userDocSnapshot = await getDoc(userDocRef);
-        setReadCount(prevReadCount => prevReadCount + 1);
-
-        const solvedQuestions = userDocSnapshot.data().solved || [];
-    
-        if (!solvedQuestions.includes(questionName)) {
-          // Update the user's document to add the solved question and increment points
-          await updateDoc(userDocRef, {
-            solved: arrayUnion(questionName), // Add the question name to the solved array
-            points: points + (userDocSnapshot.data().points || 0), // Increment points
-            coins: (points*10) + (userDocSnapshot.data().points || 0) // Increment coins
-          });
-    
-          // Get a reference to the question document
-          const questionDocRef = doc(db, "Questions", questionName);
-    
-          // Get the question document snapshot
-          const questionDocSnapshot = await getDoc(questionDocRef);
-          setReadCount(prevReadCount => prevReadCount + 1);
-          
-          // Check if solutions array exists, if not, create it
-    
-    
-          // Check and update daily challenge progress
-          const challengeDocRef = doc(db, "Challenges", "Daily");
-          const challengeDocSnapshot = await getDoc(challengeDocRef);
-          setReadCount(prevReadCount => prevReadCount + 1);
-
-          const dailyChallenges = challengeDocSnapshot.data().dailyChallenges || [];
-    
-          dailyChallenges.forEach(async (challenge, index) => {
-            if (challenge.users.includes(userUid)) {
-              // User already solved this challenge, increment the score
-              await updateDoc(challengeDocRef, {
-                [`dailyChallenges.${index}.score`]: challenge.score + 1
-              });
-            } else {
-              // User solved this challenge for the first time, add user and set score to 1
-              await updateDoc(challengeDocRef, {
-                [`dailyChallenges.${index}.users`]: arrayUnion(userUid),
-                [`dailyChallenges.${index}.score`]: 1
-              });
-            }
-          });
-    
-        } else {
-        }
-      } catch (error) {
-      }
-    };
-  
-    // Example parsing
-    const problemPassed = () => {
-      if (results && results.length !== 0) {
-          for (let test of results) {
-              if (test && test.status.description !== 'Accepted') {
-                  return false;
-              }
-          }
-          return true;
-      }
-      else {
-          return false;
-      }
-    };
-
-  
-    // If the problem is solved, update the user's document
-    if (problemPassed() && currentTab.data) {
-      const questionName = currentTab.data.title; // Assuming the question name is stored in the `title` field of the tab data
-      const pointsEarned = currentTab.data.points; // Assuming the points earned for solving the question are stored in the `points` field of the tab data
-      const userUid = auth.currentUser.uid; // Get the current user's UID
-  
-      updateUserSolvedQuestions(userUid, questionName, pointsEarned, currentCode, executionTime);
-    }
-  }, [results]);
 
   const state = useSelector(state => state); // Access the state
 
@@ -750,6 +700,8 @@ int main() {
     }
   }
 
+  const [isLessonProblemActive, setIsLessonProblemActive] = useState(false);
+
   return (
     <>
       <Navigation />
@@ -811,7 +763,7 @@ int main() {
                 </div>
               )}
           </ScrollArea>
-          { props.currentPage === 'problems' && currentTab.type === 'problem' &&
+          { ((props.currentPage === 'problems' && currentTab.type === 'problem') || (isLessonProblemActive)) &&
             <Group gap={0} bg={'var(--code-bg)'} mt={6}>
               <Button style={{ color: selectedTab === 'question' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconNotebook style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('question')}>Description</Button>
               <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
@@ -828,7 +780,7 @@ int main() {
           }}>
             { props.currentPage === 'ccc' || props.currentPage === 'usaco' ? (
               <>
-                <Paths currentTab={currentTab.data} currentPage={props.currentPage}/>
+                <Paths currentTab={currentTab.data} currentPage={props.currentPage} selectedTab={selectedTab} setSelectedTab={setSelectedTab} setIsLessonProblemActive={setIsLessonProblemActive}/>
               </>
             ) : currentTab.type === 'problem' ? (
                 <ProblemDescription userData={userData} currentTab={currentTab} testCases={testCases} displayCases={displayCases} selectedTab={selectedTab} setSelectedTab={setSelectedTab}/>

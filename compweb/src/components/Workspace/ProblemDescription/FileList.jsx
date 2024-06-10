@@ -333,7 +333,7 @@ const FileList = (props) => {
     setTreeData(newTreeData);
   }; 
 
-  const loadedTreeData = useSelector(state => state.loadedTreeData);
+  const [loadedTreeData, setLoadedTreeData] = useState(false);
 
   useEffect(() => {
     const updateTree = async (newTreeData) => {
@@ -352,7 +352,7 @@ const FileList = (props) => {
     if (loadedTreeData) updateTree(treeData);
   }, [treeData]);
   
-  const loadedFirestoreCode = useSelector(state => state.loadedFirestoreCode);
+  const [loadedFirestoreCode, setLoadedFirestoreCode] = useState(false);
 
   useEffect(() => {
     const fetchData = async (userId) => {
@@ -387,8 +387,8 @@ const FileList = (props) => {
 
     if (auth.currentUser && auth.currentUser.uid && !loadedFirestoreCode) {
       fetchData(auth.currentUser.uid);
-      dispatch({ type: 'LOADED_FIRESTORE_CODE' });
-      dispatch({ type: 'LOADED_TREE_DATA' });
+      setLoadedFirestoreCode(true);
+      setLoadedTreeData(true);
     }
   }, [auth.currentUser]);
 
@@ -635,21 +635,6 @@ const FileList = (props) => {
                   )}
                   <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
                   {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
-                  {!node.droppable && (
-                    <CopyButton value={node.data && node.data.language ? TEMPLATE_CODE[node.text][node.data.language] : ''} timeout={2000}>
-                    {({ copied, copy }) => (
-                      <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
-                        <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
-                          {copied ? (
-                            <IconCheck style={{ width: rem(18) }} />
-                          ) : (
-                            <IconCopy style={{ width: rem(18) }} />
-                          )}
-                        </ActionIcon>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                  )}
                 </div>
               )}
               dragPreviewRender={(monitorProps) => (

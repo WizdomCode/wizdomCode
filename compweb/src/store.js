@@ -7,12 +7,27 @@ const initialState = {
     { type: 'newTab', data: null , id: uuidv4() },
   ],
   lessonTabs: [],
-  lessonMetaData: [{
+  usacoMetaData: [{
     unit: NaN,
     lesson: NaN,
     problem_id: '',
   }],
-  lessonProblemData: [{
+  usacoProblemData: [{
+    contest: '',
+    description: '',
+    folder: '',
+    inputFormat: '',
+    outputFormat: '',
+    points: NaN,
+    title: '',
+    topics: [],
+  }],
+  cccMetaData: [{
+    unit: NaN,
+    lesson: NaN,
+    problem_id: '',
+  }],
+  cccProblemData: [{
     contest: '',
     description: '',
     folder: '',
@@ -55,6 +70,7 @@ const initialState = {
   loadedTreeData: false,
   submitCodeSignal: undefined,
   results: [],
+  resultId: undefined,
   usacoTabIndex: 0,
   cccTabIndex: 0,
   activePathTab: undefined
@@ -105,20 +121,42 @@ function reducer(state = initialState, action) {
         ...state,
         lessonActiveTab: action.payload,
       };
-    case 'SET_LESSON_META_DATA':
+    case 'SET_USACO_META_DATA':
       return {
         ...state,
-        lessonMetaData: state.lessonMetaData.map((item, index) => {
+        usacoMetaData: state.usacoMetaData.map((item, index) => {
           if(index === action.index) {
             return { ...item, ...action.payload };
           }
           return item;
         }),
       };
-    case 'SET_LESSON_PROBLEM_DATA':
+    case 'SET_USACO_PROBLEM_DATA':
       return {
         ...state,
-        lessonProblemData: state.lessonProblemData.map((item, index) => {
+        usacoProblemData: state.usacoProblemData.map((item, index) => {
+          if(index === action.index) {
+            return { ...item, ...action.payload };
+          }
+          return item;
+        }),
+      };
+    case 'SET_CCC_META_DATA':
+      console.log('SET_CCC_META_DATA', action);
+
+      return {
+        ...state,
+        cccMetaData: state.cccMetaData.map((item, index) => {
+          if(index === action.index) {
+            return { ...item, ...action.payload };
+          }
+          return item;
+        }),
+      };
+    case 'SET_CCC_PROBLEM_DATA':
+      return {
+        ...state,
+        cccProblemData: state.cccProblemData.map((item, index) => {
           if(index === action.index) {
             return { ...item, ...action.payload };
           }
@@ -170,11 +208,17 @@ function reducer(state = initialState, action) {
         title: '',
         topics: [],
       };
-      while (state.lessonMetaData.length < newSize) {
-        state.lessonMetaData.push(defaultMetaData);
+      while (state.usacoMetaData.length < newSize) {
+        state.usacoMetaData.push(defaultMetaData);
       }
-      while (state.lessonProblemData.length < newSize) {
-        state.lessonProblemData.push(defaultProblemData);
+      while (state.usacoProblemData.length < newSize) {
+        state.usacoProblemData.push(defaultProblemData);
+      }
+      while (state.cccMetaData.length < newSize) {
+        state.cccMetaData.push(defaultMetaData);
+      }
+      while (state.cccProblemData.length < newSize) {
+        state.cccProblemData.push(defaultProblemData);
       }
       return {
         ...state,
@@ -383,6 +427,11 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         results: action.payload
+      }
+    case 'SET_RESULT_ID':
+      return {
+        ...state,
+        resultId: action.payload
       }
     case 'SET_USACO_INDEX':
       return {

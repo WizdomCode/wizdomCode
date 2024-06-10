@@ -12,12 +12,16 @@ import {
   IconDatabaseImport,
   IconReceipt2,
   IconSwitchHorizontal,
-  IconLogout
+  IconLogout,
+  IconUserCircle,
+  IconChartBar
 } from '@tabler/icons-react';
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 const data = [
-  { link: '/userprofile', label: 'Profile', icon: IconBellRinging },
-  { link: '/leaderboard', label: 'Leaderboard', icon: IconReceipt2 }
+  { link: '/userprofile', label: 'Profile', icon: IconUserCircle },
+  { link: '/leaderboard', label: 'Leaderboard', icon: IconChartBar }
 ];
 
 const CommunityNav = () => {
@@ -25,6 +29,10 @@ const CommunityNav = () => {
   const [opened, { toggle }] = useDisclosure();
 
   const location = useLocation();
+
+  const userSignOut = () => {
+    signOut(auth)
+  }
 
   const links = data.map((item) => (
     <Link to={item.link}>
@@ -46,7 +54,7 @@ const CommunityNav = () => {
   return (
     <nav className={styles.navbar} style={{ backgroundColor: 'var(--site-bg)', borderRight: '1px solid var(--border)'}}>
         <div className={styles.navbarMain}>
-        <Group className={styles.header} justify="space-between">
+        <Group className={styles.header} justify="space-between" display={'none'}>
             <IconSwitchHorizontal size={28} inverted style={{ color: 'white' }} stroke={1.5} />
             <Code fw={700} className={styles.version}>
             v3.1.2
@@ -56,7 +64,7 @@ const CommunityNav = () => {
         </div>
 
         <div className={styles.footer}>
-          <a href="#" className={styles.link} onClick={(event) => event.preventDefault()}>
+          <a href="#" className={styles.link} onClick={userSignOut}>
               <IconLogout className={styles.linkIcon} stroke={1.5} />
               <span>Logout</span>
           </a>

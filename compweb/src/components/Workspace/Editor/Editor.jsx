@@ -250,11 +250,11 @@ const CodeEditor = (props) => {
     console.log("Editor reads:", readCount);
   }, [readCount]);
   
-  const submitCode = async (tests, numTests, isCustomCase) => {
+  const submitCode = async (tests, numTests, isCustomCase, code) => {
 
     console.log("Submitted data", JSON.stringify({
       language: fileTabs[activeTabIndex].language,
-      code: getEditorModels(),
+      code: code,
       test_cases: tests
     }));
 
@@ -268,17 +268,26 @@ const CodeEditor = (props) => {
       },
       body: JSON.stringify({
         language: fileTabs[activeTabIndex].language,
-        code: getEditorModels(),
+        code: code,
         test_cases: tests
       })
     });
 
     // Extract request_id from response
     const { request_id } = await response.json();
+
+    // Wait for 1.5 seconds before fetching the data from Firestore for the first time
+    await new Promise(resolve => setTimeout(resolve, 1500));
   
     // Continuously fetch data from Firestore until the condition is met
     let stopFetching = false;
+    let iterationCount = 0; // Add a counter for the number of iterations
     while (!stopFetching) {
+      // Break the loop after 100 iterations
+      if (iterationCount >= 100) {
+        break;
+      }
+
       // Fetch data from Firestore using request_id
       const docRef = doc(db, "Results", request_id);
       const rdata = await getDoc(docRef);
@@ -296,7 +305,7 @@ const CodeEditor = (props) => {
           
           if (numTests === 1) {
 
-            if (isCustomCase) setLocalOutputData(ndata.results[0].stdout);
+            if (isCustomCase) setLocalOutputData(ndata.results[0].stdout + `\n\n${ndata.results[0].status.description} [${ndata.results[0].time}s, ${ndata.results[0].memory} MB]`);
             else {
               const results = new Array(ndata.results[0].key - 1).fill(null);
               results.push(ndata.results[0]);
@@ -317,9 +326,16 @@ const CodeEditor = (props) => {
           }
 
           // All test cases have been received
-          if (ndata.results.length >= numTests) {
+          if (ndata.results.length >= numTests || ndata.results[ndata.results.length - 1].key === 'stop') {
             stopFetching = true;
-            break;
+
+            const docRef = doc(db, "Results", request_id);
+            try {
+              await deleteDoc(docRef);
+            } catch (error) {
+            }
+
+            return ndata.results;
           }
         }
       
@@ -330,6 +346,8 @@ const CodeEditor = (props) => {
       } else {
         break;
       }
+
+      iterationCount++; // Increment the counter at the end of each iteration
     }
     // Once the condition is met, set results to the data received so far
     const docRef = doc(db, "Results", request_id);
@@ -345,11 +363,23 @@ const CodeEditor = (props) => {
     if (submitCodeSignal) {
       const runTests = async () => {
         
-        await submitCode(
+        dispatch({ type: 'SET_RESULT_ID', payload: submitCodeSignal.problemId });
+
+        const code = getEditorModels();
+
+        const results = await submitCode(
           submitCodeSignal.tests, 
           submitCodeSignal.numTests,
-          submitCodeSignal.isCustomCase
+          submitCodeSignal.isCustomCase,
+          code
         );
+
+        if (problemPassed(results)) {
+          console.log('Problem passed');
+          updateUserSolvedQuestions(auth.currentUser.uid, submitCodeSignal.problemId, submitCodeSignal.points, code);
+        } else {
+          console.log('Not passed');
+        }
 
         // Update appropriate loading states
         if (submitCodeSignal.tests.length !== 1) dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' });
@@ -361,6 +391,97 @@ const CodeEditor = (props) => {
       runTests();
     }
   }, [submitCodeSignal]);
+
+  const problemPassed = (results) => {
+    if (results && results.length !== 0 && results.length >= props.testCases.length) {
+        for (let test of results) {
+            if (test && test.status.description !== 'Accepted' && test.status.description !== 'stop') {
+                return false;
+            }
+        }
+        return true;
+    }
+    else {
+        return false;
+    }
+  };
+
+  const updateUserSolvedQuestions = async (userUid, questionName, points, code) => {
+    try {
+      // Get a reference to the user's document
+      const userDocRef = doc(db, "Users", userUid);
+
+      // Check if the question is already solved by the user
+      const userDocSnapshot = await getDoc(userDocRef);
+      setReadCount(prevReadCount => prevReadCount + 1);
+
+      const userData = userDocSnapshot.data();
+
+      // Get a reference to the question document
+      const questionDocRef = doc(db, "Questions", questionName);
+
+      // Get the question document snapshot
+      const questionDocSnapshot = await getDoc(questionDocRef);
+      setReadCount(prevReadCount => prevReadCount + 1);
+
+      if (!questionDocSnapshot.exists() || !questionDocSnapshot.data().solutions) {
+        await setDoc(questionDocRef, { solutions: [] }, { merge: true });
+      }
+
+      // Update the solutions array in the question document
+      const solutionMap = {
+        userId: userData.username,
+        solution: code
+      };
+
+      console.log("solutionMap", solutionMap);
+
+      await updateDoc(questionDocRef, {
+        solutions: arrayUnion(solutionMap)
+      });
+
+      const solvedQuestions = userDocSnapshot.data().solved || [];
+  
+      if (!solvedQuestions.includes(questionName)) {
+        // Update the user's document to add the solved question and increment points
+        await updateDoc(userDocRef, {
+          solved: arrayUnion(questionName), // Add the question name to the solved array
+          points: points + (userDocSnapshot.data().points || 0), // Increment points
+          coins: (points*10) + (userDocSnapshot.data().points || 0) // Increment coins
+        });
+
+        
+        // Check if solutions array exists, if not, create it
+  
+  
+        // Check and update daily challenge progress
+        const challengeDocRef = doc(db, "Challenges", "Daily");
+        const challengeDocSnapshot = await getDoc(challengeDocRef);
+        setReadCount(prevReadCount => prevReadCount + 1);
+
+        const dailyChallenges = challengeDocSnapshot.data().dailyChallenges || [];
+  
+        dailyChallenges.forEach(async (challenge, index) => {
+          if (challenge.users.includes(userUid)) {
+            // User already solved this challenge, increment the score
+            await updateDoc(challengeDocRef, {
+              [`dailyChallenges.${index}.score`]: challenge.score + 1
+            });
+          } else {
+            // User solved this challenge for the first time, add user and set score to 1
+            await updateDoc(challengeDocRef, {
+              [`dailyChallenges.${index}.users`]: arrayUnion(userUid),
+              [`dailyChallenges.${index}.score`]: 1
+            });
+          }
+        });
+  
+      } else {
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const location = useLocation();
   const currentTab = useSelector(state => state.currentTab);
@@ -740,9 +861,11 @@ const CodeEditor = (props) => {
                       <Button
                         variant="outline" 
                         onClick={() => {
-                        submitCode();
-                        dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
-                      }}>
+                          submitCode();
+                          dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' });
+                        }}
+                        display={'none'}
+                      >
                         SUBMIT
                       </Button>
                     </Group>

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { setDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import "./index.css";
 import {
@@ -155,6 +155,7 @@ const SignUp = () => {
       navigate("/"); // Replace "/" with the path of your home page
 
     } catch (error) {
+      console.log(error);
     }
   };
 
@@ -206,51 +207,56 @@ const SignUp = () => {
     <>
       <Container size={580} my={40}>
         <Title ta="center" className={classes.title}>
-          Welcome to The Top Solver!
+          Welcome to WizdomCode
         </Title>
         <Text c="dimmed" size="sm" ta="center" mt={5}>
           Already a user?{' '}
-          <Anchor size="sm" component="button">
-            Login
-          </Anchor>
+          <Link to={'/login'}>
+            <Anchor size="sm" component="button">
+              Login
+            </Anchor>
+          </Link>
         </Text>
 
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md" style={{ backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' }}>
-          <Text size="lg" fw={500}>
-            Sign up with
-          </Text>
+        <Paper withBorder shadow="md" p={30} mt={30} radius="md" style={{ backgroundColor: 'var(--site-bg)', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'none' }}>
+            <Text size="lg" fw={500}>
+              Sign up with
+            </Text>
 
-          <Group grow mb="md" mt="md">
-            <GoogleButton radius="xl">Google</GoogleButton>
-            <TwitterButton radius="xl">Twitter</TwitterButton>
-          </Group>
+            <Group grow mb="md" mt="md">
+              <GoogleButton radius="xl">Google</GoogleButton>
+              <TwitterButton radius="xl">Twitter</TwitterButton>
+            </Group>
 
-          <Divider label="Or continue with email" labelPosition="center" my="lg" />
+            <Divider label="Or continue with email" labelPosition="center" my="lg" />
+          </div>
 
-          <TextInput label="Username" placeholder="Username" mb={8} styles={{
-              input: { backgroundColor: 'var(--site-bg)' }
-            }}
+          <TextInput label="Username" placeholder="Username" mb={8}
+              styles={{ 
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+              }}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
           />
 
           <Group justify="space-between" grow>
-            <TextInput label="First name" placeholder="First name" mb={8} styles={{
-              input: { backgroundColor: 'var(--site-bg)' }
-            }}
+            <TextInput label="First name" placeholder="First name" mb={8} styles={{ 
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+              }}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
-            <TextInput label="Last name" placeholder="Last name" mb={8} styles={{
-              input: { backgroundColor: 'var(--site-bg)' }
-            }}
+            <TextInput label="Last name" placeholder="Last name" mb={8} styles={{ 
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+              }}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
           </Group>
-          <TextInput label="Email" placeholder="you@mantine.dev" required mb={8} styles={{
-            input: { backgroundColor: 'var(--site-bg)' }
-          }}
+          <TextInput label="Email" placeholder="you@mantine.dev" mb={8} styles={{ 
+              input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+            }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -260,9 +266,8 @@ const SignUp = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
               label="Password"
-              required
-              styles={{
-                input: { backgroundColor: 'var(--site-bg)' }
+              styles={{ 
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
               }}
               mb={8}
             />
@@ -285,7 +290,6 @@ const SignUp = () => {
               position="bottom-start"
               withinPortal={false}
               onOptionSubmit={(val) => {
-                console.log('c', val);
                 setCountry(val);
                 setSearchCountry(val);
                 combobox.closeDropdown();
@@ -298,7 +302,6 @@ const SignUp = () => {
                   rightSectionPointerEvents="none"
                   value={searchCountry}
                   onChange={(event) => {
-                    console.log('a', event.currentTarget.value);
                     combobox.openDropdown();
                     combobox.updateSelectedOptionIndex();      
                     setSearchCountry(event.currentTarget.value)
@@ -306,12 +309,11 @@ const SignUp = () => {
                   label="Select country"
                   placeholder="Select country"
                   onBlur={() => {
-                    console.log('b', country);
                     combobox.closeDropdown();
                     setSearchCountry(country || '');
                   }}
-                  styles={{
-                    input: { backgroundColor: 'var(--site-bg)' }
+                  styles={{ 
+                    input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
                   }}
                 />
               </Combobox.Target>
@@ -325,9 +327,9 @@ const SignUp = () => {
               </Combobox.Dropdown>
             </Combobox>
 
-            <NumberInput value={age} onChange={setAge} label="Age" placeholder="Enter your age"styles={{
-              input: { backgroundColor: 'var(--site-bg)' }
-            }}
+            <NumberInput value={age} onChange={setAge} label="Age" placeholder="Enter your age" styles={{ 
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+              }}
               clampBehavior="strict"
               min={1}
               max={120}
@@ -335,8 +337,8 @@ const SignUp = () => {
             />
           </Group>
 
-          <Button fullWidth mt="xl" onSubmit={signUp}>
-            CREATE ACCOUNT
+          <Button fullWidth mt="xl" variant="light" onSubmit={signUp}>
+            Create account
           </Button>
         </Paper>
       </Container>
