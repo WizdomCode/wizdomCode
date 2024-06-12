@@ -52,6 +52,7 @@ const initialState = {
   fileCode: undefined,
   treeData: null,
   openFile: null,
+  clickedTemplate: null,
   openTemplate: null,
   templateIsClicked: false,
   isFileListOpen: true,
@@ -73,7 +74,9 @@ const initialState = {
   resultId: undefined,
   usacoTabIndex: 0,
   cccTabIndex: 0,
-  activePathTab: undefined
+  activePathTab: undefined,
+  filesInitialOpen: undefined,
+  templatesInitialOpen: undefined
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -307,6 +310,11 @@ function reducer(state = initialState, action) {
         ...state,
         openFile: action.payload
       }
+    case 'SET_CLICKED_TEMPLATE':
+      return {
+        ...state,
+        clickedTemplate: action.payload
+      }
     case 'SET_OPEN_TEMPLATE':
       return {
         ...state,
@@ -447,6 +455,16 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         activePathTab: action.payload
+      }
+    case 'SET_FILES_INITIAL_OPEN':
+      return {
+        ...state,
+        filesInitialOpen: action.payload
+      }
+    case 'SET_TEMPLATES_INITIAL_OPEN':
+      return {
+        ...state,
+        templatesInitialOpen: action.payload
       }
     default:
       return state;

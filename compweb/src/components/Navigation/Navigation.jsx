@@ -121,6 +121,8 @@ const Navigation = () => {
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
 
+  const userInfo = useSelector(state => state.userInfo);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -151,7 +153,8 @@ const Navigation = () => {
       }
     };
 
-    fetchUserData();
+    if (!userInfo && auth.currentUser) fetchUserData();
+    else setUserData(userInfo);
   }, [auth.currentUser]);
 
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);

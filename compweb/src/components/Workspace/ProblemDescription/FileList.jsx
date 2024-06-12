@@ -234,9 +234,8 @@ const FileList = (props) => {
 
         const newTreeData = [...treeData, newFile];
         dispatch({ type: 'SET_TREE_DATA', payload: newTreeData });
-        setTreeData(newTreeData);
 
-        setOpenFile(newFile);
+        dispatch({ type: 'SET_OPEN_FILE', payload: newFile });
     };
     
     const handleFolderSubmit = async (event) => {
@@ -251,7 +250,7 @@ const FileList = (props) => {
         };
     
         const newTreeData = [...treeData, newFile];
-        setTreeData(newTreeData);    
+        dispatch({ type: 'SET_TREE_DATA', payload: newTreeData });
     };
 
 
@@ -323,14 +322,14 @@ const FileList = (props) => {
         }
     };
 
-  const [treeData, setTreeData] = useState(initialData);
+  const treeData = useSelector(state => state.treeData);
   const fileCode = useSelector(state => state.fileCode);
 
   useEffect(() => {
   }, [fileCode]);
 
   const handleDrop = async (newTreeData) => {
-    setTreeData(newTreeData);
+    dispatch({ type: 'SET_TREE_DATA', payload: newTreeData });
   }; 
 
   const [loadedTreeData, setLoadedTreeData] = useState(false);
@@ -363,7 +362,7 @@ const FileList = (props) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
 
-        setTreeData(data.files || initialData);
+        dispatch({ type: 'SET_TREE_DATA', payload: data.files || initialData });
 
         if (data.code) {
           dispatch({type: 'REPLACE_FILE_CODE', newState: data.code});
@@ -379,20 +378,22 @@ const FileList = (props) => {
           fetchData(userId);
         }  
       } else {
-        setTreeData(initialData);
-
+        dispatch({ type: 'SET_TREE_DATA', payload: initialData });
         dispatch({type: 'REPLACE_FILE_CODE', newState: docSnap.data().code || initialCode});
       }
     };  
 
-    if (auth.currentUser && auth.currentUser.uid && !loadedFirestoreCode) {
+    if (fileCode && treeData) {
+      // do nothing
+    }
+    else if (auth.currentUser && auth.currentUser.uid && !loadedFirestoreCode) {
       fetchData(auth.currentUser.uid);
       setLoadedFirestoreCode(true);
       setLoadedTreeData(true);
     }
   }, [auth.currentUser]);
 
-  const [openFile, setOpenFile] = useState(null);
+  const openFile = useSelector(state => state.openFile);
 
   useEffect(() => {
     const handleFileClick = async () => {
@@ -408,6 +409,7 @@ const FileList = (props) => {
       } else {
           // If file doesn't exist, create a new file and set it as the active tab
           dispatch({ type: 'ADD_FILE_TAB', payload: { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] } });
+          console.log({ type: 'ADD_FILE_TAB', payload: { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] } });
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
       }
     };
@@ -426,15 +428,15 @@ const FileList = (props) => {
             handleFileDelete(file);
           }
         }
-        setTreeData(prevArray => prevArray.filter(object => object.id !== openFile.id));
+        dispatch({ type: 'SET_TREE_DATA', payload: treeData.filter(object => object.id !== openFile.id) });
         return;
       }
       
       const id = openFile.id;
       const removeIndex = fileTabs.findIndex(object => object.id === id);
       dispatch({ type: 'REMOVE_FILE_TAB_BY_ID', payload: id });
-      setTreeData(prevArray => prevArray.filter(object => object.id !== id));
-      deleteFirestoreCode(id, fileCode);
+      dispatch({ type: 'SET_TREE_DATA', payload: treeData.filter(object => object.id !== openFile.id) });
+      deleteFirestoreCode(id);
       dispatch({ type: 'DELETE_FILE_CODE', key: id });
       dispatch({ type: 'DELETE_IS_FILE_SAVED', key: id });
 
@@ -460,33 +462,44 @@ const FileList = (props) => {
     }
   }
 
-  const deleteFirestoreCode = async (key, fileCode) => {
+  // TODO: make this work without a read
+  const deleteFirestoreCode = async (key, retries = 3) => {
     try {
       const uid = auth.currentUser.uid;
       const ideRef = doc(db, "IDE", uid);
 
-      const {[key]: _, ...newFileCode} = fileCode;
-      await setDoc(ideRef, { code: newFileCode }, { merge: true });
+      const docSnapshot = await getDoc(ideRef);
+      setReadCount(prevReadCount => prevReadCount + 1);
+
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        if (data && data.code) {
+          const fileCode = data.code;
+
+          delete fileCode[key];
+
+          await setDoc(ideRef, { code: fileCode }, { merge: true });
+        } else {
+          console.log("data.code is undefined, retrying...");
+          if (retries > 0) deleteFirestoreCode(key, retries - 1);
+        }
+      } else {
+        console.log("No such document!");
+      }
     } catch (error) {
-      console.log("Error deleting firestore filecode", error)
+      console.log("Error deleting firestore filecode", error);
     }
   }
 
-  useEffect(() => {
-    if (loadedTreeData) dispatch({ type: 'SET_TREE_DATA', payload: treeData });
-  }, [treeData]);
-  
-  useEffect(() => {
-    dispatch({ type: 'SET_OPEN_FILE', payload: openFile });
-  }, [openFile]);
-
   const [hoveredFile, setHoveredFile] = useState(null);
-  const [clickedTemplate, setClickedTemplate] = useState(null);
+  const clickedTemplate = useSelector(state => state.clickedTemplate);
   const [hoveredTemplate, setHoveredTemplate] = useState(null);
   const openTemplate = useSelector(state => state.openTemplate);
   const templateIsClicked = useSelector(state => state.templateIsClicked);
   const filesSectionOpen = useSelector(state => state.filesSectionOpen);
   const templatesSectionOpen = useSelector(state => state.templatesSectionOpen);
+  const filesInitialOpen = useSelector(state => state.filesInitialOpen);
+  const templatesInitialOpen = useSelector(state => state.templatesInitialOpen);
 
   const isFileSaved = useSelector(state => state.isFileSaved);
 
@@ -519,7 +532,7 @@ const FileList = (props) => {
         </div>
             <div className={styles.marginSpacing}>
             </div>
-        { filesSectionOpen &&
+        { filesSectionOpen && treeData &&
           <DndProvider backend={MultiBackend} options={getBackendOptions()} style={{ height: "100%" }}>
             <Tree
               tree={treeData}
@@ -528,7 +541,7 @@ const FileList = (props) => {
               render={(node, { depth, isOpen, onToggle }) => (
                 <div 
                   style={{ backgroundColor: openFile && openFile.id === node.id ? 'var(--selected-item)' : hoveredFile && hoveredFile.id === node.id ? 'var(--hover)' : 'transparent' }}
-                  onClick={() => {setOpenFile(node);}}
+                  onClick={() => dispatch({ type: 'SET_OPEN_FILE', payload: node })}
                   onMouseEnter={() => {
                     setHoveredFile(node);
                   }}
@@ -549,6 +562,8 @@ const FileList = (props) => {
                 <div>{monitorProps.item.text}</div>
               )}
               style={{ height: "100%" }}
+              onChangeOpen={(newOpenIds) => dispatch({ type: 'SET_FILES_INITIAL_OPEN', payload: newOpenIds })}
+              initialOpen={filesInitialOpen ? filesInitialOpen : false}
             />
           </DndProvider> 
         }
@@ -620,7 +635,7 @@ const FileList = (props) => {
                     backgroundColor: (openTemplate || node.droppable) && clickedTemplate && clickedTemplate.id === node.id ? 'var(--selected-item)' : hoveredTemplate && hoveredTemplate.id === node.id ? 'var(--hover)' : 'transparent'
                   }}
                   onClick={() => {
-                    setClickedTemplate(node); 
+                    dispatch({ type: 'SET_CLICKED_TEMPLATE', payload: node }); 
                     if (!node.droppable)
                     dispatch({ type: 'SET_OPEN_TEMPLATE', payload: { name: node.text, language: node.data.language }})
                   }}
@@ -645,6 +660,8 @@ const FileList = (props) => {
                 <div>{monitorProps.item.text}</div>
               )}
               style={{ height: "100%" }}
+              onChangeOpen={(newOpenIds) => dispatch({ type: 'SET_TEMPLATES_INITIAL_OPEN', payload: newOpenIds })}
+              initialOpen={templatesInitialOpen ? templatesInitialOpen : false}
             />
           </DndProvider>
         }

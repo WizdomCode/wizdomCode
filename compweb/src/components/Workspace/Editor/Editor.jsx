@@ -534,30 +534,6 @@ const CodeEditor = (props) => {
   useEffect(() => {
   }, [fileCode]);
 
-  const openFile = useSelector(state => state.openFile);
-
-  useEffect(() => {
-    const handleFileClick = async () => {
-      setSelectedItem(openFile.text);
-      setEditedContent(fileCode[openFile.id]);
-
-      // Check if file with same name already exists
-      const existingTabIndex = fileTabs.findIndex(tab => tab.id === openFile.id);
-      if (existingTabIndex !== -1) {
-          // If file exists, set the active tab index to that file
-          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: existingTabIndex });
-      } else {
-          // If file doesn't exist, create a new file and set it as the active tab
-          dispatch({ type: 'ADD_FILE_TAB', payload: { id: openFile.id, language: openFile.data.language, name: openFile.text, code: fileCode[openFile.id] } });
-          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
-      }
-    };
-
-    if (openFile && !openFile.droppable) {
-      handleFileClick();
-    }
-  }, [openFile]);
-
   const openTemplate = useSelector(state => state.openTemplate);
 
   const isFileListOpen = useSelector(state => state.isFileListOpen);
@@ -599,37 +575,6 @@ const CodeEditor = (props) => {
       dispatch({ type: 'TOGGLE_GET_CODE_SIGNAL' });
     }
   }, [getCurrentCodeSignal]);
-
-  const updateFileCode = () => {
-    if (codeSpaceRef.current) {
-      const models = codeSpaceRef.current.getModels();
-
-      console.log("treeData", treeData);
-
-      const newFileCode = {};
-
-      treeData.forEach((file) => {
-        if (!file.droppable) {
-          console.log("Updating file", file);
-
-          const code = models[file.id].getValue();
-          
-          newFileCode[file.id] = code;
-        }
-      });
-
-      console.log("newFileCode", newFileCode);
-
-      dispatch({ type: 'SET_FILE_CODE', payload: newFileCode });
-    }
-  }
-
-  useEffect(() => {
-    if (updateFileCodeSignal) {
-      updateFileCode();
-      dispatch({ type: 'TOGGLE_UPDATE_FILE_CODE_SIGNAL' });
-    }
-  }, [updateFileCodeSignal]);
 
   const isFileSaved = useSelector(state => state.isFileSaved);
 
@@ -724,7 +669,8 @@ const CodeEditor = (props) => {
             </Container>
           </ScrollArea>
         ) :
-        (fileTabs.length > 0 ?
+        (fileTabs.length > 0 ? (
+          console.log('fileTabs', fileTabs),
           <div className={styles.codeEditor}>
             <CodeSpace
               ref={codeSpaceRef}
@@ -741,7 +687,7 @@ const CodeEditor = (props) => {
               path={fileTabs[activeTabIndex].id}
               dispatch={dispatch}
             />
-          </div> :
+          </div> ) :
           <Stack align="center" justify="center" style={{ height: '100%' }}>
             <Group>
               <Stack align="flex-end">
