@@ -1,3 +1,4 @@
+// App.js
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -52,82 +53,78 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
-// import 'bootstrap/dist/css/bootstrap.min.css';
+import ProtectedRoute from "./ProtectedRoute";
+import { AuthProvider } from './AuthContext';
 
-// core styles are required for all packages
 import '@mantine/core/styles.css';
-
-// other css files are required only if
-// you are using components from the corresponding package
-// import '@mantine/dates/styles.css';
-// import '@mantine/dropzone/styles.css';
-// import '@mantine/code-highlight/styles.css';
-// ...
-
 import '@mantine/code-highlight/styles.css';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/newide" element={<NewIDE />} />
-      <Route path="/leaderboard" element={<LeaderboardPage />} />
-      <Route path="/learningpath" element={<LearningPath />} />
-      <Route path="/computercontest" element={<ComputerContest />} />
-      <Route path="/challenges" element={<Challenges />} />
-      <Route path="/achievements" element={<Achievements />} />
-      <Route path="/usaco" element={<USACO />} />
-      <Route path="/ccc" element={<CCC />} />
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
 
-      {/* Routes for Bronze lessons */}
-      <Route path="/bronze" element={<Bronze />} />
-      <Route path="/adhoc" element={<AdHoc />} />
-      <Route path="/completesearch" element={<CompleteSearch />} />
-      <Route path="/datastructures" element={<DataStructures />} />
-      <Route path="/graphs" element={<Graphs />} />
-      <Route path="/greedyalgorithims" element={<GreedyAlgorithims />} />
-      <Route path="/rectanglegeometry" element={<RectangleGeometry />} />
-      <Route path="/recursion" element={<Recursion />} />
-      <Route path="/simulation" element={<Simulation />} />
-      <Route path="/sorting" element={<Sorting />} />
+        {/* Protected routes */}
+        <Route path="/newide" element={<ProtectedRoute element={NewIDE} />} />
+        <Route path="/leaderboard" element={<ProtectedRoute element={LeaderboardPage} />} />
+        <Route path="/learningpath" element={<ProtectedRoute element={LearningPath} />} />
+        <Route path="/computercontest" element={<ProtectedRoute element={ComputerContest} />} />
+        <Route path="/challenges" element={<ProtectedRoute element={Challenges} />} />
+        <Route path="/achievements" element={<ProtectedRoute element={Achievements} />} />
+        <Route path="/usaco" element={<ProtectedRoute element={USACO} />} />
+        <Route path="/ccc" element={<ProtectedRoute element={CCC} />} />
 
-      {/* Routes for Silver lessons */}
-      <Route path="/silver" element={<Silver />} />
-      <Route path="/binarysearch" element={<BinarySearch />} />
-      <Route path="/prefixsums" element={<PrefixSums />} />
-      <Route path="/twopointers" element={<TwoPointers />} />
-      <Route path="/depthfirstsearch" element={<DepthFirstSearch />} />
-      <Route path="/floodfill" element={<FloodFill />} />
-      <Route path="/trees" element={<Trees />} />
-      <Route path="/customcomparators" element={<CustomComparators />} />
-      <Route path="/greedysorting" element={<GreedySorting />} />
+        {/* Routes for Bronze lessons */}
+        <Route path="/bronze" element={<ProtectedRoute element={Bronze} />} />
+        <Route path="/adhoc" element={<ProtectedRoute element={AdHoc} />} />
+        <Route path="/completesearch" element={<ProtectedRoute element={CompleteSearch} />} />
+        <Route path="/datastructures" element={<ProtectedRoute element={DataStructures} />} />
+        <Route path="/graphs" element={<ProtectedRoute element={Graphs} />} />
+        <Route path="/greedyalgorithims" element={<ProtectedRoute element={GreedyAlgorithims} />} />
+        <Route path="/rectanglegeometry" element={<ProtectedRoute element={RectangleGeometry} />} />
+        <Route path="/recursion" element={<ProtectedRoute element={Recursion} />} />
+        <Route path="/simulation" element={<ProtectedRoute element={Simulation} />} />
+        <Route path="/sorting" element={<ProtectedRoute element={Sorting} />} />
 
-      {/* Routes for Gold lessons */}
-      <Route path="/gold" element={<Gold />} />
-      <Route path="/combinatorics" element={<Combinatorics />} />
-      <Route path="/dynamicprogramming" element={<DynamicProgramming />} />
-      <Route path="/unionfind" element={<UnionFind />} />
-      <Route path="/shortestpaths" element={<ShortestPaths />} />
-      <Route path="/pointupdaterangesum" element={<PointUpdateRangeSum />} />
-      <Route path="/topologicalsort" element={<TopologicalSort />} />
-      <Route path="/minimumspanningtrees" element={<MinimumSpanningTrees />} />
-      <Route path="/eulertour" element={<EulerTour />} />
-      <Route path="/stringhashing" element={<StringHashing />} />
+        {/* Routes for Silver lessons */}
+        <Route path="/silver" element={<ProtectedRoute element={Silver} />} />
+        <Route path="/binarysearch" element={<ProtectedRoute element={BinarySearch} />} />
+        <Route path="/prefixsums" element={<ProtectedRoute element={PrefixSums} />} />
+        <Route path="/twopointers" element={<ProtectedRoute element={TwoPointers} />} />
+        <Route path="/depthfirstsearch" element={<ProtectedRoute element={DepthFirstSearch} />} />
+        <Route path="/floodfill" element={<ProtectedRoute element={FloodFill} />} />
+        <Route path="/trees" element={<ProtectedRoute element={Trees} />} />
+        <Route path="/customcomparators" element={<ProtectedRoute element={CustomComparators} />} />
+        <Route path="/greedysorting" element={<ProtectedRoute element={GreedySorting} />} />
 
-      {/* Routes for Platinum lessons */}
-      <Route path="/platinum" element={<Platinum />} />
-      <Route path="/segmenttrees" element={<SegmentTrees />} />
-      <Route path="/advancedtreetechniques" element={<AdvancedTreeTechniques />} />
-      <Route path="/advanceddynamicprogramming" element={<AdvancedDynamicProgramming />} />
-      <Route path="/computationalgeometry" element={<ComputationalGeometry />} />
-      <Route path="/matrixexponentiation" element={<MatrixExponentiation />} />
+        {/* Routes for Gold lessons */}
+        <Route path="/gold" element={<ProtectedRoute element={Gold} />} />
+        <Route path="/combinatorics" element={<ProtectedRoute element={Combinatorics} />} />
+        <Route path="/dynamicprogramming" element={<ProtectedRoute element={DynamicProgramming} />} />
+        <Route path="/unionfind" element={<ProtectedRoute element={UnionFind} />} />
+        <Route path="/shortestpaths" element={<ProtectedRoute element={ShortestPaths} />} />
+        <Route path="/pointupdaterangesum" element={<ProtectedRoute element={PointUpdateRangeSum} />} />
+        <Route path="/topologicalsort" element={<ProtectedRoute element={TopologicalSort} />} />
+        <Route path="/minimumspanningtrees" element={<ProtectedRoute element={MinimumSpanningTrees} />} />
+        <Route path="/eulertour" element={<ProtectedRoute element={EulerTour} />} />
+        <Route path="/stringhashing" element={<ProtectedRoute element={StringHashing} />} />
 
-      <Route path="/userprofile" element={<UserProfilePage />} />
-      <Route path="/problems" element={<Problems />} />
-      <Route path="/addproblem" element={<AddProblem />} />
-    </Routes>
+        {/* Routes for Platinum lessons */}
+        <Route path="/platinum" element={<ProtectedRoute element={Platinum} />} />
+        <Route path="/segmenttrees" element={<ProtectedRoute element={SegmentTrees} />} />
+        <Route path="/advancedtreetechniques" element={<ProtectedRoute element={AdvancedTreeTechniques} />} />
+        <Route path="/advanceddynamicprogramming" element={<ProtectedRoute element={AdvancedDynamicProgramming} />} />
+        <Route path="/computationalgeometry" element={<ProtectedRoute element={ComputationalGeometry} />} />
+        <Route path="/matrixexponentiation" element={<ProtectedRoute element={MatrixExponentiation} />} />
+
+        <Route path="/userprofile" element={<ProtectedRoute element={UserProfilePage} />} />
+        <Route path="/problems" element={<ProtectedRoute element={Problems} />} />
+        <Route path="/addproblem" element={<ProtectedRoute element={AddProblem} />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
