@@ -676,38 +676,8 @@ const Paths = (props) => {
         });
     };
 
-    const [userData, setUserData] = useState(null);
+    const userData = useSelector(state => state.userInfo);
     const [userId, setUserId] = useState(null);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-        try {
-            // Get the current user
-            const currentUser = auth.currentUser;
-
-            if (currentUser) { // Check if currentUser is not null
-            setUserId(currentUser.uid); // Set the user ID
-
-            // Get the document reference for the current user from Firestore
-            const userDocRef = doc(db, "Users", currentUser.uid);
-
-            // Fetch user data from Firestore
-            const userSnapshot = await getDoc(userDocRef);
-            setReadCount(prevReadCount => prevReadCount + 1);
-            
-            if (userSnapshot.exists()) {
-                // Extract required user information from the snapshot
-                const userData = userSnapshot.data();
-                setUserData(userData); // Set the user data in the state
-            } else {
-            }
-            }
-        } catch (error) {
-        }
-        };
-
-        fetchUserData();
-    }, [auth.currentUser]);
 
     const [solutions, setSolutions] = useState([]);
     const [selectedTab, setSelectedTab] = useState('question');

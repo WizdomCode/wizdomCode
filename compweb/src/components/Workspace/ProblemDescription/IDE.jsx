@@ -250,43 +250,13 @@ const IDE = (props) => {
   const [filterOption, setFilterOption] = useState('');
 
   const codeState = useSelector(state => state.codeState); 
-  const [userData, setUserData] = useState(null);
+  const userData = useSelector(state => state.userInfo);
   const [userId, setUserId] = useState(null);
   const [executionTime, setExecutionTime] = useState(0);
   const [currentCode, setCurrentCode] = useState("");
   const [questionName, setQuestionName] = useState();
 
   const [editorSize, setEditorSize] = useState();
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        // Get the current user
-        const currentUser = auth.currentUser;
-
-        if (currentUser) { // Check if currentUser is not null
-          setUserId(currentUser.uid); // Set the user ID
-
-          // Get the document reference for the current user from Firestore
-          const userDocRef = doc(db, "Users", currentUser.uid);
-
-          // Fetch user data from Firestore
-          const userSnapshot = await getDoc(userDocRef);
-          setReadCount(prevReadCount => prevReadCount + 1);
-
-          if (userSnapshot.exists()) {
-            // Extract required user information from the snapshot
-            const userData = userSnapshot.data();
-            setUserData(userData); // Set the user data in the state
-          } else {
-          }
-        }
-      } catch (error) {
-      }
-    };
-
-    fetchUserData();
-  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
 
   const handleFocus = (name) => {
     setIsFocused({...isFocused, [name]: true});
@@ -710,59 +680,49 @@ int main() {
       <Panel defaultSize={35} minSize={14} collapsible={true} collapsedSize={0}>
       <div className={styles.row} style={{ backgroundColor: 'var(--site-bg)' }}>
         <div className={styles.problemStatement} style={{ borderRight: '1px solid var(--border)' }}>
-          <ScrollArea scrollbars="x" scrollHideDelay={0} className={styles.scrollableContent} style={{ height: '58.848px' }} styles={{
+          <div style={{ width: '100%' }}>
+          <ScrollArea scrollbars="x" scrollHideDelay={0} style={{ width: '100%' }} styles={{
             scrollbar: { background: 'transparent', backgroundColor: 'transparent', height: '7px', opacity: '1' },
             thumb: { backgroundColor: 'var(--selected-item)', borderRadius: '0' }
           }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', borderBottom: '1px solid var(--border)' }} onDragOver={(e) => e.preventDefault()}>
             { props.currentPage === 'problems' ? ( 
               <>
-                <div className={styles.tabWrapper}>
-                  <div 
-                    className={styles.buttonRow}
-                    onDragOver={(e) => e.preventDefault()} // Add this line
-                    style={{ backgroundColor: 'var(--site-bg)' }}
-                  >
-                    {tabs.map((tab, index) => (
-                      <>
-                        {linePosition.index === index.toString() && linePosition.position === 'left' && <div className={styles.line} />}
-                        <Tab
-                          key={index}
-                          index={index}
-                          tab={tab}
-                          isActive={currentTab === tab}
-                          setDraggedTab={setDraggedTab}
-                          setQuestionID={setQuestionID}
-                        />
-                        {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
-                      </>
-                    ))}
-                    <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
-                      <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
-                    </button>
-                    <div className={styles.rightAlign}>
-                    </div>
-                  </div>
+                {tabs.map((tab, index) => (
+                  <>
+                    {linePosition.index === index.toString() && linePosition.position === 'left' && <div className={styles.line} />}
+                    <Tab
+                      key={index}
+                      index={index}
+                      tab={tab}
+                      isActive={currentTab === tab}
+                      setDraggedTab={setDraggedTab}
+                      setQuestionID={setQuestionID}
+                    />
+                    {linePosition.index === index.toString() && linePosition.position === 'right' && <div className={styles.line} />}
+                  </>
+                ))}
+                <button className={styles.newTab} onClick={() => dispatch({ type: 'ADD_TAB', payload: { type: 'newTab', data: null } })}>
+                  <img src='/add.png' alt="New tab" style={{minWidth: '10px', minHeight: '10px', background: 'transparent'}}/>
+                </button>
+                <div className={styles.rightAlign}>
                 </div>
               </>
               ) : (
-                <div className={styles.tabWrapper}>
-                    <div className={styles.buttonRow}>
-                        {defaultTabs.map((tab, index) => (
-                            <Tab
-                                key={index}
-                                index={index}
-                                tab={tab}
-                                isActive={(props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex) === index}
-                                currentPage={props.currentPage}
-                                type='lesson'
-                            />
-                        ))}
-                        <div className={styles.rightAlign}>
-                        </div>
-                    </div>
-                </div>
+                defaultTabs.map((tab, index) => (
+                    <Tab
+                        key={index}
+                        index={index}
+                        tab={tab}
+                        isActive={(props.currentPage === 'usaco' ? usacoTabIndex : cccTabIndex) === index}
+                        currentPage={props.currentPage}
+                        type='lesson'
+                    />
+                ))
               )}
+            </div>
           </ScrollArea>
+          </div>
           { ((props.currentPage === 'problems' && currentTab.type === 'problem') || (isLessonProblemActive)) &&
             <Group gap={0} bg={'var(--code-bg)'} mt={6}>
               <Button style={{ color: selectedTab === 'question' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconNotebook style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('question')}>Description</Button>
@@ -913,7 +873,7 @@ int main() {
                                 <Table.Td>{extractYear(problem.specificContest)}</Table.Td>
                                 <Table.Td>{problem.points}</Table.Td>
                                 <Table.Td>{problem.topics.join(", ")}</Table.Td>
-                                { userData && userData.solved ? <Table.Td>{userData.solved.includes(problem.id) ? "yes" : "no"}</Table.Td> : <Table.Td>no</Table.Td> }
+                                { userData && userData.solved ? <Table.Td>{userData.solved.includes(problem.title) ? "yes" : "no"}</Table.Td> : <Table.Td>no</Table.Td> }
                               </Table.Tr>
                             ))
                           }

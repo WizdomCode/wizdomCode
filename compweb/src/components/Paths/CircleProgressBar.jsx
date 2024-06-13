@@ -7,8 +7,14 @@ const CircleProgressBar = ({ progress }) => {
 
   return (
     <svg height="240" width="240" style={{ transform: 'rotate(-90deg)' }}> {/* increased SVG size */}
+      <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style={{stopColor:'#87ddee', stopOpacity:1}} />
+          <stop offset="100%" style={{stopColor:'var(--accent)', stopOpacity:1}} />
+        </linearGradient>
+      </defs>
       <circle
-        stroke="dimgrey" // color of the remaining part
+        stroke="var(--selected-item)" // color of the remaining part
         fill="transparent"
         strokeWidth="15" // increased stroke width
         r={radius}
@@ -16,9 +22,10 @@ const CircleProgressBar = ({ progress }) => {
         cy="120" // center of the circle adjusted according to the new SVG size
       />
       <circle
-        stroke="var(--accent)"
+        stroke="url(#grad1)"
         fill="transparent"
         strokeWidth="15" // increased stroke width
+        strokeLinecap="round" // make the ends of the stroke rounded
         strokeDasharray={circumference + ' ' + circumference}
         style={{ strokeDashoffset }}
         r={radius}
