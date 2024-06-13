@@ -128,7 +128,7 @@ const ViewUser = ({ userData, onClose, setReadCount }) => {
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
-                        { userData.solved && 
+                        { allMetaData && userData.solved && 
                             userData.solved.map((problem) => {
                                 problem = allMetaData[problem];
 
