@@ -613,8 +613,7 @@ const CodeEditor = (props) => {
     <>
       <Main open={filesOpen} style={{ width: '100%' }}>
       <div className={styles.scrollableContent} style={{ backgroundColor: 'var(--code-bg)' }}>
-        <div className={styles.tabWrapper} style={{ height: '54px', borderBottom: '1px solid var(--border)'}}>
-        <Group justify="space-between" bg={'var(--site-bg)'}>
+        <Group justify="space-between" bg={'var(--site-bg)'} style={{ borderBottom: '1px solid var(--border)'}}>
           <ScrollArea scrollbars="x" scrollHideDelay={0} style={{ width: 'calc(100% - 100px)' }} styles={{
             scrollbar: { background: 'transparent', backgroundColor: 'transparent', height: '7px', opacity: '1' },
             thumb: { backgroundColor: 'var(--selected-item)', borderRadius: '0' }
@@ -628,10 +627,11 @@ const CodeEditor = (props) => {
                 />
               }
               {fileTabs.map((tab, index) => (
-                <button className={styles.button} style={{ height: '50px', background: index === activeTabIndex ? 'var(--code-bg)' : 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
+                <button className={styles.button} style={{ position: 'relative', height: '50px', background: 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>
                   <p style={{ color: index === activeTabIndex ? 'white' : 'var(--dim-text)', marginRight: '16px' }} className={styles.buttonText}>{`${tab.name}${tab.language ? FILE_EXTENSION[tab.language] : ''}`}</p>
                   { !isFileSaved[tab.id] && <IconPointFilled style={{ margin: '0 5px' }}/>}
                   {<img className={styles.closeIcon} src='/close.png' alt="X" style={{maxWidth: '13px', maxHeight: '13px', background: 'transparent'}} onClick={(e) => { e.stopPropagation(); handleTabClose(index); }}/>}
+                  { index === activeTabIndex && <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
                 </button>          
               ))
               }
@@ -650,7 +650,6 @@ const CodeEditor = (props) => {
             </ActionIcon>
           </Group>
         </Group>
-        </div>
         <br />
         <PanelGroup direction="vertical" style={{ width: '100%' }}>
         <Panel style={{ width: '100%' }} defaultSize={66}>
@@ -735,17 +734,19 @@ const CodeEditor = (props) => {
                 <div className={styles.buttonRow} style={{ backgroundColor: 'var(--site-bg)' }}>
                   <button 
                     className={styles.buttonTab} 
-                    style={{background: inputOutputTab === 'input' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
+                    style={{position: 'relative', background: 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
                     onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'input' })}}
                   >
                     <p style={{color: inputOutputTab === 'input' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Input</p>
+                    { inputOutputTab === 'input' && <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
                   </button>
                   <button 
                     className={styles.buttonTab} 
-                    style={{background: inputOutputTab === 'output' ? 'var(--code-bg)' : 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
+                    style={{position: 'relative', background: 'var(--site-bg)', color: "white", borderRight: '1px solid var(--border)' }} 
                     onClick={() => {dispatch({ type: 'SET_INPUT_OUTPUT_TAB', payload: 'output' })}}
                   >
                     <p style={{color: inputOutputTab === 'output' ? 'white' : 'var(--dim-text)'}} className={styles.buttonText}>Output</p>
+                    { inputOutputTab === 'output' && <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'var(--accent)', height: '2px' }}/>}
                   </button>
                   <div className={styles.rightAlign}>
                     <Group gap={8}>

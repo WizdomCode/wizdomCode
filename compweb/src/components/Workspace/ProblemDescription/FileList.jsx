@@ -146,14 +146,13 @@ const FileList = (props) => {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const [code, setCode] = useState(null);
   const [output, setOutput] = useState([]);
   const [language, setLanguage] = useState("cpp");
   const languageRef = useRef(language); // Create a ref for the language
 
   useEffect(() => {
     if (fileTabs[activeTabIndex]) {
-      setCode(fileTabs[activeTabIndex].code);
+      dispatch({ type: 'SET_OPEN_FILE', payload: fileTabs[activeTabIndex] });
     }
   }, [activeTabIndex]);
 
@@ -253,75 +252,6 @@ const FileList = (props) => {
         dispatch({ type: 'SET_TREE_DATA', payload: newTreeData });
     };
 
-
-    useEffect(() => {
-    }, [activeTabIndex]);
-    
-    useEffect(() => {
-    }, [fileTabs]);
-    
-     const handleItemClick = async (itemName) => {
-        try {
-            const uid = auth.currentUser.uid;
-            const ideRef = doc(db, "IDE", uid);
-            const ideSnapshot = await getDoc(ideRef);
-            setReadCount(prevReadCount => prevReadCount + 1);
-
-            if (ideSnapshot.exists()) {
-                const itemData = ideSnapshot.data().ide[itemName];
-                const itemType = ideSnapshot.data().fileTypes[itemName];
-                setSelectedItem(itemName);
-                setEditedContent(itemData); // Set the edited content to the selected item data
-                setCode(itemData);
-
-                // Check if file with same name already exists
-                const existingTabIndex = fileTabs.findIndex(tab => tab.name === itemName);
-                if (existingTabIndex !== -1) {
-                    // If file exists, set the active tab index to that file
-                    dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: existingTabIndex });
-                } else {
-                    // If file doesn't exist, create a new file and set it as the active tab
-                    dispatch({ type: 'ADD_FILE_TAB', payload: { language: itemType, name: itemName, code: itemData } });
-                    dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: fileTabs.length });
-                }
-            } else {
-            }
-        } catch (error) {
-        }
-    };
-
-
-    const handleSave = async () => {
-        try {
-            const uid = auth.currentUser.uid;
-            const ideRef = doc(db, "IDE", uid);
-            const ideSnapshot = await getDoc(ideRef);
-            if (ideSnapshot.exists()) {
-                const existingIdeMap = ideSnapshot.data().ide || {};
-                const updatedIdeMap = {
-                    ...existingIdeMap,
-                    [fileTabs[activeTabIndex].name]: code // Update the content of the selected item
-                };
-                await setDoc(ideRef, { ide: updatedIdeMap }, { merge: true });
-                setIsContentSaved(true);
-
-                const updateFileCode = async (newFileCode) => {
-                
-                  try {
-                    await setDoc(ideRef, { code: newFileCode }, { merge: true });
-                  } catch (error) {
-                  }
-                }; 
-            
-                updateFileCode(fileCode);
-
-                dispatch({ type: 'UPDATE_IS_FILE_SAVED', payload: true });
-            } else {
-            }
-        } catch (error) {
-        }
-    };
-
   const treeData = useSelector(state => state.treeData);
   const fileCode = useSelector(state => state.fileCode);
 
@@ -399,7 +329,6 @@ const FileList = (props) => {
     const handleFileClick = async () => {
       setSelectedItem(openFile.text);
       setEditedContent(fileCode[openFile.id]);
-      setCode(fileCode[openFile.id]);
 
       // Check if file with same name already exists
       const existingTabIndex = fileTabs.findIndex(tab => tab.id === openFile.id);
@@ -443,19 +372,15 @@ const FileList = (props) => {
       if (fileTabs.length > 1) {
 
         if (activeTabIndex === fileTabs.length - 1) {
-          setCode(fileTabs[activeTabIndex - 1].code);
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
           return;
         } else if (removeIndex < activeTabIndex) {
-          setCode(fileTabs[activeTabIndex - 1].code);
           dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
           return;
         }
-        setCode(fileTabs[activeTabIndex].code);
         dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex });
         return;
       } else {
-        setCode(null);
         dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: 0 });
         return;
       }
@@ -505,11 +430,13 @@ const FileList = (props) => {
 
   return (
     <div style={{ minWidth: '240px', backgroundColor: 'var(--site-bg)', borderRight: '1px solid var(--border)' }}>
-        <div style={{ height: "50px", alignItems: "center", display: "flex", direction: "row", borderBottom: '1px solid var(--border)' }}>
+        <div style={{ height: "51px", alignItems: "center", display: "flex", direction: "row", borderBottom: '1px solid var(--border)' }}>
+          <ActionIcon variant="subtle" aria-label="Settings" style={{ marginLeft: '10px' }}>
             <ChevronRightIcon 
-                style={{ marginLeft: '10px', height: "30px", width: "30px" }}
+                style={{ height: "30px", width: "30px" }}
                 onClick={() => { dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: false }); }}    
             />
+          </ActionIcon>  
         </div>
         <div style={{ marginTop: '4px' , paddingLeft: '2px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
             <span className={styles.vertCenterIcons} onClick={() => dispatch({ type: 'TOGGLE_FILES_SECTION_OPEN' })}>{filesSectionOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>

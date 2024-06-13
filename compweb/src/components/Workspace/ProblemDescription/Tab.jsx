@@ -52,7 +52,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab, setQuestionID, current
         onDragEnter={dragEnter}
         onDragOver={dragOver}
         className={styles.buttonTab} 
-        style={{border: 'calc(0.0625rem* var(--mantine-scale)) solid var(--border)', borderTop: 'none', background: isActive ? 'var(--site-bg)' : 'var(--site-bg)', color: "white", width: `${text.length * 1.3}ch`, minWidth: '156px'}} 
+        style={{borderRight: 'calc(0.0625rem* var(--mantine-scale)) solid var(--border)', borderTop: 'none', background: isActive ? 'var(--site-bg)' : 'var(--site-bg)', color: "white", width: `${text.length * 1.3}ch`, minWidth: '156px'}} 
         onMouseOver={() => setIsHovered(true)}
         onMouseOut={() => setIsHovered(false)}  
         onClick={() => {dispatch({ type: type === 'lesson' ? 'SET_LESSON_TAB' : 'SET_CURRENT_TAB', payload: tab })
@@ -66,7 +66,7 @@ const Tab = ({ index, tab, isActive, type, setDraggedTab, setQuestionID, current
           }
       }}
       >
-        <p className={styles.buttonText}>{text}</p>
+        <p className={styles.buttonText} style={{ color: (isHovered || isActive) ? 'white' : 'var(--dim-text)'}}>{text}</p>
         { (isHovered || isActive) && type !== 'lesson' &&
         <img 
           className={styles.closeIcon} 
