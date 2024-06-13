@@ -30,12 +30,12 @@ export function HeroText() {
         <div className={classes.controls}>
           <Group>
             <Link to={'/login'}>
-              <Button className={classes.control} size="lg" variant="default" color="gray">
+              <Button className={classes.control} size="lg" variant="light">
                 LOG IN
               </Button>
             </Link>
             <Link to={'/signup'}>
-              <Button className={classes.control} size="lg">
+              <Button className={classes.control} size="lg" variant="white">
                 GET STARTED
               </Button>
             </Link>
