@@ -32,8 +32,7 @@ import { TwitterButton } from './TwitterButton';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import countryList from 'react-select-country-list'
 
-function PasswordRequirement(props) {
-  const { meets, label } = props;
+function PasswordRequirement({ meets, label }) {
   return (
     <Text component="div" color={meets ? 'teal' : 'red'} mt={5} size="sm">
       <Center inline>
@@ -87,26 +86,21 @@ const SignUp = () => {
           const data = docSnap.data();
           let updated = false;
 
-          // Iterate over each key in the document data
           for (const key in data) {
             if (data.hasOwnProperty(key) && typeof data[key] === 'object' && data[key] !== null) {
-              // Check if the object has a points property and it's an array
               if (Array.isArray(data[key].points)) {
-                // Add the userId: 0 to the points array
                 data[key].points.push({ [userId]: 0 });
                 updated = true;
               }
             }
           }
 
-          // If any updates were made, update the document
           if (updated) {
             await updateDoc(docRef, data);
-          } else {
           }
-        } else {
         }
       } catch (error) {
+        console.error(`Error updating document ${documentId}:`, error);
       }
     }
   };
@@ -118,10 +112,8 @@ const SignUp = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Set user information with the same ID as the user's authentication UID
       const userDocRef = doc(db, "Users", user.uid);
 
-      // Create an empty array called "solved" for each new user
       const skills = {
         "Ad Hoc": 0,
         "Data Structures": 0,
@@ -129,31 +121,28 @@ const SignUp = () => {
         "Graph Theory": 0,
         "Greedy Algorithms": 0,
         "Math": 0,
-        "String Algorithms": 0
-        // Add more skills here if needed
+        "String Algorithms": 0,
       };
 
       const userData = {
-        username: username,
-        firstName: firstName,
-        lastName: lastName,
-        country: country,
-        city: city,
+        username,
+        firstName,
+        lastName,
+        country,
+        city,
         age: parseInt(age, 10),
         points: 0,
         coins: 0,
-        solved: [], // Empty array for solved problems
+        solved: [],
         solvedCategories: [],
         streak: 0,
-        skills: skills // Assign the skills map to userData
+        skills,
       };
 
       await setDoc(userDocRef, userData);
       await addUserIdToPointsArray(user.uid);
 
-      // Redirect to the home page after successful sign-up
-      navigate("/"); // Replace "/" with the path of your home page
-
+      navigate("/");
     } catch (error) {
       console.log(error);
     }
@@ -186,7 +175,7 @@ const SignUp = () => {
     onDropdownOpen: () => {
       combobox.focusSearchInput();
     },
-  });  
+  });
 
   const countries = useMemo(() => countryList().getData(), []);
 
@@ -199,63 +188,77 @@ const SignUp = () => {
     ));
 
   useEffect(() => {
-    // we need to wait for options to render before we can select first one
     combobox.selectFirstOption();
-  }, [searchCountry]);    
+  }, [searchCountry]);
 
   return (
-    <>
-      <Container size={580} my={40}>
-        <Title ta="center" className={classes.title}>
-          Welcome to WizdomCode
-        </Title>
-        <Text c="dimmed" size="sm" ta="center" mt={5}>
-          Already a user?{' '}
-          <Link to={'/login'}>
-            <Anchor size="sm" component="button">
-              Login
-            </Anchor>
-          </Link>
-        </Text>
+    <Container size={580} my={40}>
+      <Title ta="center" className={classes.title}>
+        Welcome to WizdomCode
+      </Title>
+      <Text c="dimmed" size="sm" ta="center" mt={5}>
+        Already a user?{' '}
+        <Link to={'/login'}>
+          <Anchor size="sm" component="button">
+            Login
+          </Anchor>
+        </Link>
+      </Text>
 
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md" style={{ backgroundColor: 'var(--site-bg)', border: '1px solid var(--border)' }}>
-          <div style={{ display: 'none' }}>
-            <Text size="lg" fw={500}>
-              Sign up with
-            </Text>
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md" style={{ backgroundColor: 'var(--site-bg)', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'none' }}>
+          <Text size="lg" fw={500}>
+            Sign up with
+          </Text>
 
-            <Group grow mb="md" mt="md">
-              <GoogleButton radius="xl">Google</GoogleButton>
-              <TwitterButton radius="xl">Twitter</TwitterButton>
-            </Group>
+          <Group grow mb="md" mt="md">
+            <GoogleButton radius="xl">Google</GoogleButton>
+            <TwitterButton radius="xl">Twitter</TwitterButton>
+          </Group>
 
-            <Divider label="Or continue with email" labelPosition="center" my="lg" />
-          </div>
+          <Divider label="Or continue with email" labelPosition="center" my="lg" />
+        </div>
 
-          <TextInput label="Username" placeholder="Username" mb={8}
-              styles={{ 
-                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
-              }}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+        <form onSubmit={signUp}>
+          <TextInput
+            label="Username"
+            placeholder="Username"
+            mb={8}
+            styles={{
+              input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' },
+            }}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
 
           <Group justify="space-between" grow>
-            <TextInput label="First name" placeholder="First name" mb={8} styles={{ 
-                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+            <TextInput
+              label="First name"
+              placeholder="First name"
+              mb={8}
+              styles={{
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' },
               }}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
-            <TextInput label="Last name" placeholder="Last name" mb={8} styles={{ 
-                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+            <TextInput
+              label="Last name"
+              placeholder="Last name"
+              mb={8}
+              styles={{
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' },
               }}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
           </Group>
-          <TextInput label="Email" placeholder="you@mantine.dev" mb={8} styles={{ 
-              input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+          <TextInput
+            label="Email"
+            placeholder="you@mantine.dev"
+            mb={8}
+            styles={{
+              input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' },
             }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -266,13 +269,13 @@ const SignUp = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
               label="Password"
-              styles={{ 
-                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+              styles={{
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' },
               }}
               mb={8}
             />
 
-            { password && (
+            {password && (
               <>
                 <Group gap={5} grow mt="xs" mb="md">
                   {bars}
@@ -303,8 +306,8 @@ const SignUp = () => {
                   value={searchCountry}
                   onChange={(event) => {
                     combobox.openDropdown();
-                    combobox.updateSelectedOptionIndex();      
-                    setSearchCountry(event.currentTarget.value)
+                    combobox.updateSelectedOptionIndex();
+                    setSearchCountry(event.currentTarget.value);
                   }}
                   label="Select country"
                   placeholder="Select country"
@@ -312,8 +315,8 @@ const SignUp = () => {
                     combobox.closeDropdown();
                     setSearchCountry(country || '');
                   }}
-                  styles={{ 
-                    input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+                  styles={{
+                    input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' },
                   }}
                 />
               </Combobox.Target>
@@ -327,22 +330,27 @@ const SignUp = () => {
               </Combobox.Dropdown>
             </Combobox>
 
-            <NumberInput value={age} onChange={setAge} label="Age" placeholder="Enter your age" styles={{ 
-                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
+            <NumberInput
+              value={age}
+              onChange={setAge}
+              label="Age"
+              placeholder="Enter your age"
+              styles={{
+                input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)' },
               }}
               clampBehavior="strict"
               min={1}
               max={120}
-              allowDecimal={false}      
+              allowDecimal={false}
             />
           </Group>
 
-          <Button fullWidth mt="xl" variant="light" onSubmit={signUp}>
+          <Button fullWidth mt="xl" variant="light" type="submit">
             Create account
           </Button>
-        </Paper>
-      </Container>
-    </>
+        </form>
+      </Paper>
+    </Container>
   );
 };
 
