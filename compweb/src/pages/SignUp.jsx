@@ -142,6 +142,15 @@ const SignUp = () => {
       await setDoc(userDocRef, userData);
       await addUserIdToPointsArray(user.uid);
 
+      const IDEDocRef = doc(db, "IDE", user.uid);
+
+      const IDEData = {
+        code: {},
+        files: []
+      };
+
+      await setDoc(IDEDocRef, IDEData);
+
       navigate("/");
     } catch (error) {
       console.log(error);

@@ -145,8 +145,6 @@ function reducer(state = initialState, action) {
         }),
       };
     case 'SET_CCC_META_DATA':
-      console.log('SET_CCC_META_DATA', action);
-
       return {
         ...state,
         cccMetaData: state.cccMetaData.map((item, index) => {
@@ -236,7 +234,6 @@ function reducer(state = initialState, action) {
       else if (toIndex > fromIndex) {
         afterMove = tabsCopy.slice(0, fromIndex).concat(tabsCopy.slice(fromIndex + 1, direction === 'left' ? toIndex : toIndex + 1), [tabsCopy[fromIndex]], tabsCopy.slice(direction === 'left' ? toIndex : toIndex + 1, ));
       }
-      console.log(afterMove);
       return {
         ...state,
         tabs: afterMove,
@@ -274,10 +271,6 @@ function reducer(state = initialState, action) {
         fileCode: action.payload,
       }
     case 'UPDATE_FILE_CODE':
-      console.log('UPDATE_FILE_CODE', {
-        ...state.fileCode,
-        [action.key]: action.value,
-      });
       return {
         ...state, 
         fileCode: {
@@ -286,11 +279,8 @@ function reducer(state = initialState, action) {
         }
       }
     case 'DELETE_FILE_CODE':
-      console.log('DELETE_FILE_CODE', action.key);
-      console.log("state.fileCode", state.fileCode);
       const newFileCodeState = { ...state.fileCode };
       delete newFileCodeState[action.key];
-      console.log("newFileCodeState", newFileCodeState);
       return {
         ...state,
         fileCode: newFileCodeState
@@ -396,11 +386,6 @@ function reducer(state = initialState, action) {
       }
     }
     case 'UPDATE_IS_FILE_SAVED':
-      console.log('UPDATE_IS_FILE_SAVED');
-      console.log({
-        ...state.isFileSaved,
-        [action.key]: action.payload,
-      });
       return {
         ...state, 
         isFileSaved: {
@@ -421,7 +406,6 @@ function reducer(state = initialState, action) {
         isFileSaved: action.payload
       }
     case 'LOADED_TREE_DATA':
-      console.log('LOADED_TREE_DATA');
       return {
         ...state,
         loadedTreeData: true

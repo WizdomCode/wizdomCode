@@ -297,13 +297,9 @@ const CodeEditor = (props) => {
 
       if (rdata.exists) {
         const ndata = rdata.data();
-        
-        console.log(ndata);
       
         // At least 1 result is received
-        if (ndata && ndata.results && Array.isArray(ndata.results)) {
-          console.log("ndata.results", ndata.results);
-          
+        if (ndata && ndata.results && Array.isArray(ndata.results)) {          
           if (numTests === 1) {
 
             if (isCustomCase) setLocalOutputData(ndata.results[0].stdout + `\n\n${ndata.results[0].status.description} [${ndata.results[0].time}s, ${ndata.results[0].memory} MB]`);
@@ -435,8 +431,6 @@ const CodeEditor = (props) => {
         solution: code
       };
 
-      console.log("solutionMap", solutionMap);
-
       await updateDoc(questionDocRef, {
         solutions: arrayUnion(solutionMap)
       });
@@ -550,12 +544,8 @@ const CodeEditor = (props) => {
   const getEditorModels = () => {
     if (codeSpaceRef.current) {
       const models = codeSpaceRef.current.getModels();
-      
-      console.log("models", models);
 
       const currentCode = models[fileTabs[activeTabIndex].id].getValue();
-
-      console.log(currentCode);
 
       dispatch({
         type: 'SET_CODE_STATE',
@@ -579,8 +569,6 @@ const CodeEditor = (props) => {
   const isFileSaved = useSelector(state => state.isFileSaved);
 
   const handleSave = async () => {
-    console.log('fileTabs[activeTabIndex]', fileTabs[activeTabIndex]);
-    
     try {
         const uid = auth.currentUser.uid;
         const ideRef = doc(db, "IDE", uid);
@@ -669,7 +657,6 @@ const CodeEditor = (props) => {
           </ScrollArea>
         ) :
         (fileTabs.length > 0 ? (
-          console.log('fileTabs', fileTabs),
           <div className={styles.codeEditor}>
             <CodeSpace
               ref={codeSpaceRef}
