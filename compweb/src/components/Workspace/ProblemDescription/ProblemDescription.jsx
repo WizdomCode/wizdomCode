@@ -254,6 +254,7 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
       )}
 
       { selectedTab === 'tests' && ( 
+        console.log(results),
         <>
           <div style={{ position: 'relative', height: !testCasesVisible ? 'calc(100vh - 150px)' : '100%', overflow: !testCasesVisible ? 'hidden' : 'auto' }}>
             <LoadingOverlay mt={16} visible={!testCasesVisible} zIndex={1000} overlayProps={{ radius: "sm", blur: 2, color: 'var(--site-bg)' }} loaderProps={{ children: <Button variant='outline' size="md" onClick={() => setTestCasesVisible(true)}>Show test cases</Button> }}/>      

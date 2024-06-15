@@ -10,6 +10,7 @@ import {
     Center,
     rem,
     useMantineTheme,
+    Overlay,
   } from '@mantine/core';
   import { IconGauge, IconUser, IconCookie } from '@tabler/icons-react';
   import classes from './FeaturesCards.module.css';
@@ -38,7 +39,7 @@ import {
   export function FeaturesCards() {
     const theme = useMantineTheme();
     const features = mockdata.map((feature) => (
-      <Card key={feature.title} shadow="md" radius="md" className={classes.card} padding="xl" bg={'var(--code-bg)'} style={{ border: '1px solid var(--border)' }}>
+      <Card key={feature.title} shadow="md" radius="md" className={classes.card} padding="xl" bg="radial-gradient(circle, rgba(22,22,30,1) 50%, rgba(26,27,38,1) 100%)" style={{ border: '1px solid var(--code-bg)', position: 'relative' }}>
         <feature.icon
           style={{ width: rem(50), height: rem(50) }}
           stroke={2}
@@ -55,6 +56,7 @@ import {
             Learn more
           </Button>
         </Link>
+        <Overlay gradient='linear-gradient(to bottom, rgba(0,0,0,0) 1%,rgba(22,31,57,0) 36%,rgba(61,89,161,0.10) 100%)'/>
       </Card>
     ));
   

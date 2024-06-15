@@ -374,10 +374,10 @@ const SitePreview = () => {
       <div style={{ 
         display: 'flex', 
         direction: 'row', 
-        height: '70vh', 
-        width: '70vw', 
+        height: '80vh', 
+        width: '80vw', 
         border: '1px solid var(--border)', 
-        boxShadow: '0px -2px 0px 0px #202740, 0 -20px 80px 1px #181a25' 
+        boxShadow: '0px -2px 0px 0px #202740, 0 -20px 80px 1px #181a25'
       }}>
       <SideNav />
       <PanelGroup direction="horizontal" style={{ overflow: 'auto' }}>

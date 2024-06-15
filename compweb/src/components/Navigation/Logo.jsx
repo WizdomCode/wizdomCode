@@ -7,7 +7,7 @@ const Logo = () => {
     <Link to="/">
         <Group gap={6}>
         <Image src={'/templogo.png'} w={60} h={'50px'} style={{ marginLeft: '10px' }}/>
-        <Text size="xl" fw={900}>WizdomCode</Text>
+        <Text size="xl" fw={700} c="white">WizdomCode</Text>
         </Group>
     </Link>
   )
