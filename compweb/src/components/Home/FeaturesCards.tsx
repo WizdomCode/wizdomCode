@@ -15,26 +15,22 @@ import {
   import classes from './FeaturesCards.module.css';
   import { Link } from 'react-router-dom'; // Import Link from react-router-dom
   
+  const UsacoIcon = () => <img src='/usaco.png' alt="Usaco Paths" style={{width: rem(40), height: rem(40)}}/>;
+  const CCCIcon = () => <img src='/ccc.png' alt="CCC Paths" style={{width: rem(40), height: rem(40)}}/>;  
+
   const mockdata = [
-    {
-      title: 'Miscellaneous problems',
-      description:
-        'Filter through our ultimate collection of practice problems from your favourite contests and learn the topics of your choice at the difficulties of your choice.',
-      icon: IconGauge,
-      path: '/problems', // Add path for each feature
-    },
     {
       title: 'Canadian Computing Competition',
       description:
         'The CCC is an annual programming competition for secondary school students in Canada, organized by the CEMC at the University of Waterloo.',
-      icon: IconUser,
+      icon: CCCIcon,
       path: '/ccc', // Add path for each feature
     },
     {
       title: 'USA Computing Olympiad',
       description:
         'The USACO supports computing education in the USA and worldwide by identifying, motivating, and training high-school computing students at all levels.',
-      icon: IconCookie,
+      icon: UsacoIcon,
       path: '/usaco', // Add path for each feature
     },
   ];
@@ -48,10 +44,10 @@ import {
           stroke={2}
           color={theme.colors.blue[6]}
         />
-        <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
+        <Text fz="lg" fw={700} className={classes.cardTitle} mt="md" c="white">
           {feature.title}
         </Text>
-        <Text fz="sm" c="dimmed" mt="sm">
+        <Text fz="sm" c="var(--dim-text)" mt="sm">
           {feature.description}
         </Text>
         <Link to={feature.path}> {/* Add Link component with path */}
@@ -64,19 +60,21 @@ import {
   
     return (
       <Container size="lg" py="xl">
-        <Title order={2} className={classes.title} ta="center" mt="sm">
+        <Title className={classes.title} ta="center" mt="sm" c="white">
           Master your contest of choice
         </Title>
       
         <Center>
-        <Text c="dimmed" className={classes.description} ta="center" mt="md">
-          Practice from curated sets of problems pulled directly from your favourite programming contests. Prepare for all possible topics in a logical progression.
+        <Text c="var(--dim-text)" className={classes.description} ta="center" mt="md">
+          Practice from curated sets of problems pulled directly from your favourite programming contests.
         </Text>      
         </Center>
   
-        <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" mt={50}>
-          {features}
-        </SimpleGrid>
+        <Center>
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" mt={50} w={800}>
+            {features}
+          </SimpleGrid>
+        </Center>
       </Container>
     );
   }

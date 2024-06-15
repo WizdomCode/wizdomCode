@@ -1,6 +1,7 @@
 .inner {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding-top: calc(var(--mantine-spacing-xl) * 4);
   padding-bottom: calc(var(--mantine-spacing-xl) * 4);
 }

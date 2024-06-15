@@ -71,6 +71,7 @@ import Share from '@mui/icons-material/Share';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { TwitterShareButton } from "react-share";
+import Logo from './Logo';
 
 const UsacoIcon = () => <img src='/usaco.png' alt="Usaco Paths" style={{width: rem(20), height: rem(20)}}/>;
 const CCCIcon = () => <img src='/ccc.png' alt="CCC Paths" style={{width: rem(20), height: rem(20)}}/>;
@@ -263,11 +264,9 @@ const Navigation = () => {
       <Box style={{ backgroundColor: 'var(--site-bg)' }}>
         <header className={classes.header}>
           <Group justify="space-between" h="100%">
-            <Link to="/">
-              <Image src={'/templogo.png'} w={60} h={'50px'} style={{ marginLeft: '10px' }}/>
-            </Link>
-
-            <Group h="100%" gap={0} visibleFrom="sm" ml="200">
+            <Logo />
+            
+            <Group h="100%" gap={0} visibleFrom="sm" ml="30">
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
                   <div style={{ position: 'relative', height: '100%' }}>
