@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import '../components/styles/Workspace.css';
 import "../components/styles/Paths.css";
 import Box from '@mui/material/Box';
-import { Center, Container } from '@mantine/core';
+import { Center, Container, Image, Overlay, Stack } from '@mantine/core';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
@@ -38,46 +38,34 @@ const Home = () => {
             <Navigation />
             <div style={{ background: 'radial-gradient(circle, rgba(34,42,69,1) 0%, rgba(29,34,53,1) 21%, rgba(22,22,30,1) 50%)' }}>
               <HeroText />
-              <Center>
-                <SitePreview />
+              <Center pos={'relative'}>
+                <Image src={'/apppreview.png'} w={'80vw'} style={{ 
+                  border: '1px solid var(--border)', 
+                  boxShadow: '0px -2px 0px 0px #202740, 0 -20px 80px 1px #181a25' 
+                }}/>
+                <Overlay backgroundOpacity={0} />
               </Center>
             </div>
-            <Box 
-              sx={{ 
-                maxWidth: '1200px',  // Adjust this value to control the width
-                margin: '0 auto', 
-                transform: 'scale(1.1)', // Adjust this value to control the zoom
-                transformOrigin: 'top center',
-                marginBottom: '40px',  // Add margin-bottom to create space between the box and the footer
-                marginTop: '40px'
-              }}
+            <Stack
+              align="stretch"
+              justify="space-around"
+              gap={169}
+              my={169}
             >
-              <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                <Section1 />
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                <Section2 />
-              </Box>              
+              <Section1 />
+            
+              <Section2 />
 
-              <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                <PathsPreview />
-              </Box>
+              <PathsPreview />
 
-              <Box sx={{ textAlign: 'center', width: '100%' }}>
-                <FeaturesTitle />
-              </Box>
+              <FeaturesTitle />
 
-              <Box sx={{ textAlign: 'center', width: '100%', marginBottom: '200px'  }}>
-                <FeaturesCards />
-              </Box>
-              
-              <Box sx={{ textAlign: 'center', width: '100%', marginBottom: '640px'  }}>
-                <Center>
-                  <Signup />
-                </Center>
-              </Box>
-            </Box>
+              <FeaturesCards />
+            
+              <Center>
+                <Signup />
+              </Center>
+            </Stack>
             <Footer />
         </div>
     );

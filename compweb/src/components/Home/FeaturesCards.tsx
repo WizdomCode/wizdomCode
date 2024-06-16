@@ -61,7 +61,7 @@ import {
     ));
   
     return (
-      <Container size="lg" py="xl">
+      <Container size="lg">
         <Title className={classes.title} ta="center" mt="sm" c="white">
           Master your contest of choice
         </Title>

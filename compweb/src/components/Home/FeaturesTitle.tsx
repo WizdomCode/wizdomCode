@@ -7,14 +7,14 @@ const features = [
   {
     imgPath: '/codeeditor.png',
     icon: <IconBrowser />,
-    title: 'Browser-based editor',
-    description: 'Skip the hassle of needing to write code on another IDE with our built-in code editor.',
+    title: 'Skip the setup',
+    description: 'Our built-in code editor allows you to effortlessly write and edit code right in your browser.',
   },
   {
     imgPath: '/filesystem.png',
     icon: <IconFolder />,
     title: 'Complete file system',
-    description: 'Add, modify, delete, or save your code files online, and continue just where you left off!',
+    description: 'Add, modify, delete, or save your files online. Pick up right where you left off, anytime, anywhere.',
   },
   {
     imgPath: '/inputoutput.png',
@@ -28,7 +28,7 @@ const features = [
     icon: <IconCode />,
     title: 'Templates',
     description:
-      'Access algorithm and data structure templates in Python, Java, and C++.',
+      'Access readily-available algorithm and data structure templates in Python, Java, and C++.',
   },
 ];
 

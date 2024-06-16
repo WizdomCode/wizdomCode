@@ -1,6 +1,7 @@
 import { Text, Title, TextInput, Button, Image, Card, Center, Container } from '@mantine/core';
 import classes from './Signup.module.css';
 import { CodeHighlight } from '@mantine/code-highlight';
+import { Link } from 'react-router-dom';
 
 export function Signup() {
   return (
@@ -16,14 +17,16 @@ export function Signup() {
           <Container p={0} size={600} mt={18}>
             <Text c="var(--dim-text)" className={classes.description}>
             Join us to simplify your competitive programming education<br /> 
-            and achieve success in your contest of choice
+            and achieve success in your contest of choice.
             </Text>
           </Container>
 
           <div className={classes.controls}>
-            <Button className={classes.control} size="lg" variant='white' radius="xl" mt={18}>
-              Get started for free
-            </Button>
+            <Link to={'/signup'}>
+              <Button className={classes.control} size="lg" variant='white' radius="xl" mt={18}>
+                Get started for free
+              </Button>
+            </Link>
           </div>
         </div>
       </Card>

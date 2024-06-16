@@ -79,3 +79,7 @@ input:focus {
     background-color: var(--hover) !important;
   }
 }
+
+.monaco-editor, .monaco-diff-editor {
+  --vscode-focusBorder: transparent !important;
+}

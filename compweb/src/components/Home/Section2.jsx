@@ -10,20 +10,20 @@ import { CodeHighlight } from '@mantine/code-highlight';
 export function Section2() {
   return (
     <Container size="md">
-      <div className={classes.inner}>
-        <Card w={800} h={400} shadow="sm" radius="md" withBorder bg="radial-gradient(circle, rgba(34,42,69,1) 0%, rgba(29,34,53,1) 21%, rgba(22,22,30,1) 50%)" style={{ marginRight: '60px', border: '1px solid var(--code-bg)', position: 'relative' }}>
+      <Group gap={80} justify="center">
+        <Card w={420} h={400} shadow="sm" radius="md" withBorder bg="radial-gradient(circle, rgba(34,42,69,1) 0%, rgba(29,34,53,1) 21%, rgba(22,22,30,1) 50%)" style={{ border: '1px solid var(--code-bg)', position: 'relative' }}>
             <ProblemDescription />
             <Overlay gradient='linear-gradient(to bottom, rgba(0,0,0,0) 1%,rgba(22,31,57,0) 36%,rgba(61,89,161,0.10) 100%)'/>
         </Card>
-        <div style={{ marginLeft: '60px' }}>
+        <div style={{ maxWidth: '420px' }}>
           <Title className={classes.title}>
-            Learn by <span className={classes.highlight}>doing</span>
+            Learning by doing
           </Title>
           <Text c="var(--dim-text)" mt="md">
-            Practice all possible topics with 250+ problems pulled from your favorite programming contests
+            WizdomCode makes you get hands-on with <b style={{color:'white'}}>real contest challenges</b> - so you can practice the skills you'll actually use in competition.
           </Text>
         </div>
-      </div>
+      </Group>
     </Container>
   );
 }

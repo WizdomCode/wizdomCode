@@ -12,10 +12,10 @@ import { db } from '../../firebase';
 export function PathsPreview() {
   return (
     <Container size="md">
-      <div className={classes.inner}>
-        <div className={classes.content}>
+      <Group justify="center">
+        <div style={{ maxWidth: '420px' }}>
           <Title className={classes.title}>
-            A <span className={classes.highlight}>linear</span> progression <br /> of learning goals
+            A linear progression <br /> of learning goals
           </Title>
           <Text c="dimmed" mt="md" display={'none'}>
             Build fully functional accessible web applications faster than ever – Mantine includes
@@ -33,18 +33,18 @@ export function PathsPreview() {
             }
           >
             <List.Item>
-              <b>Learn by doing</b> – master your coding contest of choice through practice and repetition
+              <b>High-value resources</b> – simplify your learning with optimized problem collections
             </List.Item>
             <List.Item>
-              <b>High-value resources</b> – optimize your learning with hand-picked problemsets
+              <b>Choose your own path</b> – skip the familiar topics and focus on what you need to practice
             </List.Item>
             <List.Item>
-              <b>Progress Tracking</b> – Keep track of your progress in terms of topics learned
+              <b>Track your progress</b> – Keep track of your growth in terms of topics learned
             </List.Item>
           </List>
         </div>
         <ScrollRow />
-      </div>
+      </Group>
     </Container>
   );
 }

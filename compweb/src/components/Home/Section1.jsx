@@ -44,18 +44,18 @@ const tabs = [
 
 export function Section1() {
   return (
-    <Container size="md">
-      <div className={classes.inner}>
-        <div className={classes.content}>
+    <Container size="md" style={{ width: '100%' }}>
+      <Group gap={80} style={{ width: '100%' }} justify="center">
+        <div style={{ maxWidth: '420px' }}>
           <Title className={classes.title}>
             Free. Fun. <span className={classes.highlight}>Effective.</span>
           </Title>
-          <Text c="var(--dim-text)" mt="md" mr={25}>
-            Stop wasting time searching for problems and tutorials. WizdomCode provides a comprehensive, organized roadmap carefully designed and crafted for USACO contestants – available to everyone, for free.
+          <Text c="var(--dim-text)" mt="md">
+            Learning with WizdomCode is fun! As you solve problems, you’ll accumulate points and advance through levels, all while honing practical skills for real-world scenarios.
           </Text>
         </div>
-        <div style={{ position: 'relative', width: '1600px', height: '420px' }}>
-            <Card shadow="sm" padding="lg" radius="md" w={400} h={400} withBorder bg="radial-gradient(circle, rgba(22,22,30,1) 50%, rgba(26,27,38,1) 100%)" style={{ border: '1px solid var(--code-bg)', position: 'absolute', top: '0', left: '0', boxShadow: '0 -1px 25px #0b0b0f' }}>
+        <div style={{ position: 'relative', width: '420px', height: '420px' }}>
+            <Card shadow="sm" padding="lg" radius="md" w={400} h={400} withBorder bg="radial-gradient(circle, rgba(22,22,30,1) 50%, rgba(26,27,38,1) 100%)" style={{ border: '1px solid var(--code-bg)', position: 'absolute', top: '0', left: '0', boxShadow: '0 -1px 15px #0b0b0f' }}>
                 <div className={styles.problemStatement} style={{ overflow: 'hidden', zoom: '75%' }}>
                     <div style={{ width: '100%' }}>
                         <ScrollArea scrollbars="x" scrollHideDelay={0} style={{ width: '100%' }} styles={{
@@ -84,11 +84,11 @@ export function Section1() {
                     <ProblemDescription currentTab={tabs[1]} selectedTab={'question'}/>
                 </div>
             </Card>
-            <div shadow="xs" p="xl" style={{ position: 'absolute', top: '300px', left: '200px', height: '30vh', width: '30vw', zoom: '75%', backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)', boxShadow: '-5px -5px 15px #0b0b0f' }}>
+            <div shadow="xs" p="xl" style={{ position: 'absolute', top: '300px', left: '200px', height: '280px', width: '520px', zoom: '75%', backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)', boxShadow: '-1px -2px 15px #0b0b0f' }}>
                 <CodeEditor />
             </div>
         </div>
-      </div>
+      </Group>
     </Container>
   );
 }
@@ -335,10 +335,19 @@ const CodeEditor = (props) => {
     cpp: ".cpp"
   };  
 
-  const code = `#include <iostream>
-  
-int main() {
-    std::cout << "Hello World!";
+  const code = `#include <bits/stdc++.h>
+typedef long long ll;
+using namespace std;
+
+int main()
+{
+    cin.sync_with_stdio(0);
+    cin.tie(0);
+
+    int r, g, b;
+    cin >> r >> g >> b;
+    cout << r*3 + g*4 + b*5 << endl;
+
     return 0;
 }`;
 
@@ -383,11 +392,10 @@ int main() {
           </Group>
         </Group>
         <br />
-        <div className={editorStyles.codeEditor}>
             <Editor
                 theme="vs-dark"
                 defaultLanguage="cpp"
-                height="100%"
+                height="70%"
                 value={code}
                 onMount={(editor, monaco) => {
                     editorRef.current = editor;
@@ -399,7 +407,6 @@ int main() {
                     })
                 }}
             />
-        </div>
     </>
   );
 };

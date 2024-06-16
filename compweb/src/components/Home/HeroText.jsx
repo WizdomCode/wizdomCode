@@ -17,10 +17,10 @@ export function HeroText() {
           </Title>
         <Container mt={15} p={0} size={600}>
           <Text c="var(--dim-text)" className={classes.description} size="xs">
-            All in one platform which will streamline your path to acing
+            Streamline your journey with WizdomCode - your comprehensive roadmap,
           </Text>
           <Text c="var(--dim-text)" className={classes.description} size="xs">
-            all of your competitive programing endeavors
+            problem bank, code editor, and online judge
           </Text>
         </Container>
 
