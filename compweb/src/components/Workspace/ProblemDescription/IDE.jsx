@@ -677,7 +677,7 @@ int main() {
       <div style={{ display: 'flex', direction: 'row', height: 'calc(100vh - 50px)', width: '100vw' }}>
       <SideNav />
       <PanelGroup direction="horizontal" style={{ overflow: 'auto' }}>
-      <Panel defaultSize={35} minSize={14} collapsible={true} collapsedSize={0}>
+      <Panel defaultSize={35} minSize={24} collapsible={true} collapsedSize={0}>
       <div className={styles.row} style={{ backgroundColor: 'var(--site-bg)' }}>
         <div className={styles.problemStatement} style={{ borderRight: '1px solid var(--border)' }}>
           <div style={{ width: '100%' }}>
@@ -746,7 +746,7 @@ int main() {
                 <ProblemDescription userData={userData} currentTab={currentTab} testCases={testCases} displayCases={displayCases} selectedTab={selectedTab} setSelectedTab={setSelectedTab}/>
             ) : currentTab.type === 'newTab' ? (
               <Container>
-                <div className='hero'> 
+                <Container my={24} mt={34}> 
                   <div className={styles.description}>
                     <h2 className="title">Problems</h2>
                     <div className="search-rect">
@@ -755,92 +755,90 @@ int main() {
                           <Input fullWidth placeholder="Search problems..." inputProps={ariaLabel} sx={{ color: 'black', width: '100%' }} style={{ color: 'black' }} theme={lightTheme} value={search} onChange={(e) => setSearch(e.target.value)}/>
                         </Box>
                     </div>
-                    <div className="subsearch-row">
-                      <div className="search-container">
-                        <div className="column1">
-                          <div style={{position: 'relative'}}>
-                            <Select 
-                              placeholder="Topics..."
-                              styles={SELECT_STYLES}
-                              options={TOPICS.map(opt => ({ label: opt, value: opt }))}
-                              isMulti
-                              onChange={(selected) => setTopics(selected.map((s) => s.value))}
-                              onFocus={() => handleFocus('topics')}
-                              onBlur={() => handleBlur('topics')}
-                            />
-                            {!topics.length && !isFocused.topics && <div className="dropdown-placeholder">Topic</div>}
-                          </div>
-                          <div style={{position: 'relative'}}>
-                            <Select 
-                              styles={SELECT_STYLES}
-                              options={CONTESTS.map(opt => ({ label: opt, value: opt }))}
-                              isMulti
-                              onChange={(selected) => setContests(selected.map((s) => s.value))}
-                              placeholder="Contests..."
-                              onFocus={() => handleFocus('contests')}
-                              onBlur={() => handleBlur('contests')}
-                            />
-                            {!contests.length && !isFocused.contests && <div className="dropdown-placeholder">Contest</div>}
-                          </div>
+                    <Group>
+                      <div className="column1">
+                        <div style={{position: 'relative'}}>
+                          <Select 
+                            placeholder="Topics..."
+                            styles={SELECT_STYLES}
+                            options={TOPICS.map(opt => ({ label: opt, value: opt }))}
+                            isMulti
+                            onChange={(selected) => setTopics(selected.map((s) => s.value))}
+                            onFocus={() => handleFocus('topics')}
+                            onBlur={() => handleBlur('topics')}
+                          />
+                          {!topics.length && !isFocused.topics && <div className="dropdown-placeholder">Topic</div>}
                         </div>
-                        <div className="column2">
-                          <ThemeProvider theme={darkTheme}>
-                            <Box sx={{ width: 350, ml: 2 }}>
-                              <Typography id="input-slider" gutterBottom>
-                                Points Range
-                              </Typography>
-                              <Grid container spacing={2} alignItems="center">
-                                <Grid item xs>
-                                  <Slider
-                                    value={value}
-                                    onChange={handleSliderChange}
-                                    aria-labelledby="input-slider"
-                                    min={1}
-                                    max={50}
-                                    marks={marks}
-                                  />
-                                </Grid>
-                                <Grid item style={{ marginTop: '-25px' }}>
-                                  <Input
-                                    value={value[0]}
-                                    size="small"
-                                    onChange={handleInputChangeMin}
-                                    onBlur={handleBlurring}
-                                    inputProps={{
-                                      step: 1,
-                                      min: 1,
-                                      max: 50,
-                                      type: 'number',
-                                      'aria-labelledby': 'input-slider',
-                                    }}
-                                  />
-                                </Grid>
-                                <Grid item style={{ marginTop: '-25px' }}>
-                                  <Input
-                                    value={value[1]}
-                                    size="small"
-                                    onChange={handleInputChangeMax}
-                                    onBlur={handleBlurring}
-                                    inputProps={{
-                                      step: 1,
-                                      min: 1,
-                                      max: 50,
-                                      type: 'number',
-                                      'aria-labelledby': 'input-slider',
-                                    }}
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Box>
-                          </ThemeProvider>
+                        <div style={{position: 'relative'}}>
+                          <Select 
+                            styles={SELECT_STYLES}
+                            options={CONTESTS.map(opt => ({ label: opt, value: opt }))}
+                            isMulti
+                            onChange={(selected) => setContests(selected.map((s) => s.value))}
+                            placeholder="Contests..."
+                            onFocus={() => handleFocus('contests')}
+                            onBlur={() => handleBlur('contests')}
+                          />
+                          {!contests.length && !isFocused.contests && <div className="dropdown-placeholder">Contest</div>}
                         </div>
                       </div>
-                    </div>
+                      <div className="column2">
+                        <ThemeProvider theme={darkTheme}>
+                          <Box sx={{ minWidth: 250, ml: 2 }}>
+                            <Typography id="input-slider" gutterBottom>
+                              Points Range
+                            </Typography>
+                            <Grid container spacing={2} alignItems="center">
+                              <Grid item xs>
+                                <Slider
+                                  value={value}
+                                  onChange={handleSliderChange}
+                                  aria-labelledby="input-slider"
+                                  min={1}
+                                  max={50}
+                                  marks={marks}
+                                />
+                              </Grid>
+                              <Grid item style={{ marginTop: '-25px' }}>
+                                <Input
+                                  value={value[0]}
+                                  size="small"
+                                  onChange={handleInputChangeMin}
+                                  onBlur={handleBlurring}
+                                  inputProps={{
+                                    step: 1,
+                                    min: 1,
+                                    max: 50,
+                                    type: 'number',
+                                    'aria-labelledby': 'input-slider',
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item style={{ marginTop: '-25px' }}>
+                                <Input
+                                  value={value[1]}
+                                  size="small"
+                                  onChange={handleInputChangeMax}
+                                  onBlur={handleBlurring}
+                                  inputProps={{
+                                    step: 1,
+                                    min: 1,
+                                    max: 50,
+                                    type: 'number',
+                                    'aria-labelledby': 'input-slider',
+                                  }}
+                                />
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </ThemeProvider>
+                      </div>
+                    </Group>
                   </div>
-                </div>
+                </Container>
                 <div className="question-list">
                   <div className="wrapper">
-                    <div className="question-list-rect">
+                    <ScrollArea>
                       <Table>
                         <Table.Thead>
                           <Table.Tr>
@@ -879,7 +877,7 @@ int main() {
                           }
                         </Table.Tbody>
                       </Table>
-                    </div>
+                    </ScrollArea>
                   </div>
                 </div>
                 <div className='pagination'>

@@ -412,7 +412,7 @@ const CodeEditor = (props) => {
       const userDocSnapshot = await getDoc(userDocRef);
       setReadCount(prevReadCount => prevReadCount + 1);
 
-      const userData = userDocSnapshot.data();
+      let userData = userDocSnapshot.data();
 
       // Get a reference to the question document
       const questionDocRef = doc(db, "Questions", questionName);
@@ -439,12 +439,15 @@ const CodeEditor = (props) => {
   
       if (!solvedQuestions.includes(questionName)) {
         // Update the user's document to add the solved question and increment points
-        await updateDoc(userDocRef, {
-          solved: arrayUnion(questionName), // Add the question name to the solved array
-          points: points + (userDocSnapshot.data().points || 0), // Increment points
-          coins: (points*10) + (userDocSnapshot.data().points || 0) // Increment coins
-        });
-
+        userData = {
+          ...userData,
+          solved: [...solvedQuestions, questionName], // Add the question name to the solved array
+          points: points + (userData.points || 0), // Increment points
+          coins: (points*10) + (userData.points || 0) // Increment coins
+        };
+        console.log("userData", userData);
+        await updateDoc(userDocRef, userData);
+        dispatch({ type: 'SET_USER_INFO', payload: userData });
         
         // Check if solutions array exists, if not, create it
   
@@ -601,8 +604,8 @@ const CodeEditor = (props) => {
     <>
       <Main open={filesOpen} style={{ width: '100%' }}>
       <div className={styles.scrollableContent} style={{ backgroundColor: 'var(--code-bg)' }}>
-        <Group justify="space-between" bg={'var(--site-bg)'} style={{ borderBottom: '1px solid var(--border)'}}>
-          <ScrollArea scrollbars="x" scrollHideDelay={0} style={{ width: 'calc(100% - 100px)' }} styles={{
+        <div style={{ display: 'grid', gridTemplateColumns: 'auto 100px', backgroundColor: 'var(--site-bg)', borderBottom: '1px solid var(--border)'}}>
+          <ScrollArea scrollbars="x" scrollHideDelay={0} style={{ width: '100%' }} styles={{
             scrollbar: { background: 'transparent', backgroundColor: 'transparent', height: '7px', opacity: '1' },
             thumb: { backgroundColor: 'var(--selected-item)', borderRadius: '0' }
           }}>
@@ -625,7 +628,7 @@ const CodeEditor = (props) => {
               }
             </div>
           </ScrollArea>
-          <Group gap={8} pr={16} style={{ height: '50px' }}>
+          <Group gap={8} justify="center" style={{ height: '50px' }}>
             <ActionIcon variant="subtle" aria-label="Settings">
               <IconDeviceFloppy onClick={handleSave}/>
             </ActionIcon>
@@ -637,7 +640,7 @@ const CodeEditor = (props) => {
                 }
             </ActionIcon>
           </Group>
-        </Group>
+        </div>
         <br />
         <PanelGroup direction="vertical" style={{ width: '100%' }}>
         <Panel style={{ width: '100%' }} defaultSize={66}>

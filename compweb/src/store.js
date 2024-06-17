@@ -260,6 +260,11 @@ function reducer(state = initialState, action) {
         ...state,
         fileTabs: removedByIndex,
       };
+    case 'SET_FILE_TABS':
+      return {
+        ...state,
+        fileTabs: action.payload,
+      }
     case 'SET_ACTIVE_FILE_TAB':
       return {
         ...state,

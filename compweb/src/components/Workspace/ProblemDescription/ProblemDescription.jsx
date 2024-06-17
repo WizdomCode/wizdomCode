@@ -46,7 +46,7 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
   // Example usage of getDifficultyLevel // prints { level: 'Intermediate', number: 1 }
 
   const [selectedSolution, setSelectedSolution] = useState(null);
-  const [testCasesVisible, setTestCasesVisible] = useState(false);
+  const [testCasesVisible, setTestCasesVisible] = useState(true);
 
   const toggleCodeVisibility = (index) => {
     setSelectedSolution(selectedSolution === index ? null : index);

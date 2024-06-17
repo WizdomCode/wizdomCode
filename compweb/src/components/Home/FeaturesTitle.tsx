@@ -1,4 +1,4 @@
-import { Title, SimpleGrid, Text, Button, ThemeIcon, Grid, rem, Stack, Center, Group, Paper, Image, Card, Overlay } from '@mantine/core';
+import { Title, SimpleGrid, Text, Button, ThemeIcon, Grid, rem, Stack, Center, Group, Paper, Image, Card, Overlay, Container } from '@mantine/core';
 import { IconReceiptOff, IconFlame, IconCircleDotted, IconFileCode, IconBrowser, IconFolder, IconPlayerPlay, IconCode } from '@tabler/icons-react';
 import classes from './FeaturesTitle.module.css';
 import { Link } from 'react-router-dom';
@@ -48,7 +48,7 @@ export function FeaturesTitle() {
   ));
 
   return (
-    <div className={classes.wrapper}>
+    <Container>
       <Center>
               <Title className={classes.title} style={{ zoom: '125%' }}>
                 Home of the internet's best<br />
@@ -64,6 +64,6 @@ export function FeaturesTitle() {
           </SimpleGrid>
         </Grid>
       </Center>
-    </div>
+    </Container>
   );
 }

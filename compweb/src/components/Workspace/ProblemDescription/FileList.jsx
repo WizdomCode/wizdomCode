@@ -14,6 +14,7 @@ import {
   Group,
   NativeSelect,
   rem,
+  ScrollArea,
   Select,
   Text,
   TextInput,
@@ -152,7 +153,7 @@ const FileList = (props) => {
 
   useEffect(() => {
     if (fileTabs[activeTabIndex]) {
-      dispatch({ type: 'SET_OPEN_FILE', payload: fileTabs[activeTabIndex] });
+      dispatch({ type: 'SET_OPEN_FILE', payload: treeData.find(item => item.id === fileTabs[activeTabIndex].id) });
     }
   }, [activeTabIndex]);
 
@@ -209,6 +210,7 @@ const FileList = (props) => {
     const [showFolderForm, setShowFolderForm] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [inputValue, setInputValue] = useState("");
+    const [folderInputValue, setFolderInputValue] = useState("");
     const [isContentSaved, setIsContentSaved] = useState(true);
     const [selectedItem, setSelectedItem] = useState(null); 
     const [editedContent, setEditedContent] = useState("");
@@ -216,6 +218,10 @@ const FileList = (props) => {
 
     const handleFileSubmit = async (event) => {
         event.preventDefault();
+        setShowFileForm(false);
+        setInputValue("");
+
+        console.log("openFile", openFile);
 
         const parentId = openFile ? (openFile.droppable ? openFile.id : openFile.parent) : 0;
         const newFile = { 
@@ -239,12 +245,14 @@ const FileList = (props) => {
     
     const handleFolderSubmit = async (event) => {
         event.preventDefault();
+        setShowFolderForm(false);
+        setFolderInputValue("");
 
         const parentId = openFile ? (openFile.droppable ? openFile.id : openFile.parent) : 0;
         const newFile = { 
-            id: treeData[treeData.length - 1].id + 1, 
+            id: treeData[treeData.length - 1] ? treeData[treeData.length - 1].id + 1 : 1, 
             parent: parentId, 
-            text: inputValue, 
+            text: folderInputValue, 
             droppable: true
         };
     
@@ -274,11 +282,15 @@ const FileList = (props) => {
         try {
             await setDoc(docRef, { files: newTreeData }, { merge: true });
         } catch (error) {
+          console.log(error);
         }
       }
     }; 
 
+    console.log("Change in treeData", treeData);
+
     if (loadedTreeData) updateTree(treeData);
+    else console.log("loadedTreeData", loadedTreeData);
   }, [treeData]);
   
   const [loadedFirestoreCode, setLoadedFirestoreCode] = useState(false);
@@ -348,71 +360,74 @@ const FileList = (props) => {
     }
   }, [openFile]);
 
-  const handleFileDelete = (openFile) => {
+  const handleFileDelete = (openFile, treeData) => {
+    console.log("handleFileDelete", openFile);
+  
     if (openFile && openFile.id) {
-
-      if (openFile.droppable) {
-        for (let file of treeData) {
-          if (file.parent === openFile.id) {
-            handleFileDelete(file);
+      dispatch({ type: 'SET_OPEN_FILE', payload: null });
+  
+      let newTreeData = [...treeData]; // Create a copy of treeData
+      let newFileTabs = [...fileTabs];
+      let newFileCode = {...fileCode};
+      let newIsFileSaved = {...isFileSaved};
+      let newActiveTabIndex = activeTabIndex;
+  
+      const deleteFile = (file) => {
+        newTreeData = newTreeData.filter(object => object.id !== file.id); // Remove the file from newTreeData
+  
+        if (file.droppable) { // If the file is a folder, delete its children
+          newTreeData.filter(child => child.parent === file.id).forEach(deleteFile);
+        } 
+        else {
+          const id = file.id;
+          const removeIndex = fileTabs.findIndex(object => object.id === id);
+          newFileTabs = newFileTabs.filter(object => object.id !== file.id);
+          delete newFileCode[id];
+          delete newIsFileSaved[id];
+    
+          if (fileTabs.length > 1) {
+            if (activeTabIndex === fileTabs.length - 1) {
+              newActiveTabIndex--;
+            } else if (removeIndex < activeTabIndex) {
+              newActiveTabIndex--;
+            }
+          } else {
+            newActiveTabIndex = 0;
           }
         }
-        dispatch({ type: 'SET_TREE_DATA', payload: treeData.filter(object => object.id !== openFile.id) });
-        return;
-      }
+      };
+  
+      deleteFile(openFile); // Start the deletion process
+  
+      console.log("newTreeData", newTreeData);
+      dispatch({ type: 'SET_TREE_DATA', payload: newTreeData });
+
+      console.log("newFileTabs", newFileTabs);
+      dispatch({ type: 'SET_FILE_TABS', payload: newFileTabs });
+
+      console.log("newFileCode", newFileCode);
+      dispatch({ type: 'SET_FILE_CODE', payload: newFileCode });
+
+      console.log("newIsFileSaved", newIsFileSaved);
+      dispatch({ type: 'REPLACE_IS_FILE_SAVED', payload: newIsFileSaved });
+
+      console.log("newActiveTabIndex", newActiveTabIndex);
+      dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: newActiveTabIndex });
       
-      const id = openFile.id;
-      const removeIndex = fileTabs.findIndex(object => object.id === id);
-      dispatch({ type: 'REMOVE_FILE_TAB_BY_ID', payload: id });
-      dispatch({ type: 'SET_TREE_DATA', payload: treeData.filter(object => object.id !== openFile.id) });
-      deleteFirestoreCode(id);
-      dispatch({ type: 'DELETE_FILE_CODE', key: id });
-      dispatch({ type: 'DELETE_IS_FILE_SAVED', key: id });
-
-      if (fileTabs.length > 1) {
-
-        if (activeTabIndex === fileTabs.length - 1) {
-          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
-          return;
-        } else if (removeIndex < activeTabIndex) {
-          dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex - 1 });
-          return;
-        }
-        dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: activeTabIndex });
-        return;
-      } else {
-        dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: 0 });
-        return;
-      }
+      deleteFirestoreCode(newFileCode, newTreeData);
     }
-  }
+  };  
 
-  // TODO: make this work without a read
-  const deleteFirestoreCode = async (key, retries = 3) => {
-    try {
+  const deleteFirestoreCode = async (newFileCode, newTreeData) => {
+    if (auth.currentUser && auth.currentUser.uid) {
       const uid = auth.currentUser.uid;
       const ideRef = doc(db, "IDE", uid);
 
-      const docSnapshot = await getDoc(ideRef);
-      setReadCount(prevReadCount => prevReadCount + 1);
-
-      if (docSnapshot.exists()) {
-        const data = docSnapshot.data();
-        if (data && data.code) {
-          const fileCode = data.code;
-
-          delete fileCode[key];
-
-          await setDoc(ideRef, { code: fileCode }, { merge: true });
-        } else {
-          console.log("data.code is undefined, retrying...");
-          if (retries > 0) deleteFirestoreCode(key, retries - 1);
-        }
-      } else {
-        console.log("No such document!");
+      try {
+        await setDoc(ideRef, { code: newFileCode, files: newTreeData });
+      } catch (error) {
+        console.log("Error deleting firestore filecode", error);
       }
-    } catch (error) {
-      console.log("Error deleting firestore filecode", error);
     }
   }
 
@@ -438,6 +453,10 @@ const FileList = (props) => {
             />
           </ActionIcon>  
         </div>
+      <ScrollArea scrollbars="y" scrollHideDelay={0} style={{ height: 'calc(100vh - 100px)' }} styles={{
+        scrollbar: { background: 'transparent', backgroundColor: 'transparent', width: '15px', opacity: '1' },
+        thumb: { backgroundColor: 'var(--selected-item)', borderRadius: '0' }
+      }}>
         <div style={{ marginTop: '4px' , paddingLeft: '2px' }} className={`${styles.selectedBackground} ${styles.fileNameButtonRow} ${styles.vertCenterIcons}`}>
             <span className={styles.vertCenterIcons} onClick={() => dispatch({ type: 'TOGGLE_FILES_SECTION_OPEN' })}>{filesSectionOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
             <p className={`${styles.marginSpacing} ${styles.classTwo}`} style={{ color: 'var(--dim-text)' }}>
@@ -447,13 +466,13 @@ const FileList = (props) => {
             </p>
             <div className={`${styles.rightAlign} ${styles.vertCenterIcons}`}>
               <ActionIcon variant="subtle"> 
-                <NoteAddOutlinedIcon style={{ color: 'var(--dim-text)' }} onClick={() => setShowFileForm(!showFileForm)}/>
+                <NoteAddOutlinedIcon style={{ color: 'var(--dim-text)' }} onClick={() => {setShowFileForm(!showFileForm); setShowFolderForm(false);}}/>
               </ActionIcon>
               <ActionIcon variant="subtle">
-                <CreateNewFolderOutlinedIcon style={{ color: 'var(--dim-text)' }} onClick={() => setShowFolderForm(!showFolderForm)}/>
+                <CreateNewFolderOutlinedIcon style={{ color: 'var(--dim-text)' }} onClick={() => {setShowFolderForm(!showFolderForm); setShowFileForm(false);}}/>
               </ActionIcon>
               <ActionIcon variant="subtle">
-                <IconTrash style={{ color: 'var(--dim-text)' }} onClick={() => handleFileDelete(openFile)}/>
+                <IconTrash style={{ color: 'var(--dim-text)' }} onClick={() => handleFileDelete(openFile, treeData)}/>
               </ActionIcon>
             </div>
         </div>
@@ -481,7 +500,8 @@ const FileList = (props) => {
                       <span className={styles.vertCenterIcons} onClick={onToggle}>{isOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}</span>
                     )}
                     <img src={node.data && node.data.language ? LANGUAGE_ICON[node.data.language] : ''} className={styles.languageIcon}/>
-                    {`${node.text}${node.data && node.data.language ? FILE_EXTENSION[node.data.language] : ''}`}
+                    {`${node.text}${node.data?.language ? FILE_EXTENSION[node.data.language] : ''}`.substring(0, 26 - (Math.floor((depth + 1) * 2.5)))}
+                    {`${node.text}${node.data?.language ? FILE_EXTENSION[node.data.language] : ''}`.length > 26 - (Math.floor((depth + 1) * 2.5)) ? '...' : ''}
                   </div>
                 </div>
               )}
@@ -529,8 +549,8 @@ const FileList = (props) => {
               <TextInput
                   label="Folder name"
                   type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.currentTarget.value)}
+                  value={folderInputValue}
+                  onChange={(e) => setFolderInputValue(e.currentTarget.value)}
                   autoFocus
                   styles={{ 
                     input: { backgroundColor: 'var(--code-bg)', border: '1px solid var(--border)'}, 
@@ -592,6 +612,7 @@ const FileList = (props) => {
             />
           </DndProvider>
         }
+      </ScrollArea>
     </div>
   );
 };

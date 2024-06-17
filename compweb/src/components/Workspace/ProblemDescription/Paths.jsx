@@ -34,9 +34,10 @@ import zIndex from "@mui/material/styles/zIndex.js";
 import { useClickOutside } from '@mantine/hooks';
 import ArrowDropUpRoundedIcon from '@mui/icons-material/ArrowDropUpRounded';
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
-import { Card, Overlay, Button, Text, Container, Stack, Group, Title } from '@mantine/core';
+import { Card, Overlay, Button, Text, Container, Stack, Group, Title, Table } from '@mantine/core';
 import ProblemDescription from './ProblemDescription.jsx';
 import { getDownloadURL, getStorage, listAll, ref } from "firebase/storage";
+import { IconCheck } from "@tabler/icons-react";
 
 const Item = styled(Paper)(({ theme }) => ({
   textAlign: 'center',
@@ -331,31 +332,22 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
                                     activeCategoryId && activeCategoryId.unitTitle === unitTitle && activeCategoryId.rowIndex === rowIndex && lessonQuestionList && (
                                         <div className="question-list-rect" style={{ zIndex: 9999 }} ref={ref}>
                                             <div>
-                                            <table>
-                                                <thead>
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Points</th>
-                                                    <th>Topics</th>
-                                                    <th>Contest</th>
-                                                    <th>Solved</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
+                                            <Table>
+                                                <Table.Thead>
+                                                    <Table.Tr>
+                                                        <Table.Th>Name</Table.Th>
+                                                        <Table.Th>Points</Table.Th>
+                                                        <Table.Th>Topics</Table.Th>
+                                                        <Table.Th>Contest</Table.Th>
+                                                        <Table.Th><IconCheck /></Table.Th>
+                                                    </Table.Tr>
+                                                </Table.Thead>
+                                                <Table.Tbody>
                                                 {lessonQuestionList.map((q) => (
                                                     q && q.title &&
-                                                    <tr key={q.id}>
-                                                        <td>{q.title}</td>
-                                                        <td>{q.points}</td>
-                                                        <td>{q.topics.join(", ")}</td>
-                                                        <td>{q.contest}</td>
-                                                        { userData && userData.solved ? <td>{userData.solved.includes(q.title) ? "yes" : "no"}</td> : <td>no</td> }
-                                                        <td>
-                                                            <button
-                                                            type="button"
-                                                            className='open-question'
-                                                            onClick={() => {
+                                                    <Table.Tr key={q.id}>
+                                                        <Table.Td>
+                                                            <Link onClick={() => {
                                                                 window.scrollTo(0, 0); // This will scroll the page to the top
                                                                 dispatch({
                                                                     type: currentPage === 'usaco' ? 'SET_USACO_META_DATA' : 'SET_CCC_META_DATA',
@@ -366,15 +358,18 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
                                                                         problem_id: q.title // TODO: This becomes problem if question id in firebase differs from question title
                                                                     },
                                                                 })
-                                                            }}
-                                                            >
-                                                            <img src='/open.png' alt='open' style={{background:'transparent', maxHeight: '20px'}}/>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
+                                                            }}>
+                                                                {q.title}
+                                                            </Link>
+                                                        </Table.Td>
+                                                        <Table.Td>{q.points}</Table.Td>
+                                                        <Table.Td>{q.topics.join(", ")}</Table.Td>
+                                                        <Table.Td>{q.contest}</Table.Td>
+                                                        { userData && userData.solved ? <Table.Td>{userData.solved.includes(q.title) ? "yes" : "no"}</Table.Td> : <Table.Td>no</Table.Td> }
+                                                    </Table.Tr>
                                                 ))}
-                                                </tbody>
-                                            </table>
+                                                </Table.Tbody>
+                                            </Table>
                                             </div>
                                         </div>
                                     )}
