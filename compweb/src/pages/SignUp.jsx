@@ -31,6 +31,7 @@ import { GoogleButton } from './GoogleButton';
 import { TwitterButton } from './TwitterButton';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import countryList from 'react-select-country-list'
+import { useDispatch } from "react-redux";
 
 function PasswordRequirement({ meets, label }) {
   return (
@@ -73,6 +74,7 @@ const SignUp = () => {
   const [age, setAge] = useState("");
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const addUserIdToPointsArray = async (userId) => {
     const documentIds = ["General", "Challenges", "ComputingContest", "Community", "Miscellaneous"];
@@ -150,6 +152,8 @@ const SignUp = () => {
       };
 
       await setDoc(IDEDocRef, IDEData);
+
+      dispatch({ type: 'SET_SHOW_BEGINNER_TUTORIAL', payload: true });
 
       navigate("/");
     } catch (error) {

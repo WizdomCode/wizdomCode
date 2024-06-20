@@ -64,6 +64,7 @@ import {
   IconCheck,
   IconFlask
 } from '@tabler/icons-react'
+import StarterGuide from './StarterGuide.jsx';
 
 const card = (
   <React.Fragment>
@@ -671,8 +672,11 @@ int main() {
 
   const [isLessonProblemActive, setIsLessonProblemActive] = useState(false);
 
+  const showBeginnerTutorial = useSelector(state => state.showBeginnerTutorial);
+
   return (
     <>
+      {showBeginnerTutorial && <StarterGuide />}
       <Navigation />
       <div style={{ display: 'flex', direction: 'row', height: 'calc(100vh - 50px)', width: '100vw' }}>
       <SideNav />

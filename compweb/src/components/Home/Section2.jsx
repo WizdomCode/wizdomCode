@@ -17,7 +17,7 @@ export function Section2() {
         </Card>
         <div style={{ maxWidth: '420px' }}>
           <Title className={classes.title}>
-            Learning by doing
+            Learn by doing
           </Title>
           <Text c="var(--dim-text)" mt="md">
             WizdomCode makes you get hands-on with <b style={{color:'white'}}>real contest challenges</b> - so you can practice the skills you'll actually use in competition.

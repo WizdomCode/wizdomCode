@@ -76,7 +76,8 @@ const initialState = {
   cccTabIndex: 0,
   activePathTab: undefined,
   filesInitialOpen: undefined,
-  templatesInitialOpen: undefined
+  templatesInitialOpen: undefined,
+  showBeginnerTutorial: false
 };
 
 initialState.currentTab = initialState.tabs[0];
@@ -454,6 +455,11 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         templatesInitialOpen: action.payload
+      }
+    case 'SET_SHOW_BEGINNER_TUTORIAL':
+      return {
+        ...state,
+        showBeginnerTutorial: action.payload
       }
     default:
       return state;

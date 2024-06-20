@@ -22,7 +22,9 @@ import {
   IconLogout,
   IconSwitchHorizontal,
   IconUserCircle,
-  IconSearch
+  IconSearch,
+  IconQuestionMark,
+  IconHelp
 } from '@tabler/icons-react';
 import classes from './NavbarMinimal.module.css';
 
@@ -100,7 +102,7 @@ export function SideNav() {
         </div>
 
         <Stack justify="center" gap={0}>
-              <NavbarLink icon={IconUserCircle} label="Profile" path={"/userprofile"}/>
+              <NavbarLink icon={IconHelp} label="Help" path={""} onClick={() => dispatch({ type: 'SET_SHOW_BEGINNER_TUTORIAL', payload: true })}/>
               <NavbarLink icon={IconSettings} label="Settings" path={""} onClick={open}/>
         </Stack>
       </nav>
