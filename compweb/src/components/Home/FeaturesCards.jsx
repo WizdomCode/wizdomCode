@@ -25,21 +25,21 @@ import {
       description:
         'The CCC is an annual programming competition for secondary school students in Canada, organized by the CEMC at the University of Waterloo.',
       icon: CCCIcon,
-      path: '/ccc', // Add path for each feature
+      path: 'https://www.cemc.uwaterloo.ca/contests/ccc-cco.html', // Add path for each feature
     },
     {
       title: 'USA Computing Olympiad',
       description:
         'The USACO supports computing education in the USA and worldwide by identifying, motivating, and training high-school computing students at all levels.',
       icon: UsacoIcon,
-      path: '/usaco', // Add path for each feature
+      path: 'https://usaco.org/', // Add path for each feature
     },
   ];
   
   export function FeaturesCards() {
     const theme = useMantineTheme();
     const features = mockdata.map((feature) => (
-      <Card key={feature.title} shadow="md" radius="md" className={classes.card} padding="xl" bg="radial-gradient(circle, rgba(22,22,30,1) 50%, rgba(26,27,38,1) 100%)" style={{ border: '1px solid var(--code-bg)', position: 'relative' }}>
+      <Card key={feature.title} shadow="md" radius="md" className={classes.card} padding="xl" bg="linear-gradient(to bottom, rgba(0,0,0,0) 1%,rgba(22,31,57,0) 36%,rgba(61,89,161,0.10) 100%), radial-gradient(circle, rgba(22,22,30,1) 50%, rgba(26,27,38,1) 100%)" style={{ border: '1px solid var(--code-bg)', position: 'relative' }}>
         <feature.icon
           style={{ width: rem(50), height: rem(50) }}
           stroke={2}
@@ -51,12 +51,11 @@ import {
         <Text fz="sm" c="var(--dim-text)" mt="sm">
           {feature.description}
         </Text>
-        <Link to={feature.path}> {/* Add Link component with path */}
+        <a href={feature.path} target="_blank" rel="noopener noreferrer">
           <Button variant="outline" color="blue" fullWidth mt="xl"> {/* Add Button component */}
             Learn more
           </Button>
-        </Link>
-        <Overlay gradient='linear-gradient(to bottom, rgba(0,0,0,0) 1%,rgba(22,31,57,0) 36%,rgba(61,89,161,0.10) 100%)'/>
+        </a>
       </Card>
     ));
   
