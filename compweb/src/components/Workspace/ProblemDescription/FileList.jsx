@@ -519,7 +519,7 @@ const FileList = (props) => {
             <form onSubmit={handleFileSubmit} style={{ margin: '10px 0' }}>
                 <Select 
                   label="Language" 
-                  data={['cpp', 'python', 'java']}
+                  data={['cpp', 'python']}
                   value={fileTypeInputValue}
                   onChange={(_value, option) => setFileTypeInputValue(_value)}
                   styles={{ 
