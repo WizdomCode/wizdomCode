@@ -43,6 +43,7 @@ import { useSelector } from "react-redux";
 import { 
   useMantineTheme
 } from '@mantine/core';
+import { Link } from "react-router-dom";
 
 const Leaderboard = () => {
 
@@ -318,9 +319,11 @@ const Leaderboard = () => {
                   </Text>
                 </div>
                 </Group>
-                <Button fullWidth radius="md" mt="xl" size="md" variant="default" style={{ backgroundColor: 'var(--site-bg)', border: '1px solid var(--border)' }}>
-                  View profile
-                </Button>
+                <Link to={'/userprofile'}>
+                  <Button fullWidth radius="md" mt="xl" size="md" variant="default" style={{ backgroundColor: 'var(--site-bg)', border: '1px solid var(--border)' }}>
+                    View profile
+                  </Button>
+                </Link>
               </Card>
               }
           </Group>

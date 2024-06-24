@@ -611,11 +611,15 @@ const CodeEditor = (props) => {
           }}>
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
               {!isFileListOpen && 
-                <IconFolderOpen 
-                  className={styles.newTab}
-                  onClick={() => dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true })}
-                  style={{ ...(filesOpen && { display: 'none' }), paddingRight: '10px', borderRight: '1px solid var(--border)' }}            
-                />
+                <div style={{ ...(filesOpen && { display: 'none' }), padding: '0 8px', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                  <ActionIcon variant="subtle">
+                    <IconFolderOpen 
+                      className={styles.newTab}
+                      onClick={() => dispatch({ type: 'SET_IS_FILE_LIST_OPEN', payload: true })}
+                      style={{ height: '50px', paddingRight: '10px' }}            
+                    />
+                  </ActionIcon>
+                </div>
               }
               {fileTabs.map((tab, index) => (
                 <button className={styles.button} style={{ position: 'relative', height: '50px', background: 'var(--site-bg)', color: index === activeTabIndex ? "white" : "white", borderRight: '1px solid var(--border)' }} onClick={() => { dispatch({ type: 'SET_ACTIVE_FILE_TAB', payload: index }); }}>

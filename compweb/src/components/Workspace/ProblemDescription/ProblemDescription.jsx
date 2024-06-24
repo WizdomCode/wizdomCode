@@ -138,6 +138,7 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                   rehypePlugins={[rehypeRaw, rehypeKatex]}
                   children={customParser(currentTab.data.description.replace(/\\n/g, '\n'))}
                 />
+                <br />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -150,6 +151,7 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                   rehypePlugins={[rehypeRaw, rehypeKatex]}
                   children={customParser(currentTab.data.inputFormat.replace(/\\n/g, '\n'))}
                 />
+                <br />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -162,6 +164,7 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                   rehypePlugins={[rehypeRaw, rehypeKatex]}
                   children={customParser(currentTab.data.constraints.replace(/\\n/g, '\n'))}
                 />
+                <br />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -174,6 +177,7 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                   rehypePlugins={[rehypeRaw, rehypeKatex]}
                   children={customParser(currentTab.data.outputFormat.replace(/\\n/g, '\n'))}
                 />
+                <br />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -186,15 +190,17 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                 <h3>Output for Sample Input 1</h3>
                 <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample1.output.replace(/\\n/g, '\n')} language="txt" />
                 <br />
-                <h3>Explanation for Sample 1</h3>
                 {currentTab.data.sample1.explanation && 
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeRaw, rehypeKatex]}
-                    children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} 
-                  />
+                  <>
+                    <h3>Explanation for Sample 1</h3>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeRaw, rehypeKatex]}
+                      children={customParser(currentTab.data.sample1.explanation.replace(/\\n/g, '\n'))} 
+                    />
+                    <br />
+                  </>
                 }
-                <br />
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -207,14 +213,17 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                 <h3>Output for Sample Input 2</h3>
                 <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample2.output.replace(/\\n/g, '\n')} language="txt" />
                 <br />
-                <h3>Explanation for Sample 2</h3>
                 {currentTab.data.sample2.explanation && 
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeRaw, rehypeKatex]}
-                    children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} 
-                  />
-                }                <br />
+                  <>
+                    <h3>Explanation for Sample 2</h3>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeRaw, rehypeKatex]}
+                      children={customParser(currentTab.data.sample2.explanation.replace(/\\n/g, '\n'))} 
+                    />
+                    <br />
+                  </>
+                }                
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -227,14 +236,17 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
                 <h3>Output for Sample Input 3</h3>
                 <CodeHighlight styles={{pre: { backgroundColor: 'var(--code-bg)' }, code: { fontSize: '18px', color: 'var(--dim-text)' }}} code={currentTab.data.sample3.output.replace(/\\n/g, '\n')} language="txt" />
                 <br />
-                <h3>Explanation for Sample 3</h3>
                 {currentTab.data.sample3.explanation && 
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeRaw, rehypeKatex]}
-                    children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} 
-                  />
-                }                <br />
+                  <>
+                    <h3>Explanation for Sample 3</h3>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeRaw, rehypeKatex]}
+                      children={customParser(currentTab.data.sample3.explanation.replace(/\\n/g, '\n'))} 
+                    />
+                    <br />
+                  </>
+                }
                 <div className={styles.divider}></div>
                 <br />
               </>
@@ -249,6 +261,15 @@ const ProblemDescription = ({ userData, currentTab, testCases, displayCases, sel
           <br />
           <br />
           <button className={styles.runAll} onClick={() => { dispatch({ type: 'TOGGLE_RUNNING_ALL_CASES' }); setSelectedTab('tests'); dispatch({ type: 'SET_SUBMIT_CODE_REQUEST', payload: { tests: testCases, numTests: testCases.length, isCustomCase: false, problemId: currentTab.data.title, points: currentTab.data.points } }); }} style={{color: 'white'}}>Run all tests</button>
+          <br />
+          <div className={styles.divider}></div>
+          <br />
+          <p style={{ fontSize: '14px' }}><i>
+            { currentTab.data.contest === 'CCC' ?
+              "Problem courtesy of CEMC, University of Waterloo, used under CC BY-NC 3.0."
+            :
+              "Problem courtesy of the USA Computing Olympiad (USACO)." }
+          </i></p>
           <br />
         </div> 
       )}

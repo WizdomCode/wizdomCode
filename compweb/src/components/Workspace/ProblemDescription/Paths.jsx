@@ -330,8 +330,7 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
                                 <React.Fragment>
                                     {
                                     activeCategoryId && activeCategoryId.unitTitle === unitTitle && activeCategoryId.rowIndex === rowIndex && lessonQuestionList && (
-                                        <div className="question-list-rect" style={{ zIndex: 9999 }} ref={ref}>
-                                            <div>
+                                            <div style={{ margin: '0 10px' }} ref={ref}>
                                             <Table>
                                                 <Table.Thead>
                                                     <Table.Tr>
@@ -371,7 +370,6 @@ const ScrollRow = ({ lessons, unitTitle, unitDescription, division, userData, al
                                                 </Table.Tbody>
                                             </Table>
                                             </div>
-                                        </div>
                                     )}
                                 </React.Fragment>
                             </>

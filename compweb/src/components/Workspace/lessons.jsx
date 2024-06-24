@@ -109,10 +109,10 @@ export const BRONZE_UNIT_TITLES = ["USACO Bronze"];
 export const BRONZE_UNIT_DESCRIPTIONS = [""];
 export const BRONZE_UNIT_LESSONS = [
     [
-        [{ category: "5 Problems", lessonName: "Sorting", imgPath: <IconSortDescending className='lesson-component-icon'/>, problemIds: ["Why Did the Cow Cross the Road III", "Cow College", "Angry Cows"] },
-        { category: "7 Problems", lessonName: "Simulation", imgPath: <IconCardboards className='lesson-component-icon'/>, problemIds: ["Shell Game", "Speeding Ticket", "Mixing Milk", "The Bucket List", "Measuring Traffic", "Block Game", "Team Tic Tac Toe", "Milk Measurement", "Stuck in a Rut"] }],
-        [{ category: "7 Problems", lessonName: "Complete Search", imgPath: <IconSearch className='lesson-component-icon'/>, problemIds: ["Daisy Chains", "Counting Liars", "Cow Gymnastics", "Bovine Genomics", "Triangles", "Lifeguards", "Why Did the Cow Cross the Road II", "Guess the Animal", "Sleeping in Class", "Cowntact Tracing", "Moo Language"] }],
-        [{ category: "7 Problems", lessonName: "Ad Hoc", imgPath: <IconQuestionMark className='lesson-component-icon'/>, problemIds: ["Milking Order", "Sleepy Cow Herding", "Sleepy Cow Sorting", "Taming the Herd", "Modern Art", "Hoofball", "FEB"] },
+        [{ category: "5 Problems", lessonName: "Sorting", imgPath: <IconSortDescending className='lesson-component-icon'/>, problemIds: ["Why Did the Cow Cross the Road III", "Cow College", "Angry Cows (Bronze)"] },
+        { category: "7 Problems", lessonName: "Simulation", imgPath: <IconCardboards className='lesson-component-icon'/>, problemIds: ["Shell Game", "Speeding Ticket", "Mixing Milk", "The Bucket List", "Measuring Traffic", "Block Game", "Team Tic Tac Toe", "Milk Measurement", "Stuck in a Rut (Bronze)"] }],
+        [{ category: "7 Problems", lessonName: "Complete Search", imgPath: <IconSearch className='lesson-component-icon'/>, problemIds: ["Daisy Chains", "Counting Liars", "Cow Gymnastics", "Lifeguards", "Why Did the Cow Cross the Road II", "Guess the Animal", "Sleeping in Class", "Cowntact Tracing", "Moo Language"] }],
+        [{ category: "7 Problems", lessonName: "Ad Hoc", imgPath: <IconQuestionMark className='lesson-component-icon'/>, problemIds: ["Milking Order", "Sleepy Cow Herding", "Hoofball", "FEB"] },
         { category: "7 Problems", lessonName: "Greedy", imgPath: <IconStar className='lesson-component-icon'/>, problemIds: ["Mad Scientist", "Cow Tipping", "Even More Odd Photos", "Out of Place", "Photoshoot", "Watching Mooloo", "Race"] }],
         [{ category: "7 Problems", lessonName: "Data Structures", imgPath: <IconBrandDatabricks className='lesson-component-icon'/>, problemIds: ["Where Am I?", "Year of the Cow", "Don't Be Last!"] },
         { category: "7 Problems", lessonName: "Graph Theory", imgPath: <IconBinaryTree className='lesson-component-icon'/>, problemIds: ["Livestock Lineup", "The Great Revegetation", "Milk Factory", "Swapity Swap"] }],
@@ -126,13 +126,13 @@ export const SILVER_UNIT_DESCRIPTIONS = [""];
 export const SILVER_UNIT_LESSONS = [
     [
         [{ category: "5 Problems", lessonName: "Binary Search", imgPath: <IconListSearch className='lesson-component-icon'/>, problemIds: ["Counting Haybales", "Cow Dance Show", "Convention", "Angry Cows", "Social Distancing", "Bakery", "Loan Repayment"] }], 
-        [{ category: "7 Problems", lessonName: "Depth First Search", imgPath: <IconChartDots3 className='lesson-component-icon'/>, problemIds: ["Moocast", "Fence Planning", "Wormhole Sort", "Connecting Two Barns", "Redistributing Gifts", "Cereal 2", "The Great Revegetation"] }, 
+        [{ category: "7 Problems", lessonName: "Depth First Search", imgPath: <IconChartDots3 className='lesson-component-icon'/>, problemIds: ["Fence Planning", "Wormhole Sort", "Connecting Two Barns", "Cereal 2"] }, 
         { category: "7 Problems", lessonName: "Flood Fill", imgPath: <IconGrid4x4 className='lesson-component-icon'/>, problemIds: ["Icy Perimeter", "Mooyo Mooyo", "Comfortable Cows", "Snow Boots", "Maze Tac Toe", "Multiplayer Moo"] }],
-        [{ category: "7 Problems", lessonName: "Prefix Sums", imgPath: <IconBracketsContain className='lesson-component-icon'/>, problemIds: ["Breed Counting", "Subsequences Summing to Sevens", "Hoof, Paper, Scissors", "Why Did the Cow Cross the Road II", "Painting the Barn", "Rectangular Pasture"] },
+        [{ category: "7 Problems", lessonName: "Prefix Sums", imgPath: <IconBracketsContain className='lesson-component-icon'/>, problemIds: ["Breed Counting", "Subsequences Summing to Sevens", "Hoof, Paper, Scissors", "Painting the Barn", "Rectangular Pasture"] },
         { category: "7 Problems", lessonName: "Two Pointers", imgPath: <IconNumber2Small className='lesson-component-icon'/>, problemIds: ["Paired Up", "Diamond Collector", "Sleepy Cow Herding"] }],
-        [{ category: "7 Problems", lessonName: "Greedy", imgPath: <IconStar className='lesson-component-icon'/>, problemIds: ["Lemonade Line", "High Card Wins", "Rest Stops", "Why Did the Cow Cross the Road", "Berry Picking", "Closest Cow Wins"] }],
-        [{ category: "7 Problems", lessonName: "Trees", imgPath: <IconBinaryTree className='lesson-component-icon'/>, problemIds: ["MooTube", "Milk Visits", "Cowntagion", "Clock Tree"] },
-        { category: "7 Problems", lessonName: "Custom Comparators", imgPath: <IconMathLower className='lesson-component-icon'/>, problemIds: ["Wormhole Sort", "Rectangular Pasture", "Lifeguards", "Rental Service", "Mountain View", "Stuck in a Rut", "Triangles", "Out of Sorts", "Meetings"] }],
+        [{ category: "7 Problems", lessonName: "Greedy", imgPath: <IconStar className='lesson-component-icon'/>, problemIds: ["Lemonade Line", "High Card Wins", "Rest Stops", "Berry Picking", "Closest Cow Wins"] }],
+        [{ category: "7 Problems", lessonName: "Trees", imgPath: <IconBinaryTree className='lesson-component-icon'/>, problemIds: ["Cowntagion", "Clock Tree"] },
+        { category: "7 Problems", lessonName: "Custom Comparators", imgPath: <IconMathLower className='lesson-component-icon'/>, problemIds: ["Wormhole Sort", "Rectangular Pasture", "Rental Service", "Mountain View", "Stuck in a Rut", "Triangles", "Out of Sorts", "Meetings"] }],
     ]
 ];
 
@@ -141,13 +141,13 @@ export const GOLD_UNIT_DESCRIPTIONS = [""];
 export const GOLD_UNIT_LESSONS = [
     [
         [{ category: "7 Problems", lessonName: "Dynamic Programming", imgPath: <IconDatabase className='lesson-component-icon'/>, problemIds: ["Time is Mooney", "Teamwork", "Snakes", "Taming the Herd", "Drought", "Stamp Painting", "Bovine Genetics", "Talent Show", "Cow Poetry", "Exercise", "Lights Off", "Uddered but not Herd", "Redistributing Gifts", "Farmer John Solves 3SUM", "Modern Art 3", "248", "Piling Papers", "Count the Cows"] }],
-        [{ category: "5 Problems", lessonName: "Combinatorics", imgPath: <IconComponents className='lesson-component-icon'/>, problemIds: ["Moo Route", "Cowpatibility", "Help Yourself", "Cow Camp"] }],
+        [{ category: "5 Problems", lessonName: "Combinatorics", imgPath: <IconComponents className='lesson-component-icon'/>, problemIds: ["Cowpatibility", "Help Yourself", "Cow Camp"] }],
         [{ category: "7 Problems", lessonName: "Shortest Paths", imgPath: <IconRoute2 className='lesson-component-icon'/>, problemIds: ["Lasers and Mirrors", "Cow at Large", "Replication", "A Pie for a Pie", "Moortal Cowmbat", "Milk Pumping", "Why Did the Cow Cross the Road", "Fine Dining", "Shortcut"] },
-        { category: "7 Problems", lessonName: "Topological Sort", imgPath: <IconTopologyBus className='lesson-component-icon'/>, problemIds: ["Timeline", "Milking Order"] }],
+        { category: "7 Problems", lessonName: "Topological Sort", imgPath: <IconTopologyBus className='lesson-component-icon'/>, problemIds: ["Timeline"] }],
         [{ category: "7 Problems", lessonName: "Euler Tour", imgPath: <IconChartDots3 className='lesson-component-icon'/>, problemIds: ["Cow Land", "Milk Visits"] }],
         [{ category: "7 Problems", lessonName: "Union Find", imgPath: <IconSitemap className='lesson-component-icon'/>, problemIds: ["Closing the Farm", "MooTube", "Moocast", "Strongest Friendship Group", "Favorite Colors"] },
         { category: "7 Problems", lessonName: "Minimum Spanning Trees", imgPath: <IconBinaryTree2 className='lesson-component-icon'/>, problemIds: ["Fenced In", "Moo Network", "I Would Walk 500 Miles", "Portals"] }],
-        [{ category: "7 Problems", lessonName: "Point Update Range Sum", imgPath: <IconBinaryTree className='lesson-component-icon'/>, problemIds: ["Haircut", "Balanced Photo", "Why Did the Cow Cross the Road III", "Sleepy Cow Sorting"] }],
+        [{ category: "7 Problems", lessonName: "Point Update Range Sum", imgPath: <IconBinaryTree className='lesson-component-icon'/>, problemIds: ["Haircut", "Balanced Photo", "Sleepy Cow Sorting"] }],
         [{ category: "7 Problems", lessonName: "String Hashing", imgPath: <IconBlockquote className='lesson-component-icon'/>, problemIds: ["Bovine Genomics", "Lights Out"] }],
     ]
 ];
@@ -156,7 +156,7 @@ export const PLAT_UNIT_TITLES = ["USACO Platinum"];
 export const PLAT_UNIT_DESCRIPTIONS = [""];
 export const PLAT_UNIT_LESSONS = [
     [
-        [{ category: "5 Problems", lessonName: "Segment Trees", imgPath: <IconBinaryTree className='lesson-component-icon'/>, problemIds: ["Pareidolia", "High Card Low Card (Platinum)", "Slingshot", "Load Balancing", "Sort It Out", "Counting Haybales", "Bessie's Snow Cow", "Why Did the Cow Cross the Road III (Platinum)", "Mowing the Field"] },
+        [{ category: "5 Problems", lessonName: "Segment Trees", imgPath: <IconBinaryTree className='lesson-component-icon'/>, problemIds: ["Pareidolia", "High Card Low Card (Platinum)", "Slingshot", "Load Balancing", "Sort It Out", "Bessie's Snow Cow", "Why Did the Cow Cross the Road III (Platinum)", "Mowing the Field"] },
         { category: "5 Problems", lessonName: "Advanced Tree Techniques", imgPath: <IconBinaryTree2 className='lesson-component-icon'/>, problemIds: ["262144", "Max Flow", "Disruption", "New Barns", "The Cow Gathering", "Exercise Route"] }],
         [{ category: "5 Problems", lessonName: "Dynamic Programming", imgPath: <IconDatabase className='lesson-component-icon'/>, problemIds: ["Mowing Mischief"] }],
         [{ category: "5 Problems", lessonName: "Computational Geometry", imgPath: <IconSquareRotated className='lesson-component-icon'/>, problemIds: ["Balance Beam", "Circular Barn", "Falling Portals"] },

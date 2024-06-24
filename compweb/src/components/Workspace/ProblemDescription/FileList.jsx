@@ -205,7 +205,7 @@ const FileList = (props) => {
   const lessonProblemData = useSelector(state => state.lessonProblemData);
   const tabIndex = useSelector(state => state.lessonTabIndex);
   
-    const [showFileForm, setShowFileForm] = useState(false);
+    const [showFileForm, setShowFileForm] = useState(true);
     const [fileTypeInputValue, setFileTypeInputValue] = useState("cpp");
     const [showFolderForm, setShowFolderForm] = useState(false);
     const [showForm, setShowForm] = useState(false);
