@@ -733,7 +733,7 @@ int main() {
               <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
               <Button style={{ color: selectedTab === 'tests' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconFlask style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('tests')}>Test cases</Button>
               <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
-              <Button style={{ color: selectedTab === 'solution' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconCircleDashedCheck style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('solution')}>Solution</Button>
+              <Button style={{ color: selectedTab === 'solution' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconCircleDashedCheck style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('solution')}>Solutions</Button>
               <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--selected-item)' }} />
               <Button style={{ color: selectedTab === 'editorial' ? 'white' : 'var(--dim-text)' }} size="compact-md" variant="subtle" leftSection={<IconBook style={{ marginRight: '-8' }}/>} onClick={() => setSelectedTab('editorial')}>Editorial</Button>
             </Group>
