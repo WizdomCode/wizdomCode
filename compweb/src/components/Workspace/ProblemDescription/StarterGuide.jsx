@@ -46,6 +46,7 @@ import ArrowDropUpRoundedIcon from '@mui/icons-material/ArrowDropUpRounded';
 import navClasses from '../../Navigation/NavbarMinimal.module.css'
 import { CodeHighlight } from '@mantine/code-highlight';
 import { useDisclosure } from '@mantine/hooks';
+import { Footer } from '../../Home/Footer.jsx';
 
 const StarterGuide = () => {
     const [opened, { open, close }] = useDisclosure(true);
@@ -85,7 +86,7 @@ const StarterGuide = () => {
                         <Title order={3} c="var(--dim-text)">From here...</Title>
                         <div style={{ position: 'relative' }}>
                             <Group style={{ height: '900px', zoom: '90%', border: '1px solid var(--border)' }}>
-                                <SideNav />
+                                <SideNav activeLabel={'Problems'} />
                                 <div style={{ width: '90%' }}>
                                   <ProblemSearch />
                                 </div>
@@ -98,7 +99,7 @@ const StarterGuide = () => {
                         <Title order={3} c="var(--dim-text)">...or here</Title>
                         <Center pos="relative">
                             <Group pr={15} style={{ height: '900px', zoom: '90%', border: '1px solid var(--border)' }}>
-                                <SideNav />
+                                <SideNav activeLabel={'CCC'} />
                                 <div style={{ zoom: '80%', padding: '0 69px' }}>
                                     <ScrollRow />
                                 </div>
@@ -136,6 +137,8 @@ const StarterGuide = () => {
                     </div>
                 </div>
                 </Container>
+
+                <Footer />
             </Modal.Body>
         </Modal.Content>
     </Modal.Root>
@@ -266,13 +269,13 @@ function NavbarLink({ icon: Icon, label, active, onClick, path }) {
       { icon: CCCIcon, label: 'CCC', path: '/ccc', dispatch: { type: 'SET_ACTIVE_PATH_TAB', payload: 'ccc' } },
   ];
   
-  function SideNav() {
+  function SideNav({ activeLabel }) {
   
     const links = mockdata.map((link, index) => (
       <NavbarLink
         {...link}
         key={link.label}
-        active={link.isActive}
+        active={link.label === activeLabel}
       />
     ));
   
@@ -280,6 +283,7 @@ function NavbarLink({ icon: Icon, label, active, onClick, path }) {
       <NavbarLink
         {...link}
         key={link.label}
+        active={link.label === activeLabel}
       />
     ));
   

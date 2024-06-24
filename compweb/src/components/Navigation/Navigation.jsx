@@ -263,10 +263,10 @@ const Navigation = () => {
     <>
       <Box style={{ backgroundColor: 'var(--site-bg)' }}>
         <header className={classes.header}>
-          <Group justify="space-between" h="100%">
+          <Group justify="space-between" h="100%" grow>
             <Logo />
             
-            <Group h="100%" gap={0} visibleFrom="sm" ml="30">
+            <Group h="100%" gap={0} visibleFrom="sm" justify='center' wrap="nowrap">
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
                 <HoverCard.Target>
                   <div style={{ position: 'relative', height: '100%' }}>
@@ -336,7 +336,7 @@ const Navigation = () => {
               </HoverCard>
             </Group>
 
-            <Group visibleFrom="sm" gap={0}>
+            <Group visibleFrom="sm" gap={0} justify='flex-end'>
 
               { authenticatedUser ? <Menu
                 width={260}

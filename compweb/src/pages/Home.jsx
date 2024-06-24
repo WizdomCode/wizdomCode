@@ -49,8 +49,8 @@ const Home = () => {
             <Stack
               align="stretch"
               justify="space-around"
-              gap={169}
-              my={169}
+              gap={200}
+              my={200}
             >
               <Section1 />
             

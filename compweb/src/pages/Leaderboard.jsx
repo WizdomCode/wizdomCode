@@ -222,10 +222,13 @@ const Leaderboard = () => {
                         store={combobox}
                         width={250}
                         position="bottom-start"
-                        withArrow
                         onOptionSubmit={(val) => {
                           setSelectedItem(val);
                           combobox.closeDropdown();
+                        }}
+                        styles={{
+                          dropdown: { backgroundColor: 'var(--site-bg)', borderColor: 'var(--border)' },
+                          search: { backgroundColor: 'var(--code-bg)', borderColor: 'var(--border)' }
                         }}
                       >
                         <Combobox.Target withAriaAttributes={false}>
@@ -288,10 +291,10 @@ const Leaderboard = () => {
                   className={styles.avatar}
                 />
                 <Text ta="center" fz="lg" fw={500} mt="sm">
-                  {currentUserRankData.username}
+                  {`${currentUserRankData.firstName} ${currentUserRankData.lastName}`}
                 </Text>
                 <Text ta="center" fz="sm" c="dimmed">
-                  Bronze
+                  {currentUserRankData.username}
                 </Text>
                 <Group mt="md" justify="center" gap={30}>
                 <div>

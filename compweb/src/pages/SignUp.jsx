@@ -234,6 +234,7 @@ const SignUp = () => {
 
         <form onSubmit={signUp}>
           <TextInput
+            required
             label="Username"
             placeholder="Username"
             mb={8}
@@ -246,6 +247,7 @@ const SignUp = () => {
 
           <Group justify="space-between" grow>
             <TextInput
+              required
               label="First name"
               placeholder="First name"
               mb={8}
@@ -256,6 +258,7 @@ const SignUp = () => {
               onChange={(e) => setFirstName(e.target.value)}
             />
             <TextInput
+              required
               label="Last name"
               placeholder="Last name"
               mb={8}
@@ -267,6 +270,7 @@ const SignUp = () => {
             />
           </Group>
           <TextInput
+            required
             label="Email"
             placeholder="you@mantine.dev"
             mb={8}
@@ -278,6 +282,7 @@ const SignUp = () => {
           />
           <div>
             <PasswordInput
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
@@ -302,6 +307,7 @@ const SignUp = () => {
 
           <Group justify="space-between" grow>
             <Combobox
+              required
               store={combobox}
               position="bottom-start"
               withinPortal={false}
@@ -309,6 +315,10 @@ const SignUp = () => {
                 setCountry(val);
                 setSearchCountry(val);
                 combobox.closeDropdown();
+              }}
+              styles={{
+                dropdown: { backgroundColor: 'var(--site-bg)', borderColor: 'var(--border)' },
+                search: { backgroundColor: 'var(--code-bg)', borderColor: 'var(--border)' }
               }}
             >
               <Combobox.Target withAriaAttributes={false}>
@@ -344,6 +354,7 @@ const SignUp = () => {
             </Combobox>
 
             <NumberInput
+              required
               value={age}
               onChange={setAge}
               label="Age"

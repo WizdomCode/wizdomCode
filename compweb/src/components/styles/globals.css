@@ -87,3 +87,15 @@ input:focus {
 #root > div > div:nth-child(2) > div > div:nth-child(1) > div > div > div._scrollableContent_r9ovl_219.m_d57069b5.mantine-ScrollArea-root > div.m_c0783ff9.mantine-ScrollArea-viewport > div {
   display: block !important;
 }
+
+.mantine-Combobox-option {
+  &:hover {
+    background-color: var(--hover) !important;
+  }
+}
+
+.mantine-Menu-item {
+  &:where([data-hovered]) {
+    background-color: var(--hover) !important;
+  }
+}

@@ -10,7 +10,7 @@ export function Footer() {
       <Container className={classes.inner}>
         <Logo />
         <Group gap={8} className={classes.links} justify="flex-end" wrap="nowrap">
-          <IconMail style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+          <IconMail stroke={1.5} />
           <Text>admin@wizdomcode.com</Text>
         </Group>
       </Container>
