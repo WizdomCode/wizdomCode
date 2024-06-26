@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from 'react-redux';
 import SpiderChart from "./SpiderChart";
 import { Tabs, rem, Avatar, Button, Group, Table, Fieldset, TextInput, Textarea } from '@mantine/core';
-import { IconPhoto, IconMessageCircle, IconSettings, IconMapPin, IconCheck, IconBook } from '@tabler/icons-react';
+import { IconPhoto, IconMessageCircle, IconSettings, IconMapPin, IconCheck, IconBook, IconSearch, IconCheckbox } from '@tabler/icons-react';
 import styles from './UserProfile.module.css';
 
 const UserProfile = () => {
@@ -156,10 +156,10 @@ const UserProfile = () => {
         <br />
         <Tabs defaultValue="overview">
           <Tabs.List>
-            <Tabs.Tab value="overview" leftSection={<IconPhoto style={iconStyle} />}>
+            <Tabs.Tab value="overview" leftSection={<IconSearch style={iconStyle} />}>
               Overview
             </Tabs.Tab>
-            <Tabs.Tab value="solved" leftSection={<IconMessageCircle style={iconStyle} />}>
+            <Tabs.Tab value="solved" leftSection={<IconCheckbox style={iconStyle} />}>
               Solved
             </Tabs.Tab>
             <Tabs.Tab value="edit" leftSection={<IconSettings style={iconStyle} />}>

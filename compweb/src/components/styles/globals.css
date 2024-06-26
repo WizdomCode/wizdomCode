@@ -99,3 +99,15 @@ input:focus {
     background-color: var(--hover) !important;
   }
 }
+
+.mantine-Tabs-list::before {
+  border-color: var(--border) !important;
+}
+
+.mantine-Tabs-tab:hover {
+  --tab-bg: var(--hover) !important;
+}
+
+.mantine-Tabs-tab:hover:where(:not([data-active])) {
+  border-color: var(--selected-item) !important;
+}
