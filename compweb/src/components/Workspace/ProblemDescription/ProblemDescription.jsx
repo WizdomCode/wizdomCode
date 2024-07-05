@@ -1,10 +1,3 @@
-// questionID is a unique identifier (str) representing a question's title, used to fetch information on a specfic question within this file
-// testCaseFolder is a string indicating the location of a problem's test cases
-// these are decided by the search/filter system
-
-// problem is an object containing { title, description, inputFormat, constraints, outputFormat, points }
-// testCases is an array of objects, each containing a .key, .input, and .output
-
 import styles from '../../styles/ProblemDescription.module.css';
 import React, { useState, useEffect } from "react";
 import { auth, app, db } from "../../../firebase.js";
