@@ -273,7 +273,9 @@ const Leaderboard = () => {
               )}
                 <Center>
                   <Container m={10}>
-                    <Pagination value={activePage} onChange={setPage} total={Math.ceil(filteredUsers.length / numRows)}/>
+                    <Pagination radius="xl" value={activePage} onChange={setPage} total={Math.ceil(filteredUsers.length / numRows)} styles={{
+                      control: { backgroundColor: 'var(--code-bg)' }
+                    }}/>
                   </Container>
                 </Center>
             </div>
