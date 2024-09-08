@@ -58,6 +58,8 @@ import { AuthProvider } from './AuthContext';
 
 import '@mantine/core/styles.css';
 import '@mantine/code-highlight/styles.css';
+import Newsletter from "./pages/Newsletter";
+import Thankyou from "./pages/Thankyou";
 
 function App() {
   return (
@@ -66,6 +68,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/newsletter" element={<Newsletter />} />
+        <Route path="/newsletter/thankyou" element={<Thankyou />} />
 
         {/* Protected routes */}
         <Route path="/newide" element={<ProtectedRoute element={NewIDE} />} />
