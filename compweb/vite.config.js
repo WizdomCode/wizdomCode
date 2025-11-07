@@ -9,7 +9,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     build: {
-      outDir: "build",
+      // Vercel expects static output in "dist" by default
+      outDir: "dist",
     },
     publicDir: './public',
     plugins: [
